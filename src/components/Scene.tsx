@@ -10,13 +10,32 @@ import {
 } from '@react-three/drei';
 import * as THREE from 'three';
 
+let lasstScrol=0;
+let scrollVal=0;
+
+window.onscroll = ()=>{
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  if(scrollTop>lasstScrol){
+    scrollVal++
+  }else{
+    scrollVal--
+  }
+  lasstScrol=scrollTop
+
+}
+
 function FloatingRing({ position = [0, 0, 0], color = '#4834d4' }) {
   const ringRef = useRef();
 
+
+
+
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    ringRef.current.rotation.x = Math.sin(t * 0.4) * 0.3;
-    ringRef.current.rotation.y = Math.cos(t * 0.4) * 0.3;
+    ringRef.current.rotation.x = Math.sin(t * 0.4) * 0.3 * scrollVal/10;
+    ringRef.current.rotation.y = Math.cos(t * 0.4) * 0.3 *scrollVal/10;
+    
+    ringRef.current.position.z = Math.cos(t * 0.4) * 0.3 *scrollVal/10;
   });
 
   return (
@@ -39,8 +58,10 @@ function FloatingBall({ position = [0, 0, 0] }) {
   
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
+    ballRef.current.position.x = position[1] + Math.sin(t * 2) * 0.1 + scrollVal;
     ballRef.current.position.y = position[1] + Math.sin(t * 2) * 0.1;
     ballRef.current.rotation.z = t * 0.5;
+
   });
 
   return (
@@ -115,7 +136,7 @@ export function Scene() {
         <FloatingRing position={[0, 0, 0]} color="#4834d4" />
       </Float>
 
-      <Float
+      {/* <Float
         speed={1.5}
         rotationIntensity={2}
         floatIntensity={1}
@@ -129,7 +150,7 @@ export function Scene() {
         floatIntensity={1}
       >
         <FloatingBall position={[-1.5, 0.5, 0]} />
-      </Float>
+      </Float> */}
 
       <Background />
       

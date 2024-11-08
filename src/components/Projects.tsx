@@ -7,7 +7,7 @@ const projects = [{
   image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=800',
   tech: ['Flask', 'SQLite', 'Bootstrap', 'JavaScript'],
   github: 'https://github.com',
-  live: 'https://example.com'
+  live: ''
 },
 
   {
@@ -16,14 +16,14 @@ const projects = [{
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',
     tech: ['Python', 'Pandas', 'Power BI'],
     github: 'https://github.com',
-    live: 'https://example.com'
+    live: ''
   },  {
     title: 'Library Management System',
     description: 'Full-stack application built with Flask and SQLite, featuring user authentication and book management',
     image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=800',
     tech: ['Flask', 'SQLite', 'Bootstrap', 'JavaScript'],
     github: 'https://github.com',
-    live: 'https://example.com'
+    live: ''
   },
 ];
 
