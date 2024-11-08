@@ -10,7 +10,7 @@ import { Loader } from '@react-three/drei';
 function App() {
   return (
     <div className="relative w-full">
-      {/* Background canvas */}
+      
       <div className="fixed inset-0 z-0">
         <Canvas>
           <Suspense fallback={null}>
@@ -20,7 +20,6 @@ function App() {
         <Loader />
       </div>
 
-      {/* Content */}
       <div className="relative z-10">
         <div className="min-h-screen">
           <Hero />

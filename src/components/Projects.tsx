@@ -1,15 +1,15 @@
 import { motion } from 'framer-motion';
 import { ExternalLink, Github } from 'lucide-react';
 
-const projects = [
-  {
-    title: 'Library Management System',
-    description: 'Full-stack application built with Flask and SQLite, featuring user authentication and book management',
-    image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=800',
-    tech: ['Flask', 'SQLite', 'Bootstrap', 'JavaScript'],
-    github: 'https://github.com',
-    live: 'https://example.com'
-  },
+const projects = [{
+  title: 'Influencer App',
+  description: 'Full-stack application built with Vue3 and Flask, featuring user authentication and crud operations ',
+  image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=800',
+  tech: ['Flask', 'SQLite', 'Bootstrap', 'JavaScript'],
+  github: 'https://github.com',
+  live: 'https://example.com'
+},,
+
   {
     title: 'Business Data Analysis',
     description: 'Comprehensive data analysis project using Python Pandas and Power BI for business insights',
@@ -17,15 +17,14 @@ const projects = [
     tech: ['Python', 'Pandas', 'Power BI'],
     github: 'https://github.com',
     live: 'https://example.com'
-  },
-  {
-    title: 'DRDO Project',
-    description: 'Contract engineering work at DEBEL, DRDO involving advanced technical solutions',
-    image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&q=80&w=800',
-    tech: ['C#', '.NET Core', 'SSMS'],
+  },  {
+    title: 'Library Management System',
+    description: 'Full-stack application built with Flask and SQLite, featuring user authentication and book management',
+    image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=800',
+    tech: ['Flask', 'SQLite', 'Bootstrap', 'JavaScript'],
     github: 'https://github.com',
     live: 'https://example.com'
-  }
+  },
 ];
 
 export function Projects() {
@@ -40,7 +39,7 @@ export function Projects() {
         >
           Featured Projects
         </motion.h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 flex">
           {projects.map((project, index) => (
             <motion.div
               key={project.title}
