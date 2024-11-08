@@ -36,7 +36,7 @@ export function Hero() {
           className="flex justify-center space-x-6"
         >
           <a
-            href="https://github.com"
+            href="https://github.com/sridhar-mani"
             target="_blank"
             rel="noopener noreferrer"
             className="text-white hover:text-indigo-400 transition-colors transform hover:scale-110"
@@ -44,7 +44,7 @@ export function Hero() {
             <Github size={24} />
           </a>
           <a
-            href="https://linkedin.com"
+            href="https://www.linkedin.com/in/sridhar-m-b4557b286/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-white hover:text-indigo-400 transition-colors transform hover:scale-110"
@@ -52,15 +52,16 @@ export function Hero() {
             <Linkedin size={24} />
           </a>
           <a
-            href="mailto:contact@example.com"
+            href="mailto:mailtosridhar01@gmail.com"
             className="text-white hover:text-indigo-400 transition-colors transform hover:scale-110"
           >
             <Mail size={24} />
           </a>
           <a
-            href="#"
+            href="https://drive.google.com/uc?export=download&id=1k6OSGz3YiPHrDHTlcNizxt6DFLUjLL-h"
             className="text-white hover:text-indigo-400 transition-colors transform hover:scale-110"
             title="Resume"
+            download='Sridhar-Resume.pdf'
           >
             <BookOpen size={24} />
           </a>
