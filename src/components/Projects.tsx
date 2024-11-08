@@ -8,7 +8,7 @@ const projects = [{
   tech: ['Flask', 'SQLite', 'Bootstrap', 'JavaScript'],
   github: 'https://github.com',
   live: 'https://example.com'
-},,
+},
 
   {
     title: 'Business Data Analysis',
