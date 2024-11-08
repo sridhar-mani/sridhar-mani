@@ -1,29 +1,37 @@
-import { motion } from 'framer-motion';
-import { ExternalLink, Github } from 'lucide-react';
+import { motion } from "framer-motion";
+import { ExternalLink, Github } from "lucide-react";
 
-const projects = [{
-  title: 'Influencer App',
-  description: 'Full-stack application built with Vue3 and Flask, featuring user authentication and crud operations ',
-  image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=800',
-  tech: ['Flask', 'SQLite', 'Bootstrap', 'JavaScript'],
-  github: 'https://github.com',
-  live: ''
-},
+const projects = [
+  {
+    title: "Influencer App",
+    description:
+      "Full-stack application built with Vue3 and Flask, featuring user authentication and crud operations ",
+    image:
+      "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=800",
+    tech: ["Flask", "SQLite", "Bootstrap", "JavaScript"],
+    github: "https://github.com/sridhar-mani/InfluencerHub",
+    live: "",
+  },
 
   {
-    title: 'Business Data Analysis',
-    description: 'Comprehensive data analysis project using Python Pandas and Power BI for business insights',
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',
-    tech: ['Python', 'Pandas', 'Power BI'],
-    github: 'https://github.com',
-    live: ''
-  },  {
-    title: 'Library Management System',
-    description: 'Full-stack application built with Flask and SQLite, featuring user authentication and book management',
-    image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=800',
-    tech: ['Flask', 'SQLite', 'Bootstrap', 'JavaScript'],
-    github: 'https://github.com',
-    live: ''
+    title: "Business Data Analysis",
+    description:
+      "Comprehensive data analysis project using Python Pandas and Power BI for business insights",
+    image:
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800",
+    tech: ["Python", "Pandas", "Power BI"],
+    github: "https://github.com",
+    live: "",
+  },
+  {
+    title: "Library Management System",
+    description:
+      "Full-stack application built with Flask and SQLite, featuring user authentication and book management",
+    image:
+      "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=800",
+    tech: ["Flask", "SQLite", "Bootstrap", "JavaScript"],
+    github: "https://github.com/sridhar-mani/library",
+    live: "",
   },
 ];
 
@@ -77,7 +85,9 @@ export function Projects() {
                 </div>
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold text-white mb-2">{project.title}</h3>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  {project.title}
+                </h3>
                 <p className="text-gray-400 mb-4">{project.description}</p>
                 <div className="flex flex-wrap gap-2">
                   {project.tech.map((tech) => (
