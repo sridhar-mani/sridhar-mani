@@ -102,7 +102,7 @@ export function Contact() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="space-y-6 bg-gray-800 p-6 rounded-lg"
+            className="space-y-6 bg-gray-800 p-6 rounded-lg h-"
           >
             <h3 className="text-2xl font-bold text-white mb-4">Get in Touch</h3>
             <div>
