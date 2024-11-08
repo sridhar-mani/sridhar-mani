@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import { Mail, MapPin, Briefcase, GraduationCap, Award } from 'lucide-react';
+import { motion } from "framer-motion";
+import { Mail, MapPin, Briefcase, GraduationCap, Award } from "lucide-react";
 
 export function Contact() {
   return (
@@ -13,12 +13,12 @@ export function Contact() {
         >
           Background & Contact
         </motion.h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-1">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="space-y-8 lg:col-span-2"
+            className="space-y-8 lg:col-span-1"
           >
             <div>
               <h3 className="text-2xl font-bold text-white mb-4">Education</h3>
@@ -26,7 +26,9 @@ export function Contact() {
                 <div className="flex items-start space-x-4">
                   <GraduationCap size={20} className="mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold">B.Tech in Textile Technology</p>
+                    <p className="font-semibold">
+                      B.Tech in Textile Technology
+                    </p>
                     <p>Anna University, Chennai</p>
                     <p>CGPA: 7.78 (2019-2023)</p>
                   </div>
@@ -34,7 +36,9 @@ export function Contact() {
                 <div className="flex items-start space-x-4">
                   <GraduationCap size={20} className="mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold">B.Sc Programming & Data Science</p>
+                    <p className="font-semibold">
+                      B.Sc Programming & Data Science
+                    </p>
                     <p>IIT Madras</p>
                     <p>CGPA: 7.0 (2021-2024)</p>
                   </div>
@@ -49,13 +53,44 @@ export function Contact() {
                 </div>
               </div>
             </div>
+
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-4">Leadership</h3>
+              <div className="space-y-4 text-gray-300">
+                <div className="flex items-start space-x-4">
+                  <Award size={20} className="mt-1 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold">Editorial Head</p>
+                    <p>Astro Club</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <Award size={20} className="mt-1 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold">
+                      NSS Volunteer Representative
+                    </p>
+                    <p>National Service Scheme</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="space-y-8 lg:col-span-1"
+          >
             <div>
               <h3 className="text-2xl font-bold text-white mb-4">Experience</h3>
               <div className="space-y-4 text-gray-300">
                 <div className="flex items-start space-x-4">
                   <Briefcase size={20} className="mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold">Associate Software Developer</p>
+                    <p className="font-semibold">
+                      Associate Software Developer
+                    </p>
                     <p>Novacast India Pvt., Coimbatore</p>
                     <p>Jun 2024 - Present</p>
                   </div>
@@ -78,35 +113,19 @@ export function Contact() {
                 </div>
               </div>
             </div>
-            <div>
-              <h3 className="text-2xl font-bold text-white mb-4">Leadership</h3>
-              <div className="space-y-4 text-gray-300">
-                <div className="flex items-start space-x-4">
-                  <Award size={20} className="mt-1 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold">Editorial Head</p>
-                    <p>Astro Club</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <Award size={20} className="mt-1 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold">NSS Volunteer Representative</p>
-                    <p>National Service Scheme</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </motion.div>
           <motion.form
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="space-y-6 bg-gray-800 p-6 rounded-lg h-"
+            className="space-y-6 bg-gray-800 p-6 rounded-lg h-min"
           >
             <h3 className="text-2xl font-bold text-white mb-4">Get in Touch</h3>
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-300"
+              >
                 Name
               </label>
               <input
@@ -116,7 +135,10 @@ export function Contact() {
               />
             </div>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-300"
+              >
                 Email
               </label>
               <input
@@ -126,7 +148,10 @@ export function Contact() {
               />
             </div>
             <div>
-              <label htmlFor="message" className="block text-sm font-medium text-gray-300">
+              <label
+                htmlFor="message"
+                className="block text-sm font-medium text-gray-300"
+              >
                 Message
               </label>
               <textarea

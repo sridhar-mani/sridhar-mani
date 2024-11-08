@@ -1,77 +1,61 @@
-import { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { 
-  Float, 
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import {
+  Float,
   PerspectiveCamera,
   Environment,
   ContactShadows,
   OrbitControls,
-  Torus
-} from '@react-three/drei';
-import * as THREE from 'three';
+  Torus,
+} from "@react-three/drei";
+import * as THREE from "three";
 
-let lasstScrol=0;
-let scrollVal=0;
+let lasstScrol = 0;
+let scrollVal = 0;
 
-window.onscroll = ()=>{
+window.onscroll = () => {
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-  if(scrollTop>lasstScrol){
-    scrollVal++
-  }else{
-    scrollVal--
+  if (scrollTop > lasstScrol) {
+    scrollVal++;
+  } else {
+    scrollVal--;
   }
-  lasstScrol=scrollTop
+  lasstScrol = scrollTop;
+};
 
-}
-
-function FloatingRing({ position = [0, 0, 0], color = '#4834d4' }) {
+function FloatingRing({ position = [0, 0, 0], color = "#4834d4" }) {
   const ringRef = useRef();
-
-
-
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    ringRef.current.rotation.x = Math.sin(t * 0.4) * 0.3 * scrollVal/10;
-    ringRef.current.rotation.y = Math.cos(t * 0.4) * 0.3 *scrollVal/10;
-    
-    ringRef.current.position.z = Math.cos(t * 0.4) * 0.3 *scrollVal/10;
+    ringRef.current.rotation.x = (Math.sin(t * 0.4) * 0.3 * scrollVal) / 10;
+    ringRef.current.rotation.y = (Math.cos(t * 0.4) * 0.3 * scrollVal) / 10;
+
+    ringRef.current.position.z = (Math.cos(t * 0.4) * 0.3 * scrollVal) / 10;
   });
 
   return (
-    <Torus
-      ref={ringRef}
-      args={[1, 0.3, 16, 32]}
-      position={position}
-    >
-      <meshStandardMaterial
-        color={color}
-        metalness={0.5}
-        roughness={0.2}
-      />
+    <Torus ref={ringRef} args={[1, 0.3, 16, 32]} position={position}>
+      <meshStandardMaterial color={color} metalness={0.5} roughness={0.2} />
     </Torus>
   );
 }
 
 function FloatingBall({ position = [0, 0, 0] }) {
   const ballRef = useRef();
-  
+
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    ballRef.current.position.x = position[1] + Math.sin(t * 2) * 0.1 + scrollVal;
+    ballRef.current.position.x =
+      position[1] + Math.sin(t * 2) * 0.1 + scrollVal;
     ballRef.current.position.y = position[1] + Math.sin(t * 2) * 0.1;
     ballRef.current.rotation.z = t * 0.5;
-
   });
 
   return (
     <mesh ref={ballRef} position={position}>
       <sphereGeometry args={[0.3, 32, 32]} />
-      <meshStandardMaterial
-        color="#ff6b6b"
-        metalness={0.5}
-        roughness={0.2}
-      />
+      <meshStandardMaterial color="#ff6b6b" metalness={0.5} roughness={0.2} />
     </mesh>
   );
 }
@@ -110,12 +94,17 @@ export function Scene() {
 
   return (
     <>
-      <color attach="background" args={['#0a0a0a']} />
-      
-      <PerspectiveCamera ref={cameraRef} makeDefault position={[0, 1, 5]} fov={45} />
-      <OrbitControls 
-        enableZoom={false} 
-        maxPolarAngle={Math.PI / 2} 
+      <color attach="background" args={["#0a0a0a"]} />
+
+      <PerspectiveCamera
+        ref={cameraRef}
+        makeDefault
+        position={[0, 1, 5]}
+        fov={45}
+      />
+      <OrbitControls
+        enableZoom={false}
+        maxPolarAngle={Math.PI / 2}
         minPolarAngle={Math.PI / 3}
       />
 
@@ -128,11 +117,7 @@ export function Scene() {
         castShadow
       />
 
-      <Float
-        speed={2}
-        rotationIntensity={1}
-        floatIntensity={1}
-      >
+      <Float speed={2} rotationIntensity={1} floatIntensity={1}>
         <FloatingRing position={[0, 0, 0]} color="#4834d4" />
       </Float>
 
@@ -153,7 +138,7 @@ export function Scene() {
       </Float> */}
 
       <Background />
-      
+
       <ContactShadows
         opacity={0.5}
         scale={10}
@@ -162,7 +147,7 @@ export function Scene() {
         resolution={256}
         color="#000000"
       />
-      
+
       <Environment preset="sunset" />
     </>
   );
