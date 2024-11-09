@@ -1,8 +1,27 @@
 import { motion } from "framer-motion";
 import { Mail, MapPin, Briefcase, GraduationCap, Award } from "lucide-react";
-import emailjs from 'emailjs'
+import emailjs from '@emailjs/browser'
 
 export function Contact() {
+  const handleSubmit=async (event: React.FormEvent)=>{
+    event.preventDefault()
+
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const name = formData.get('name') as String
+    const message = formData.get('message') as String
+    const email = formData.get('email') as String
+    
+    if(!name || !email || !message){ 
+      alert('Fill all the required fields.')
+      return;} 
+      try{
+        await emailjs.sendForm('service_fwaf4ig','template_nnehlye',form,{publicKey:'Q6vXtQ07CKVhozSRP'})
+        form.reset();
+      }catch{
+        alert('Seems like the server is busy!Sorry!')
+      }
+  }
   return (
     <section id="contact" className="min-h-screen bg-gray-900 py-20 px-4">
       <div className="max-w-6xl mx-auto">
@@ -116,6 +135,7 @@ export function Contact() {
             </div>
           </motion.div>
           <motion.form
+          onSubmit={handleSubmit}
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
