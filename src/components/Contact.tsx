@@ -8,10 +8,10 @@ export function Contact() {
 
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
-    const name = formData.get('name') as String
+    const name = formData.get('from_name') as String
     const message = formData.get('message') as String
     const email = formData.get('email') as String
-    
+ 
     if(!name || !email || !message){ 
       alert('Fill all the required fields.')
       return;} 
@@ -152,6 +152,7 @@ export function Contact() {
               <input
                 type="text"
                 id="name"
+                name='from_name'
                 className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               />
             </div>
@@ -165,6 +166,7 @@ export function Contact() {
               <input
                 type="email"
                 id="email"
+                name='email'
                 className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               />
             </div>
@@ -178,6 +180,7 @@ export function Contact() {
               <textarea
                 id="message"
                 rows={4}
+                name="message"
                 className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               ></textarea>
             </div>

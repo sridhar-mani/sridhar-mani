@@ -8,6 +8,7 @@ import {
   OrbitControls,
   Torus,
 } from "@react-three/drei";
+import { OBJLoader } from "three/examples/jsm/Addons.js";
 import * as THREE from "three";
 
 let lasstScrol = 0;
@@ -26,6 +27,7 @@ window.onscroll = () => {
 function FloatingRing({ position = [0, 0, 0], color = "#4834d4" }) {
   const ringRef = useRef();
 
+
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     ringRef.current.rotation.x = (Math.sin(t * 0.4) * 0.3 * scrollVal) / 10;
@@ -35,7 +37,7 @@ function FloatingRing({ position = [0, 0, 0], color = "#4834d4" }) {
   });
 
   return (
-    <Torus ref={ringRef} args={[1, 0.3, 16, 32]} position={position}>
+    <Torus  ref={ringRef} args={[1, 0.3, 16, 32]} position={position}>
       <meshStandardMaterial color={color} metalness={0.5} roughness={0.2} />
     </Torus>
   );
