@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Mail, MapPin, Briefcase, GraduationCap, Award } from "lucide-react";
+import emailjs from 'emailjs'
 
 export function Contact() {
   return (
