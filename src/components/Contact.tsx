@@ -11,10 +11,12 @@ export function Contact() {
     const name = formData.get('name') as String
     const message = formData.get('message') as String
     const email = formData.get('email') as String
+    console.log(name,message,email,form);
     
-    if(!name || !email || !message){ 
+    if(!name || !email || !message){
       alert('Fill all the required fields.')
-      return;} 
+      return;
+    } 
       try{
         await emailjs.sendForm('service_fwaf4ig','template_nnehlye',form,{publicKey:'Q6vXtQ07CKVhozSRP'})
         form.reset();
@@ -152,6 +154,7 @@ export function Contact() {
               <input
                 type="text"
                 id="name"
+                name='name'
                 className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               />
             </div>
@@ -165,12 +168,14 @@ export function Contact() {
               <input
                 type="email"
                 id="email"
+                                name='email'
                 className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               />
             </div>
             <div>
               <label
                 htmlFor="message"
+
                 className="block text-sm font-medium text-gray-300"
               >
                 Message
@@ -178,6 +183,7 @@ export function Contact() {
               <textarea
                 id="message"
                 rows={4}
+                name='message'
                 className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               ></textarea>
             </div>
