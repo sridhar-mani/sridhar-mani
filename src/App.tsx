@@ -6,6 +6,7 @@ import { Skills } from './components/Skills';
 import { Contact } from './components/Contact';
 import { Suspense } from 'react';
 import { Loader } from '@react-three/drei';
+import NavBar from './components/NavBar';
 
 function App() {
   return (
@@ -21,7 +22,8 @@ function App() {
       </div>
 
       <div className="relative z-10">
-        <div className="min-h-screen">
+        <div className="min-h-screen w-full">
+          <NavBar></NavBar>
           <Hero />
         </div>
         <div className="relative bg-gray-900/70 backdrop-blur-md">

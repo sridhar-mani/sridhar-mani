@@ -3,7 +3,7 @@ import { Github, Linkedin, Mail, BookOpen } from "lucide-react";
 
 export function Hero() {
   return (
-    <div className="relative z-10 h-screen flex items-center justify-center">
+    <div id="home" className="relative z-10 h-screen flex items-center justify-center">
       <div className="text-center text-white p-8 backdrop-blur-sm bg-gray-900/30 rounded-lg">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
@@ -27,8 +27,8 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="text-lg mb-8 text-gray-400 max-w-2xl mx-auto"
         >
-          Full Stack Developer with expertise in React, Vue, and .NET
-          Core. Passionate about creating impactful solutions.
+          Full Stack Developer with expertise in React, Vue, and .NET Core.
+          Passionate about creating impactful solutions.
         </motion.p>
         <motion.div
           initial={{ opacity: 0 }}
@@ -71,7 +71,7 @@ export function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.9 }}
-          className="mt-12 px-8 py-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-all hover:scale-105 transform"
+          className="mt-12 px-8 py-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 hover:shadow-indigo-700 transition-all hover:scale-105 transform"
           onClick={() =>
             document
               .getElementById("projects")

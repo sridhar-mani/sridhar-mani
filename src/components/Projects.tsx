@@ -47,7 +47,7 @@ export function Projects() {
         >
           Featured Projects
         </motion.h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 flex">
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 flex `}>
           {projects.map((project, index) => (
             <motion.div
               key={project.title}
@@ -55,9 +55,9 @@ export function Projects() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.2 }}
-              className="bg-gray-800 rounded-lg overflow-hidden transform hover:scale-105 transition-transform"
+              className={`bg-gray-800 rounded-lg overflow-hidden transform hover:scale-105 transition-transform `}
             >
-              <div className="relative h-48">
+              <div className={`relative h-48 `}>
                 <img
                   src={project.image}
                   alt={project.title}

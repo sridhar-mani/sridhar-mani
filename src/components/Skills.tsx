@@ -1,24 +1,24 @@
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 const skills = [
   {
-    category: 'Frontend',
-    items: ['HTML', 'CSS', 'JavaScript', 'React.js', 'Vue.js', 'Three.js']
+    category: "Frontend",
+    items: ["HTML", "CSS", "JavaScript", "React.js", "Vue.js", "Three.js"],
   },
   {
-    category: 'Backend',
-    items: ['Python', 'Flask', 'Django', 'C#', '.NET Core', 'SQLite']
+    category: "Backend",
+    items: ["Python", "Flask", "Django", "C#", ".NET Core", "SQLite"],
   },
   {
-    category: 'Tools & Others',
-    items: ['Git', 'Figma', 'SSMS', 'Power BI', 'Redis']
-  }
+    category: "Tools & Others",
+    items: ["Git", "Figma", "SSMS", "Power BI", "Redis", "Postman"],
+  },
 ];
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true }
+  viewport: { once: true },
 };
 
 export function Skills() {
@@ -41,7 +41,9 @@ export function Skills() {
               transition={{ delay: groupIndex * 0.2 }}
               className="bg-gray-900 rounded-lg p-6 hover:shadow-xl transition-shadow"
             >
-              <h3 className="text-2xl font-bold text-white mb-6">{skillGroup.category}</h3>
+              <h3 className="text-2xl text-center font-bold text-white mb-6">
+                {skillGroup.category}
+              </h3>
               <div className="space-y-4">
                 {skillGroup.items.map((skill, index) => (
                   <motion.div

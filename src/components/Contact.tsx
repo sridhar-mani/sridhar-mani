@@ -1,29 +1,31 @@
 import { motion } from "framer-motion";
 import { Mail, MapPin, Briefcase, GraduationCap, Award } from "lucide-react";
-import emailjs from '@emailjs/browser'
+import emailjs from "@emailjs/browser";
 
 export function Contact() {
-  const handleSubmit=async (event: React.FormEvent)=>{
-    event.preventDefault()
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
 
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
-    const name = formData.get('name') as String
-    const message = formData.get('message') as String
-    const email = formData.get('email') as String
-    console.log(name,message,email,form);
-    
-    if(!name || !email || !message){
-      alert('Fill all the required fields.')
+    const name = formData.get("name") as String;
+    const message = formData.get("message") as String;
+    const email = formData.get("email") as String;
+    console.log(name, message, email, form);
+
+    if (!name || !email || !message) {
+      alert("Fill all the required fields.");
       return;
-    } 
-      try{
-        await emailjs.sendForm('service_fwaf4ig','template_nnehlye',form,{publicKey:'Q6vXtQ07CKVhozSRP'})
-        form.reset();
-      }catch{
-        alert('Seems like the server is busy!Sorry!')
-      }
-  }
+    }
+    try {
+      await emailjs.sendForm("service_fwaf4ig", "template_nnehlye", form, {
+        publicKey: "Q6vXtQ07CKVhozSRP",
+      });
+      form.reset();
+    } catch {
+      alert("Seems like the server is busy!Sorry!");
+    }
+  };
   return (
     <section id="contact" className="min-h-screen bg-gray-900 py-20 px-4">
       <div className="max-w-6xl mx-auto">
@@ -137,7 +139,7 @@ export function Contact() {
             </div>
           </motion.div>
           <motion.form
-          onSubmit={handleSubmit}
+            onSubmit={handleSubmit}
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -154,8 +156,8 @@ export function Contact() {
               <input
                 type="text"
                 id="name"
-                name='name'
-                className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                name="name"
+                className="mt-1 focus:outline-none pt-1 pl-1.5 block w-full rounded-t-md bg-gray-700 border-b-2  border-light-600 text-white shadow-sm"
               />
             </div>
             <div>
@@ -168,28 +170,27 @@ export function Contact() {
               <input
                 type="email"
                 id="email"
-                                name='email'
-                className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                name="email"
+                className="mt-1 focus:outline-none pt-1 pl-1.5 block w-full rounded-t-md bg-gray-700 border-b-2  border-light-600 text-white shadow-sm"
               />
             </div>
             <div>
               <label
                 htmlFor="message"
-
-                className="block text-sm font-medium text-gray-300"
+                className="block  text-sm font-medium text-gray-300"
               >
                 Message
               </label>
               <textarea
                 id="message"
                 rows={4}
-                name='message'
-                className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                name="message"
+                className="mt-1 pt-1 pl-1.5 block w-full rounded-t-md focus:outline-none bg-gray-700 border-b-2  border-light-600 text-white shadow-sm"
               ></textarea>
             </div>
             <button
               type="submit"
-              className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 border:outline-none transition-colors"
             >
               Send Message
             </button>
