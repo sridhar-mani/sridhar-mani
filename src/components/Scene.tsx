@@ -106,11 +106,7 @@ export function Scene() {
   materials["Wolf_Fur"].depthWrite = false; 
     }
   }, [materials, diffuse, alpha]);
-
-
   
-  
-  console.log(scenes,userData,nodes,materials,asset)
   scene.scale.set(3,3,3)
 
   const {actions} = useAnimations(animations,scene)

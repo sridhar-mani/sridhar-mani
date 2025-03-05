@@ -1,6 +1,21 @@
 import { motion} from "framer-motion";
 import { ChevronLeft, ChevronRight, ExternalLink, Github } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return isMobile;
+};
 
 const projects = [
   {
@@ -84,7 +99,9 @@ const projects = [
 
 export function Projects() {
   const [startIndex, setStartIndex] = useState(0);
-  const itemsPerPage = 3;
+  const isMobile =useIsMobile();
+  const itemsPerPage = isMobile?1:3;
+  console.log(isMobile)
 
   const nextProjects = () => {
     if (startIndex + itemsPerPage < projects.length) {
