@@ -86,6 +86,8 @@ function Background() {
 export function Scene() {
   const cameraRef = useRef();
   const wolfRef = useRef();
+  const contactRef= useRef()
+
   const [mouse,setMouse ] = useState({x:0,y:0})
 
 
@@ -115,8 +117,9 @@ return ()=> window.removeEventListener('mousemove',handleMouseMove)
   },[])
   
   useFrame(()=>{
-    if(wolfRef.current){
+    if(wolfRef.current && contactRef.current){
       wolfRef.current.lookAt(mouse.x*5,mouse.y*-5,5)
+      contactRef.current.lookAt(mouse.x*5,mouse.y*-5,5)
     }
   })
 
@@ -178,6 +181,7 @@ return ()=> window.removeEventListener('mousemove',handleMouseMove)
       <Background />
 
       <ContactShadows
+      ref={contactRef}
         opacity={0.5}
         scale={10}
         blur={1}
