@@ -27,7 +27,7 @@ export function Contact() {
     }
   };
   return (
-    <section id="contact" className="min-h-screen bg-gray-900 py-20 px-4">
+    <section id="contact" className="min-h-screen bg-gray-900/65 py-20 px-4">
       <div className="max-w-6xl mx-auto">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -61,7 +61,7 @@ export function Contact() {
                   <GraduationCap size={20} className="mt-1 flex-shrink-0" />
                   <div>
                     <p className="font-semibold">
-                      B.Sc Programming & Data Science
+                      Diploma in Programming
                     </p>
                     <p>IIT Madras</p>
                     <p>CGPA: 7.0 (2021-2024)</p>

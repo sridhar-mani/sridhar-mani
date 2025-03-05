@@ -13,6 +13,7 @@
     "@emailjs/browser": "^4.4.1",
     "@react-three/drei": "^9.99.0",
     "@react-three/fiber": "^8.15.16",
+    "capture-website": "^4.2.0",
     "emailjs": "^4.0.3",
     "framer-motion": "^11.0.5",
     "lucide-react": "^0.344.0",

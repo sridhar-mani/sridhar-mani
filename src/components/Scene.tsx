@@ -85,10 +85,7 @@ function Background() {
 
 export function Scene() {
   const cameraRef = useRef();
-  const wolfRef = useRef();
-  const contactRef= useRef()
-
-  const [mouse,setMouse ] = useState({x:0,y:0})
+  const [wolf, setWolf] = useState(null);
 
 
   const gltf =  useLoader(GLTFLoader,'/wolf/Wolf-Blender-2.82a.glb')
@@ -104,32 +101,14 @@ export function Scene() {
       Object.values(actions)[0].play();
     }
   }, [actions]);
-
-  useEffect(()=>{
-const handleMouseMove = (event)=>{
-  const {innerHeight,innerWidth} = window;
-  const x = (event.clientX / innerWidth) * 2 - 1; 
-  const y = (event.clientY / innerHeight) * 2 - 1; 
-  setMouse({x,y})
-}
-window.addEventListener('mousemove',handleMouseMove)
-return ()=> window.removeEventListener('mousemove',handleMouseMove)
-  },[])
   
-  useFrame(()=>{
-    if(wolfRef.current && contactRef.current){
-      wolfRef.current.lookAt(mouse.x*5,mouse.y*-5,5)
-      contactRef.current.lookAt(mouse.x*5,mouse.y*-5,5)
-    }
-  })
 
-  // useFrame(({ clock }) => {
-  //   if (cameraRef.current) {
-  //     const t = clock.getElapsedTime();
-  //     cameraRef.current.position.x = Math.sin(t * 0.1) * 2;
-  //     cameraRef.current.lookAt(0, 0, 0);
-  //   }
-  // });
+  useFrame(({ clock }) => {
+    if (cameraRef.current) {
+      const elapsedTime = clock.getElapsedTime();
+      scene.rotation.y = elapsedTime*0.5;
+    }
+  });
 
   return (
     <>
@@ -160,7 +139,7 @@ return ()=> window.removeEventListener('mousemove',handleMouseMove)
         <FloatingRing position={[0, 0, 0]} color="#4834d4" />
       </Float> */}
 
-      <primitive object={scene} ref={wolfRef} position={[0, -0.5, 0]} />
+      <primitive object={scene} position={[0, -0.5, 0]} />
 
       {/* <Float
         speed={1.5}
@@ -181,7 +160,6 @@ return ()=> window.removeEventListener('mousemove',handleMouseMove)
       <Background />
 
       <ContactShadows
-      ref={contactRef}
         opacity={0.5}
         scale={10}
         blur={1}

@@ -59,7 +59,8 @@ export function Hero() {
             <Mail size={24} />
           </a>
           <a
-            href="https://drive.google.com/uc?export=download&id=1k6OSGz3YiPHrDHTlcNizxt6DFLUjLL-h"
+            href="https://drive.google.com/file/d/1h6BT5wqIrP04oXXl_Tk4JHs9SFug1T-y/view?usp=sharing"
+            target="_blank"
             className="text-white hover:text-indigo-400 transition-colors transform hover:scale-110"
             title="Resume"
             download="Sridhar-Resume.pdf"
