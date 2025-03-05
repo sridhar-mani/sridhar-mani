@@ -87,10 +87,30 @@ export function Scene() {
   const cameraRef = useRef();
   const [wolf, setWolf] = useState(null);
 
-
   const gltf =  useLoader(GLTFLoader,'/wolf/Wolf-Blender-2.82a.glb')
-  const {scene,animations} = gltf;
+  const {scene,animations,scenes,userData,nodes,materials,asset} = gltf;
+  const [diffuse, alpha] = useLoader(THREE.TextureLoader, [
+    "/wolf/Fur_2.png",
+    "/wolf/Fur_Alpha_3.png",
+  ]);
+  
 
+  useEffect(() => {
+    if (materials["Wolf_Fur"]) {
+      materials["Wolf_Fur"].map = diffuse; 
+      materials["Wolf_Fur"].alphaMap = alpha; 
+      materials["Wolf_Fur"].transparent = false;
+      materials["Wolf_Fur"].needsUpdate = true;
+      
+  materials["Wolf_Fur"].side = THREE.DoubleSide; // Render both sides
+  materials["Wolf_Fur"].depthWrite = false; 
+    }
+  }, [materials, diffuse, alpha]);
+
+
+  
+  
+  console.log(scenes,userData,nodes,materials,asset)
   scene.scale.set(3,3,3)
 
   const {actions} = useAnimations(animations,scene)
