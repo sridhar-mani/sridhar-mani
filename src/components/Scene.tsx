@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useEffect, useRef, useState } from "react";
+import { useFrame, useLoader } from "@react-three/fiber";
 import {
   Float,
   PerspectiveCamera,
@@ -7,8 +7,10 @@ import {
   ContactShadows,
   OrbitControls,
   Torus,
+  useAnimations,
 } from "@react-three/drei";
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/Addons.js";
 
 let lasstScrol = 0;
 let scrollVal = 0;
@@ -83,14 +85,48 @@ function Background() {
 
 export function Scene() {
   const cameraRef = useRef();
+  const wolfRef = useRef();
+  const [mouse,setMouse ] = useState({x:0,y:0})
 
-  useFrame(({ clock }) => {
-    if (cameraRef.current) {
-      const t = clock.getElapsedTime();
-      cameraRef.current.position.x = Math.sin(t * 0.1) * 2;
-      cameraRef.current.lookAt(0, 0, 0);
+
+  const gltf =  useLoader(GLTFLoader,'/wolf/Wolf-Blender-2.82a.glb')
+  const {scene,animations} = gltf;
+
+  scene.scale.set(3,3,3)
+
+  const {actions} = useAnimations(animations,scene)
+
+  useEffect(() => {
+    if (actions && Object.keys(actions).length > 0) {
+      console.log("Available Animations:", Object.keys(actions));
+      Object.values(actions)[0].play();
     }
-  });
+  }, [actions]);
+
+  useEffect(()=>{
+const handleMouseMove = (event)=>{
+  const {innerHeight,innerWidth} = window;
+  const x = (event.clientX / innerWidth) * 2 - 1; 
+  const y = (event.clientY / innerHeight) * 2 - 1; 
+  setMouse({x,y})
+}
+window.addEventListener('mousemove',handleMouseMove)
+return ()=> window.removeEventListener('mousemove',handleMouseMove)
+  },[])
+  
+  useFrame(()=>{
+    if(wolfRef.current){
+      wolfRef.current.lookAt(mouse.x*5,mouse.y*-5,5)
+    }
+  })
+
+  // useFrame(({ clock }) => {
+  //   if (cameraRef.current) {
+  //     const t = clock.getElapsedTime();
+  //     cameraRef.current.position.x = Math.sin(t * 0.1) * 2;
+  //     cameraRef.current.lookAt(0, 0, 0);
+  //   }
+  // });
 
   return (
     <>
@@ -116,10 +152,12 @@ export function Scene() {
         intensity={1}
         castShadow
       />
-
+{/* 
       <Float speed={2} rotationIntensity={1} floatIntensity={1}>
         <FloatingRing position={[0, 0, 0]} color="#4834d4" />
-      </Float>
+      </Float> */}
+
+      <primitive object={scene} ref={wolfRef} position={[0, -0.5, 0]} />
 
       {/* <Float
         speed={1.5}
