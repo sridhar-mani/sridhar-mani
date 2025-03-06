@@ -45,7 +45,7 @@ const fadeInUp = {
 
 export function Skills() {
   return (
-    <section id="skills" className="min-h-screen bg-gray-800/45 py-10 px-4">
+    <section id="skills" className="min-h-screen flex items-center justify-center bg-gray-800/45 py-10 px-4">
       <div className="max-w-6xl mx-auto">
         <motion.h2
           {...fadeInUp}
