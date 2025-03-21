@@ -2,7 +2,7 @@ import { motion} from "framer-motion";
 import { ChevronLeft, ChevronRight, ExternalLink, Github } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const useIsMobile = () => {
+export const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -101,7 +101,6 @@ export function Projects() {
   const [startIndex, setStartIndex] = useState(0);
   const isMobile =useIsMobile();
   const itemsPerPage = isMobile?1:3;
-  console.log(isMobile)
 
   const nextProjects = () => {
     if (startIndex + itemsPerPage < projects.length) {

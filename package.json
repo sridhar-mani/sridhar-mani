@@ -10,10 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@dnd-kit/react": "^0.0.9",
     "@emailjs/browser": "^4.4.1",
+    "@mlc-ai/web-llm": "^0.2.78",
     "@react-three/drei": "^9.99.0",
     "@react-three/fiber": "^8.15.16",
     "capture-website": "^4.2.0",
+    "comlink": "^4.4.2",
     "emailjs": "^4.0.3",
     "framer-motion": "^11.0.5",
     "lucide-react": "^0.344.0",

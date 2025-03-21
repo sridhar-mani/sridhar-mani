@@ -113,7 +113,6 @@ export function Scene() {
 
   useEffect(() => {
     if (actions && Object.keys(actions).length > 0) {
-      console.log("Available Animations:", Object.keys(actions));
       Object.values(actions)[0].play();
     }
   }, [actions]);
