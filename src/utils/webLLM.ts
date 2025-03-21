@@ -1,15 +1,16 @@
-import {CreateMLCEngine, MLCEngine, prebuiltAppConfig } from '@mlc-ai/web-llm'
-import * as Comlink from 'comlink'
+import { CreateMLCEngine, MLCEngine, prebuiltAppConfig } from "@mlc-ai/web-llm";
+import * as Comlink from "comlink";
 
 const selectedModel = "SmolLM2-360M-Instruct-q4f16_1-MLC";
 
-const initProgressCallback = Comlink.proxy(({progress}) => {
-    console.log(`Initialization Progress:${progress*100}`);
-  }
-)
-let engine:MLCEngine;
+const initProgressCallback = Comlink.proxy(({ progress }) => {
+  console.log(`Initialization Progress:${progress * 100}`);
+});
+let engine: MLCEngine;
 const messages = [
-    { role: "system", content: `Instruction for you:
+  {
+    role: "system",
+    content: `Instruction for you:
 
 This page contains detailed information about Sridhar M, a highly skilled Full-Stack Developer. When responding to any questions or queries, please use the information provided on this page as context. Here are the key details:
 
@@ -49,35 +50,35 @@ Portfolio: https://threejs-pearl-iota.vercel.app/
 Usage Note:
 Whenever a user asks a question related to Sridhar or his professional background, skills, projects, or experience, please answer by referencing the details provided above. The goal is to ensure that all responses are aligned with the background information about Sridhar M as shown on this page.
 
-` },
-    { role: "user", content: "Hello!" },
-]
+Very important note: Always remember you should think of yourself as sridhar and answer the question of the users
 
-const changeMsg = ({cusMsg})=>{
-    messages[1].content=cusMsg
-}
+
+`,
+  },
+  { role: "user", content: "Hello!" },
+];
+
+const changeMsg = ({ cusMsg }) => {
+  messages[1].content = cusMsg;
+};
 
 async function initEngine() {
+  try {
+    const config = prebuiltAppConfig;
+    config.useIndexedDBCache = true;
 
-    try {
-        const config = prebuiltAppConfig;
-        config.useIndexedDBCache = true;
-
-        engine = await CreateMLCEngine(
-            selectedModel,
-            {
-                initProgressCallback: initProgressCallback,
-                appConfig: config
-            },
-        );
-    } catch (error) {
-        console.error('Engine initialization failed:', error);
-    }   
+    engine = await CreateMLCEngine(selectedModel, {
+      initProgressCallback: initProgressCallback,
+      appConfig: config,
+    });
+  } catch (error) {
+    console.error("Engine initialization failed:", error);
+  }
 }
 
 async function reply() {
-    if(!engine) await initEngine();
-    return await engine.chat.completions.create({messages});
+  if (!engine) await initEngine();
+  return await engine.chat.completions.create({ messages });
 }
 
 Comlink.expose({ initEngine, reply, changeMsg });
