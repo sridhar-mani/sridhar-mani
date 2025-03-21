@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Mail, MapPin, Briefcase, GraduationCap, Award } from "lucide-react";
 import emailjs from "@emailjs/browser";
 
-export function Contact() {
+export default function Contact() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -60,9 +60,7 @@ export function Contact() {
                 <div className="flex items-start space-x-4">
                   <GraduationCap size={20} className="mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold">
-                      Diploma in Programming
-                    </p>
+                    <p className="font-semibold">Diploma in Programming</p>
                     <p>IIT Madras</p>
                     <p>CGPA: 7.0 (2021-2024)</p>
                   </div>

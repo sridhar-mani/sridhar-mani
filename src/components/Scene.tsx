@@ -83,45 +83,43 @@ function Background() {
   );
 }
 
-export function Scene() {
+export default function Scene() {
   const cameraRef = useRef();
   const [wolf, setWolf] = useState(null);
 
-  const gltf =  useLoader(GLTFLoader,'/wolf/Wolf-Blender-2.82a.glb')
-  const {scene,animations,scenes,userData,nodes,materials,asset} = gltf;
+  const gltf = useLoader(GLTFLoader, "/wolf/Wolf-Blender-2.82a.glb");
+  const { scene, animations, scenes, userData, nodes, materials, asset } = gltf;
   const [diffuse, alpha] = useLoader(THREE.TextureLoader, [
     "/wolf/Fur_2.png",
     "/wolf/Fur_Alpha_3.png",
   ]);
-  
 
   useEffect(() => {
     if (materials["Wolf_Fur"]) {
-      materials["Wolf_Fur"].map = diffuse; 
-      materials["Wolf_Fur"].alphaMap = alpha; 
+      materials["Wolf_Fur"].map = diffuse;
+      materials["Wolf_Fur"].alphaMap = alpha;
       materials["Wolf_Fur"].transparent = false;
       materials["Wolf_Fur"].needsUpdate = true;
-      
-  materials["Wolf_Fur"].side = THREE.DoubleSide; // Render both sides
-  materials["Wolf_Fur"].depthWrite = false; 
+
+      materials["Wolf_Fur"].side = THREE.DoubleSide; // Render both sides
+      materials["Wolf_Fur"].depthWrite = false;
     }
   }, [materials, diffuse, alpha]);
-  
-  scene.scale.set(3,3,3)
 
-  const {actions} = useAnimations(animations,scene)
+  scene.scale.set(3, 3, 3);
+
+  const { actions } = useAnimations(animations, scene);
 
   useEffect(() => {
     if (actions && Object.keys(actions).length > 0) {
       Object.values(actions)[0].play();
     }
   }, [actions]);
-  
 
   useFrame(({ clock }) => {
     if (cameraRef.current) {
       const elapsedTime = clock.getElapsedTime();
-      scene.rotation.y = elapsedTime*0.5;
+      scene.rotation.y = elapsedTime * 0.5;
     }
   });
 
@@ -149,7 +147,7 @@ export function Scene() {
         intensity={1}
         castShadow
       />
-{/* 
+      {/* 
       <Float speed={2} rotationIntensity={1} floatIntensity={1}>
         <FloatingRing position={[0, 0, 0]} color="#4834d4" />
       </Float> */}

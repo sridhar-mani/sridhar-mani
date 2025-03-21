@@ -1,29 +1,21 @@
-import { Canvas } from '@react-three/fiber';
-import { Scene } from './components/Scene';
-import { Hero } from './components/Hero';
-import { Projects, useIsMobile } from './components/Projects';
-import { Skills } from './components/Skills';
-import { Contact } from './components/Contact';
-import { Suspense, useEffect, useState } from 'react';
-import { Loader } from '@react-three/drei';
-import NavBar from './components/NavBar';
-import MyBot from './components/myBot'
-import { Bot, BotMessageSquare, SendHorizontal } from 'lucide-react';
-import {motion,AnimatePresence} from 'framer-motion'
-import { getReply } from './utils/main';
+import { Canvas } from "@react-three/fiber";
+import React, { Suspense } from "react";
+import { Loader } from "@react-three/drei";
+import { Hero } from "./components/Hero";
+import LoaderSus from "./components/Loader";
 
-const sections = ["home", "projects","skills", "contact"];
+const Scene = React.lazy(() => import("./components/Scene"));
+const Projects = React.lazy(() => import("./components/Projects"));
+const Skills = React.lazy(() => import("./components/Skills"));
+const Contact = React.lazy(() => import("./components/Contact"));
+const MyBot = React.lazy(() => import("./components/myBot"));
+const NavBar = React.lazy(() => import("./components/NavBar"));
 
 function App() {
-
-
-
-
-
   return (
     <div className="relative transition-all duration-300 w-full">
       <MyBot></MyBot>
-   
+
       <div className="fixed inset-0 z-0">
         <Canvas>
           <Suspense fallback={null}>
@@ -31,20 +23,28 @@ function App() {
           </Suspense>
         </Canvas>
         <Loader />
-        
       </div>
       <div className="relative z-10">
         <div className="min-h-screen w-full">
-          <NavBar></NavBar>
-          <Hero />
+          <Suspense fallback={<LoaderSus></LoaderSus>}>
+            <NavBar></NavBar>
+          </Suspense>
+          <Suspense fallback={<LoaderSus></LoaderSus>}>
+            <Hero />
+          </Suspense>
         </div>
         <div className="relative bg-gray-900/70 backdrop-blur-md">
-          <Projects />
-          <Skills />
-          <Contact />
+          <Suspense fallback={<LoaderSus></LoaderSus>}>
+            <Projects />
+          </Suspense>
+          <Suspense fallback={<LoaderSus></LoaderSus>}>
+            <Skills />
+          </Suspense>
+          <Suspense fallback={<LoaderSus></LoaderSus>}>
+            <Contact />
+          </Suspense>
         </div>
       </div>
-
     </div>
   );
 }

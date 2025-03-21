@@ -1,4 +1,4 @@
-import { motion} from "framer-motion";
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, ExternalLink, Github } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -28,7 +28,7 @@ const projects = [
     github: "https://github.com/sridhar-mani/InfluencerHub",
     live: "",
   },
-  
+
   {
     title: "Library Management System",
     description:
@@ -45,16 +45,17 @@ const projects = [
       "An modern and responsive fully frontend based PDF editor made with web workers, wasm libraries.",
     image:
       "https://api.screenshotone.com/take?access_key=MGzKtcw0x6WRdQ&url=https://freepdf.rest/about",
-    tech: ["React",  "Tailwind CSS","Web Workers","WASM"],
+    tech: ["React", "Tailwind CSS", "Web Workers", "WASM"],
     github: "",
     live: "https://freepdf.rest/",
   },
   {
     title: "Project Forum",
-    description: "A modern, responsive forum website built with Next.js, Postgres, Prisma and Tailwind CSS.",
+    description:
+      "A modern, responsive forum website built with Next.js, Postgres, Prisma and Tailwind CSS.",
     image:
       "https://api.screenshotone.com/take?access_key=MGzKtcw0x6WRdQ&url=https://moody-blues.vercel.app/landing",
-    tech: ["Next.js", "Tailwind CSS", "Prisma","Postgres"],
+    tech: ["Next.js", "Tailwind CSS", "Prisma", "Postgres"],
     github: "https://github.com/sridhar-mani/project-forum",
     live: "https://moody-blues.vercel.app/landing",
   },
@@ -64,13 +65,21 @@ const projects = [
       "A Python application utilizing LLMs and Ollama for data analysis, featuring a Flask backend and TypeScript frontend.",
     image:
       "https://images.unsplash.com/photo-1577401159468-3bbc7ee440b5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    tech: ["Python", "Flask", "TypeScript","TailwindCSS","React.js","Ollama"],
+    tech: [
+      "Python",
+      "Flask",
+      "TypeScript",
+      "TailwindCSS",
+      "React.js",
+      "Ollama",
+    ],
     github: "https://github.com/sridhar-mani/ai-analyzer",
     live: "",
   },
   {
     title: "ChromaDB-UI",
-    description: "A web based DB manager for the vector DB chroma DB.(Beta Version)",
+    description:
+      "A web based DB manager for the vector DB chroma DB.(Beta Version)",
     image:
       "https://plus.unsplash.com/premium_photo-1681487942927-e1a2786e6036?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     tech: ["React.js", "Tailwind CSS"],
@@ -79,7 +88,8 @@ const projects = [
   },
   {
     title: "CFD-Toolkit",
-    description: "A cfd toolkit with helper functions to view simulation output files openfoam.",
+    description:
+      "A cfd toolkit with helper functions to view simulation output files openfoam.",
     image:
       "https://images.unsplash.com/photo-1642191911856-eff75c138ead?q=80&w=2013&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     tech: ["VTK.js", "Javascript"],
@@ -88,7 +98,8 @@ const projects = [
   },
   {
     title: "Js-DSA",
-    description: "A dsa helper library in javascript to be used in other projects.(Beta Version)",
+    description:
+      "A dsa helper library in javascript to be used in other projects.(Beta Version)",
     image:
       "https://plus.unsplash.com/premium_photo-1667232504929-f94b7002079d?q=80&w=2128&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     tech: ["Javascript"],
@@ -97,10 +108,10 @@ const projects = [
   },
 ];
 
-export function Projects() {
+export default function Projects() {
   const [startIndex, setStartIndex] = useState(0);
-  const isMobile =useIsMobile();
-  const itemsPerPage = isMobile?1:3;
+  const isMobile = useIsMobile();
+  const itemsPerPage = isMobile ? 1 : 3;
 
   const nextProjects = () => {
     if (startIndex + itemsPerPage < projects.length) {
@@ -115,7 +126,10 @@ export function Projects() {
   };
 
   return (
-    <section id="projects" className="min-h-screen flex items-center justify-center bg-gray-900/45 py-20 px-4">
+    <section
+      id="projects"
+      className="min-h-screen flex items-center justify-center bg-gray-900/45 py-20 px-4"
+    >
       <div className="max-w-6xl mx-auto">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -148,54 +162,60 @@ export function Projects() {
               transition={{ duration: 0.5 }}
               className="flex gap-8 justify-center"
             >
-              {projects.slice(startIndex, startIndex + itemsPerPage).map((project) => (
-                <motion.div
-                  key={project.title}
-                  className="w-[350px] bg-gray-800 rounded-lg overflow-hidden transform hover:shadow-white transition-transform"
-                >
-                  <div className="relative h-48">
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <div className="flex space-x-4">
-                        <a
-                          href={project.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 bg-gray-900 rounded-full text-white hover:text-indigo-400 transform hover:scale-110 transition-transform"
-                        >
-                          <Github size={20} />
-                        </a>
-                        <a
-                          href={project.live}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 bg-gray-900 rounded-full text-white hover:text-indigo-400 transform hover:scale-110 transition-transform"
-                        >
-                          <ExternalLink size={20} />
-                        </a>
+              {projects
+                .slice(startIndex, startIndex + itemsPerPage)
+                .map((project) => (
+                  <motion.div
+                    key={project.title}
+                    className="w-[350px] bg-gray-800 rounded-lg overflow-hidden transform hover:shadow-white transition-transform"
+                  >
+                    <div className="relative h-48">
+                      <img
+                        src={project.image}
+                        alt={project.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                        <div className="flex space-x-4">
+                          <a
+                            href={project.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 bg-gray-900 rounded-full text-white hover:text-indigo-400 transform hover:scale-110 transition-transform"
+                          >
+                            <Github size={20} />
+                          </a>
+                          <a
+                            href={project.live}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 bg-gray-900 rounded-full text-white hover:text-indigo-400 transform hover:scale-110 transition-transform"
+                          >
+                            <ExternalLink size={20} />
+                          </a>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-white mb-2">{project.title}</h3>
-                    <p className="text-gray-400 mb-4">{project.description}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {project.tech.map((tech) => (
-                        <span
-                          key={tech}
-                          className="px-3 py-1 bg-gray-700 text-sm text-gray-300 rounded-full hover:bg-indigo-600 transition-colors"
-                        >
-                          {tech}
-                        </span>
-                      ))}
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-white mb-2">
+                        {project.title}
+                      </h3>
+                      <p className="text-gray-400 mb-4">
+                        {project.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {project.tech.map((tech) => (
+                          <span
+                            key={tech}
+                            className="px-3 py-1 bg-gray-700 text-sm text-gray-300 rounded-full hover:bg-indigo-600 transition-colors"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))}
             </motion.div>
           </div>
 
@@ -204,7 +224,9 @@ export function Projects() {
             onClick={nextProjects}
             disabled={startIndex + itemsPerPage >= projects.length}
             className={`absolute right-0 z-10 bg-gray-800 p-3 rounded-full text-white transition-transform hover:scale-110 ${
-              startIndex + itemsPerPage >= projects.length ? "opacity-50 cursor-not-allowed" : "opacity-100"
+              startIndex + itemsPerPage >= projects.length
+                ? "opacity-50 cursor-not-allowed"
+                : "opacity-100"
             }`}
           >
             <ChevronRight size={30} />
