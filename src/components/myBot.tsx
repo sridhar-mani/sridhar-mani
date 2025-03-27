@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot, BotMessageSquare, SendHorizontal } from "lucide-react";
 import React, { useState } from "react";
-import { getReply } from "../utils/main";
+import { aiworker, getReply } from "../utils/main";
 import { useIsMobile } from "./Projects";
 
 interface chating {
@@ -16,8 +16,12 @@ function MyBot() {
   const [isLoading, setIsLoading] = useState(false);
 
   const callingLLM = async () => {
-    if (!messages.trim()) return;
+    if (!messages.trim() && !isLoading) return;
+
     setIsLoading(true);
+
+    await aiworker.initEngine();
+
     const res = await getReply({ messages: messages });
     setChating([
       ...chating,
@@ -59,7 +63,7 @@ function MyBot() {
                 onChange={(e) => setMessages(e.target.value)}
                 style={{ width: "100%", height: "100%" }}
                 placeholder="Type a message..."
-                className="w-full h-full p-2 text-xs pr-10 overflow-auto rounded-lg bg-white text-gray-800 border transparent-scrollbar overflow-x-hidden border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full h-full p-2 text-xs resize-none pr-10 overflow-auto rounded-lg bg-white text-gray-800 border transparent-scrollbar overflow-x-hidden border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 outline-none"
               ></textarea>
               <button
                 onClick={callingLLM}

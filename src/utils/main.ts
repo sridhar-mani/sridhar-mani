@@ -1,16 +1,16 @@
-import * as Comlink from 'comlink'
+import * as Comlink from "comlink";
 
-const worker = new Worker(new URL('./webLLM.ts',import.meta.url),{type:'module'})
-const aiworker = Comlink.wrap(worker);
+const worker = new Worker(new URL("./webLLM.ts", import.meta.url), {
+  type: "module",
+});
+export const aiworker = Comlink.wrap(worker);
 
-    async function getReply({messages}){
-        await aiworker.initEngine();
+async function getReply({ messages }) {
+  await aiworker.changeMsg({ cusMsg: messages });
 
-        await aiworker.changeMsg({cusMsg:messages});
+  const newResponce = await aiworker.reply();
 
-        const newResponce = await aiworker.reply();
+  return newResponce.choices[0].message.content;
+}
 
-        return newResponce.choices[0].message.content
-    }
-
-    export {getReply}
+export { getReply };
