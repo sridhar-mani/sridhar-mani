@@ -13,8 +13,9 @@ import {
 } from "@xenova/transformers";
 import mammoth from "mammoth";
 import { profileSri } from "../data";
+import { simpleHash } from ".";
 
-const selectedModel = "snowflake-arctic-embed-s-q0f32-MLC-b4";
+const selectedModel = "Llama-3.2-1B-Instruct-q4f16_1-MLC";
 
 const initProgressCallback = Comlink.proxy(({ progress }) => {
   console.log(`Initialization Progress:${progress * 100}`);
@@ -24,17 +25,14 @@ let engine: MLCEngine;
 let mydetailsIndex: EmbeddingIndex | null = null;
 let docVector: number[] | null = null;
 let embeddingPipeline: FeatureExtractionPipeline | null = null;
+let retrievedContext: string = "";
 
 const messages = [
   {
     role: "system",
-    content: `Instruction for you:
+    content: `You are Sridhar M, a Full-Stack Developer. Use the following information about yourself to answer questions. Information: ${retrievedContext}
 
-    This page contains detailed information about Sridhar M, a highly skilled Full-Stack Developer. ...
-
-    Now you should answer instead of me giving information and answering the questions about me. YOU ARE SRIDHAR
-   
-`,
+    Always answer as if you are Sridhar himself.`,
   },
   { role: "user", content: "Hello!" },
 ];
@@ -42,22 +40,6 @@ const messages = [
 const changeMsg = ({ cusMsg }) => {
   messages[1].content = cusMsg;
 };
-
-async function initEmbeddingModel() {
-  try {
-    env.allowLocalModels = false;
-    env.useBrowserCache = false;
-    embeddingPipeline = await pipeline(
-      "feature-extraction",
-      "Xenova/e5-small-v2",
-      { quantized: true }
-    );
-
-    console.log("Embedding model loaded");
-  } catch (error) {
-    console.error("Failed to load embedding model:", error);
-  }
-}
 
 async function customEmbedding(text) {
   if (!embeddingPipeline) await initEmbeddingModel();
@@ -75,21 +57,58 @@ async function customEmbedding(text) {
   return Array.from(result.data);
 }
 
-async function embedProfile(profileText) {
-  // Split the profile text into paragraphs
-  const paragraphs = profileText.split(/\n\s*\n/);
-  const filteredParagraphs = paragraphs.filter((p) => p.trim().length > 10);
+async function initEmbeddingModel() {
+  try {
+    env.allowLocalModels = false;
+    env.useBrowserCache = false;
+    embeddingPipeline = await pipeline(
+      "feature-extraction",
+      "Xenova/e5-small-v2",
+      { quantized: true }
+    );
 
-  const timestamp = Date.now();
+    console.log("Embedding model loaded");
+  } catch (error) {
+    console.error("Failed to load embedding model:", error);
+  }
+}
+
+async function embedProfile(profileText) {
+  const paragraphs = profileText.split(/[.;\n]+/);
+
+  const filteredParagraphs = paragraphs
+    .map((p) => p.trim())
+    .filter((p) => p.length > 10);
+
+  // Load existing data from IndexedDB
+  let existingDb = await mydetailsIndex.getAllObjectsFromIndexedDB(
+    "ragIndexedDB",
+    "ragDB"
+  );
 
   for (let i = 0; i < filteredParagraphs.length; i++) {
-    const embedding = await customEmbedding(filteredParagraphs[i]);
-    const uniqueId = `profile_${timestamp}_${i}`;
+    const para = filteredParagraphs[i].trim();
+    const uniqueId = `profile_${simpleHash(para)}`;
 
+    // Check if this paragraph is already embedded using the unique id
+    if (existingDb && existingDb.some((item) => item.id === uniqueId)) {
+      console.log(`Paragraph already embedded: ${para.slice(0, 60)}...`);
+      continue;
+    }
+
+    const embedding = await customEmbedding(para);
     mydetailsIndex.add({
       id: uniqueId,
       name: "Profile",
-      text: filteredParagraphs[i],
+      text: para,
+      embedding: embedding,
+    });
+
+    // Update our local snapshot
+    existingDb.push({
+      id: uniqueId,
+      name: "Profile",
+      text: para,
       embedding: embedding,
     });
 
@@ -118,10 +137,7 @@ async function initEngine() {
         "ragDB"
       );
 
-      const profileExists =
-        existingDb &&
-        existingDb.length > 0 &&
-        existingDb.some((each) => each.name && each.name === "Profile");
+      const profileExists = existingDb && existingDb.length > 0;
 
       if (!profileExists) {
         await embedProfile(profileSri);
@@ -167,7 +183,7 @@ async function embedDoc(doc) {
         // Skip very short segments
         const embedding = await customEmbedding(paragraph);
         mydetailsIndex.add({
-          vector: embedding,
+          embedding: embedding,
           text: paragraph,
         });
       }
@@ -187,25 +203,27 @@ async function reply() {
 
   const querTxt = messages[1].content;
 
-  const queryEmbed = await customEmbedding(querTxt);
-
-  debugger;
-
-  let retrievedContext = "";
+  const queryEmbed = await customEmbedding(`query: ${querTxt}`);
 
   if (mydetailsIndex) {
     // Search for similar content using the embedding
     const searchResults = await mydetailsIndex.search(queryEmbed, {
       useStorage: "indexedDB",
-      topK: 3,
+      topK: 1,
       storageOptions: {
         indexedDBName: "ragIndexedDB",
         indexedDBObjectStoreName: "ragDB",
       },
-    }); // Get top 3 most relevant entries
+    }); // Get top 3 most relevant entriess
+
+    console.log(searchResults);
+
+    debugger;
 
     // Extract and format the retrieved content
-    retrievedContext = searchResults.map((result) => result.text).join("\n\n");
+    retrievedContext = searchResults
+      .map((result) => result.object.text)
+      .join("\n\n");
 
     // Add retrieved context to system message or create a new message with context
     const enhancedMessages = [
@@ -219,7 +237,7 @@ async function reply() {
       top_p: 0.1,
       max_tokens: 100,
       presence_penalty: 0.5,
-      frequency_penalty: 0.5,
+      // frequency_penalty: 0.5,
     });
   }
 
@@ -229,7 +247,7 @@ async function reply() {
     top_p: 0.1,
     max_tokens: 100,
     presence_penalty: 0.5,
-    frequency_penalty: 0.5,
+    // frequency_penalty: 0.5,
   });
 }
 

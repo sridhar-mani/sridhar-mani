@@ -42,7 +42,7 @@ function MyBot() {
             transition={{ duration: 0.4, ease: "easeInOut" }}
             className="w-80 h-[60%] rounded-xl  fixed z-20 bottom-16 right-16 bg-gradient-to-r items-start flex justify-center  from-indigo-500 to-purple-500"
           >
-            <div className="h-[80%] w-[95%] transparent-scrollbar overflow-x-hidden overflow-scroll">
+            <div className="h-[80%] w-[95%] p-3 transparent-scrollbar overflow-x-hidden overflow-scroll">
               {" "}
               {chating.map((each, index) => (
                 <div
