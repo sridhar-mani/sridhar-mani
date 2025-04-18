@@ -40,7 +40,7 @@ function MyBot() {
             animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
             exit={{ opacity: 0, scale: 0.3, x: 90, y: 130 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="w-80 h-[60%] rounded-xl  fixed z-20 bottom-16 right-16 bg-gradient-to-r items-start flex justify-center  from-indigo-500 to-purple-500"
+            className="w-80 h-[50%] rounded-xl  fixed z-20 bottom-16 right-16 bg-gradient-to-r items-start flex justify-center  from-indigo-500 to-purple-500"
           >
             <div className="h-[80%] w-[95%] p-3 transparent-scrollbar overflow-x-hidden overflow-scroll">
               {" "}

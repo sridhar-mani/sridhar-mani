@@ -3,7 +3,10 @@ import { Github, Linkedin, Mail, BookOpen } from "lucide-react";
 
 export function Hero() {
   return (
-    <div id="home" className="relative z-10 h-screen flex items-center justify-center">
+    <div
+      id="home"
+      className="relative z-10 h-screen flex items-center justify-center"
+    >
       <div className="text-center text-white p-8 backdrop-blur-sm bg-gray-900/30 rounded-lg">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
@@ -27,8 +30,8 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="text-lg mb-8 text-gray-400 max-w-2xl mx-auto"
         >
-          Full Stack Developer with expertise in React.js, Next.js,Vue.js, Flask and .NET Core.
-          Passionate about creating impactful solutions.
+          Full Stack Developer with expertise in React.js, Next.js,Vue.js, Flask
+          and .NET Core. Passionate about creating impactful solutions.
         </motion.p>
         <motion.div
           initial={{ opacity: 0 }}
