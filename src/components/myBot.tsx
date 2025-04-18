@@ -60,6 +60,11 @@ function MyBot() {
             <div className="w-[90%] h-14 bottom-3 absolute">
               <textarea
                 value={messages}
+                onKeyDownCapture={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    callingLLM();
+                  }
+                }}
                 onChange={(e) => setMessages(e.target.value)}
                 style={{ width: "100%", height: "100%" }}
                 placeholder="Type a message..."
@@ -67,9 +72,6 @@ function MyBot() {
               ></textarea>
               <button
                 onClick={callingLLM}
-                onKeyDownCapture={(e) => {
-                  if (e.key === "Enter") callingLLM();
-                }}
                 className="w-8 h-8 hover:scale-110 flex items-center justify-center absolute bottom-3 right-2 rounded-full bg-black"
               >
                 {isLoading ? (
