@@ -8,7 +8,7 @@ const Scene = React.lazy(() => import("./components/Scene"));
 const Projects = React.lazy(() => import("./components/Projects"));
 const Skills = React.lazy(() => import("./components/Skills"));
 const Contact = React.lazy(() => import("./components/Contact"));
-const MyBot = React.lazy(() => import("./components/MyBot"));
+const MyBot = React.lazy(() => import("./components/myBot"));
 const NavBar = React.lazy(() => import("./components/NavBar"));
 
 function App() {

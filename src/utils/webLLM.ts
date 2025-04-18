@@ -42,7 +42,7 @@ const changeMsg = ({ cusMsg }) => {
 };
 
 async function customEmbedding(text) {
-  if (!embeddingPipeline) await initEmbeddingModel();
+  if (!embeddingPipeline) {await initEmbeddingModel();}
 
   const formatedText =
     text.startsWith("query: ") || text.startsWith("passage: ")
@@ -57,8 +57,19 @@ async function customEmbedding(text) {
   return Array.from(result.data);
 }
 
+async function saveEmbeddingToIndexedDB(){
+  const fetchedUrls = new Set();
+  const origFetch = window.fetch;
+  window.fetch = async (input, init) => {
+    const url = typeof input === 'string' ? input : input.url;
+    fetchedUrls.add(url);
+    return origFetch(input, init);
+  }; 
+}
+
 async function initEmbeddingModel() {
   try {
+    
     env.allowLocalModels = false;
     env.useBrowserCache = false;
     embeddingPipeline = await pipeline(
@@ -67,7 +78,8 @@ async function initEmbeddingModel() {
       { quantized: true }
     );
 
-    console.log("Embedding model loaded");
+
+
   } catch (error) {
     console.error("Failed to load embedding model:", error);
   }

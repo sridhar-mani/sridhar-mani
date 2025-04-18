@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
 import { Mail, MapPin, Briefcase, GraduationCap, Award } from "lucide-react";
 import emailjs from "@emailjs/browser";
+import { useIsMobile } from "./Projects";
 
 export default function Contact() {
+  const isMobile = useIsMobile();
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -37,19 +40,20 @@ export default function Contact() {
         >
           Background & Contact
         </motion.h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-1">
+        <div className="grid grid-cols-1  lg:grid-cols-3 gap-1">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             className="space-y-8 lg:col-span-1"
           >
-            <div>
+            <div className={`${isMobile?'flex flex-col items-center text-center':''}`}>
               <h3 className="text-2xl font-bold text-white mb-4">Education</h3>
-              <div className="space-y-4 text-gray-300">
+              <div className="space-y-4 place-items-center text-gray-300">
                 <div className="flex items-start space-x-4">
-                  <GraduationCap size={20} className="mt-1 flex-shrink-0" />
+                {!isMobile?                  <GraduationCap size={20} className="mt-1 flex-shrink-0" />:<></>}
                   <div>
+                  {isMobile?                  <GraduationCap size={20} className="mt-1 place-self-center flex-shrink-0" />:<></>}
                     <p className="font-semibold">
                       B.Tech in Textile Technology
                     </p>
@@ -58,16 +62,18 @@ export default function Contact() {
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
-                  <GraduationCap size={20} className="mt-1 flex-shrink-0" />
+                {!isMobile?                  <GraduationCap size={20} className="mt-1 flex-shrink-0" />:<></>}
                   <div>
+                  {isMobile?                  <GraduationCap size={20} className="mt-1 place-self-center flex-shrink-0" />:<></>}
                     <p className="font-semibold">Diploma in Programming</p>
                     <p>IIT Madras</p>
                     <p>CGPA: 7.0 (2021-2024)</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
-                  <GraduationCap size={20} className="mt-1 flex-shrink-0" />
+                {!isMobile?                  <GraduationCap size={20} className="mt-1 flex-shrink-0" />:<></>}
                   <div>
+                  {isMobile?                  <GraduationCap size={20} className="mt-1 place-self-center flex-shrink-0" />:<></>}
                     <p className="font-semibold">HSC</p>
                     <p>Bharani Vidhyalaya</p>
                     <p>89.8%</p>
@@ -76,19 +82,22 @@ export default function Contact() {
               </div>
             </div>
 
-            <div>
+            <div className={`${isMobile?'flex flex-col items-center text-center':''}`}>
               <h3 className="text-2xl font-bold text-white mb-4">Leadership</h3>
-              <div className="space-y-4 text-gray-300">
+              <div className="space-y-4 place-items-center text-gray-300">
                 <div className="flex items-start space-x-4">
-                  <Award size={20} className="mt-1 flex-shrink-0" />
+                {!isMobile?                  <Award size={20} className="mt-1 flex-shrink-0" />:<></>}
+                  
                   <div>
+                  {isMobile?                  <Award size={20} className="mt-1 place-self-center flex-shrink-0" />:<></>}
                     <p className="font-semibold">Editorial Head</p>
                     <p>Astro Club</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
-                  <Award size={20} className="mt-1 flex-shrink-0" />
+                {!isMobile?                  <Award size={20} className="mt-1 flex-shrink-0" />:<></>}
                   <div>
+                  {isMobile?                  <Award size={20} className="mt-1 place-self-center flex-shrink-0" />:<></>}
                     <p className="font-semibold">
                       NSS Volunteer Representative
                     </p>
@@ -102,14 +111,15 @@ export default function Contact() {
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="space-y-8 lg:col-span-1"
+            className="space-y-8 mt-4 lg:col-span-1"
           >
-            <div>
+            <div className={`${isMobile?'flex flex-col items-center text-center':''}`}>
               <h3 className="text-2xl font-bold text-white mb-4">Experience</h3>
-              <div className="space-y-4 text-gray-300">
+              <div className="space-y-4 place-items-center text-gray-300">
                 <div className="flex items-start space-x-4">
-                  <Briefcase size={20} className="mt-1 flex-shrink-0" />
+                {!isMobile?<Briefcase size={20} className="mt-1 flex-shrink-0" />:<></>}
                   <div>
+                  {isMobile?<Briefcase size={20} className="mt-1 place-self-center flex-shrink-0" />:<></>}
                     <p className="font-semibold">
                       Associate Software Developer
                     </p>
@@ -118,16 +128,18 @@ export default function Contact() {
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
-                  <Briefcase size={20} className="mt-1 flex-shrink-0" />
+                {!isMobile?<Briefcase size={20} className="mt-1 flex-shrink-0" />:<></>}
                   <div>
+                  {isMobile?<Briefcase size={20} className="mt-1 place-self-center flex-shrink-0" />:<></>}
                     <p className="font-semibold">Contract Engineer</p>
                     <p>DEBEL, DRDO, Bangalore</p>
                     <p>Feb 2023 - Oct 2023</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
-                  <Briefcase size={20} className="mt-1 flex-shrink-0" />
+                {!isMobile?<Briefcase size={20} className="mt-1 flex-shrink-0" />:<></>}
                   <div>
+                  {isMobile?<Briefcase size={20} className="mt-1 place-self-center flex-shrink-0" />:<></>}
                     <p className="font-semibold">Business Development Intern</p>
                     <p>Zech Innovations</p>
                     <p>Jun 2022 - Aug 2022</p>
@@ -141,7 +153,7 @@ export default function Contact() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="space-y-6 bg-gray-800 p-6 rounded-lg h-min"
+            className="space-y-6 mt-4 bg-gray-800 p-6 rounded-lg h-min"
           >
             <h3 className="text-2xl font-bold text-white mb-4">Get in Touch</h3>
             <div>

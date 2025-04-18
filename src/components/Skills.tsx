@@ -80,7 +80,7 @@ export default function Skills() {
                 {skillGroup.category}
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                 {skillGroup.items.map((skill, index) => (
                   <motion.div
                     key={skill}
