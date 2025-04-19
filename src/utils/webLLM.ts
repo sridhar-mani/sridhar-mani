@@ -30,7 +30,7 @@ let retrievedContext: string = "";
 const messages = [
   {
     role: "system",
-    content: `You are Sridhar M, a Full-Stack Developer. Use the following information about yourself to answer questions. Information: ${retrievedContext}
+    content: `Whenever a user asks about Sridhar M’s background, skills, projects, or experience, answer by referencing the details above—and always think and respond as if you are Sridhar himself. Information: ${retrievedContext}
 
     Always answer as if you are Sridhar himself.`,
   },
@@ -86,17 +86,14 @@ async function initEmbeddingModel() {
 }
 
 async function embedProfile(profileText) {
-  const paragraphs = profileText.split(/[.;\n]+/);
 
-  const filteredParagraphs = paragraphs
-    .map((p) => p.trim())
-    .filter((p) => p.length > 10);
+  const filteredParagraphs = profileText.split(/\n(?=##\s)/g).map(s=>s.trim()).map(s=>s.replace(/^##\s*/,"")).filter(s=>s.length>0)
 
   // Load existing data from IndexedDB
   let existingDb = await mydetailsIndex.getAllObjectsFromIndexedDB(
     "ragIndexedDB",
     "ragDB"
-  );
+  ) || [];
 
   for (let i = 0; i < filteredParagraphs.length; i++) {
     const para = filteredParagraphs[i].trim();
@@ -124,8 +121,9 @@ async function embedProfile(profileText) {
       embedding: embedding,
     });
 
-    await mydetailsIndex.saveToIndexedDB("ragIndexedDB", "ragDB");
+
   }
+  await mydetailsIndex.saveToIndexedDB("ragIndexedDB", "ragDB");
 }
 
 async function initEngine() {
@@ -170,7 +168,9 @@ async function embedText(data) {
     return mydetailsIndex;
   }
   return null;
+
 }
+
 async function embedDoc(doc) {
   try {
     const res = await fetch(doc);
@@ -229,9 +229,6 @@ async function reply() {
     }); // Get top 3 most relevant entriess
 
     console.log(searchResults);
-
-    debugger;
-
     // Extract and format the retrieved content
     retrievedContext = searchResults
       .map((result) => result.object.text)
