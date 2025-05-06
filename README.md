@@ -1,14 +1,36 @@
 <p align="center">
-  <!-- GitHub overall stats -->
-  <img src="https://github-readme-stats.vercel.app/api?username=sridhar-mani&show_icons=true&theme=radical" alt="Sridhar's GitHub Stats" />
-  <!-- Top languages used -->
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=sridhar-mani&layout=compact&langs_count=8" alt="Top Languages" />
-  <!-- Contribution streak -->
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=sridhar-mani&theme=dark&hide_border=true" alt="GitHub Streak" />
-  <!-- Profile summary cards -->
-  <img src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=sridhar-mani" alt="Profile Summary" />
-  <!-- WakaTime weekly metrics -->
-  <img src="https://github-readme-stats.vercel.app/api/wakatime?username=YOUR_WAKATIME_USERNAME" alt="WakaTime Stats" />
-  <!-- Profile views -->
-  <img src="https://komarev.com/ghpvc/?username=sridhar-mani" alt="Profile Views" />
+  <!-- Social badges + Profile Views -->
+  <a href="https://github.com/sridhar-mani">
+    <img src="https://img.shields.io/badge/GitHub-@sridhar--mani-181717?style=for-the-badge&logo=github" alt="GitHub" />
+  </a>
+  <a href="https://linkedin.com/in/sridhar">
+    <img src="https://img.shields.io/badge/LinkedIn-Sridhar-blue?style=for-the-badge&logo=linkedin" alt="LinkedIn" />
+  </a>
+  <a href="https://sridhar-mani.vercel.app">
+    <img src="https://img.shields.io/badge/Portfolio-Visit-green?style=for-the-badge&logo=vercel" alt="Portfolio" />
+  </a>
+  <img src="https://komarev.com/ghpvc/?username=sridhar-mani&style=for-the-badge" alt="Profile Views" />
+</p>
+
+<p align="center">
+  <!-- Profile summary card -->
+  <img src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=sridhar-mani&theme=tokyonight" alt="Profile Summary" />
+</p>
+
+<p align="center">
+  <em>🎯 I’m <strong>Sridhar M</strong>,</em><br/>
+  <span style="font-weight:500">a full‑stack developer crafting modern web & mobile apps, immersive 3D sims,</span><br/>
+  <span style="opacity:0.8">and AI‑powered tools. I love turning ideas into clean, interactive experiences.</span>
+</p>
+
+<p align="center">
+  <!-- Stats + Top languages -->
+  <img src="https://github-readme-stats.vercel.app/api?username=sridhar-mani&show_icons=true&count_private=true&theme=tokyonight" alt="GitHub Stats" />
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=sridhar-mani&layout=compact&langs_count=6&theme=tokyonight" alt="Top Languages" />
+</p>
+
+<p align="center">
+  <!-- Streak + Contribution graph -->
+  <img src="https://github-readme-streak-stats.herokuapp.com/?user=sridhar-mani&theme=tokyonight&hide_border=true" alt="Streak Stats" />
+  <img src="https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=sridhar-mani&theme=tokyonight" alt="Productive Time" />
 </p>
