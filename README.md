@@ -18,9 +18,10 @@
 </p>
 
 <p align="center">
-  <em>🎯 I’m <strong>Sridhar M</strong>,</em><br/>
-  <span style="font-weight:500">a full‑stack developer crafting modern web & mobile apps, immersive 3D sims,</span><br/>
-  <span style="opacity:0.8">and AI‑powered tools. I love turning ideas into clean, interactive experiences.</span>
+<em>👋 Hey there! I’m <strong>Sridhar M</strong>,</em><br/>
+<span style="font-weight:500">A passionate full-stack developer crafting modern web & mobile apps, immersive 3D interfaces, and smart tools powered by AI.</span><br/>
+<span style="opacity:0.8">I love turning complex ideas into simple, elegant user experiences.</span>
+
 </p>
 
 <p align="center">
