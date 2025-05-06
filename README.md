@@ -3,7 +3,7 @@
   <a href="https://github.com/sridhar-mani">
     <img src="https://img.shields.io/badge/GitHub-@sridhar--mani-181717?style=for-the-badge&logo=github" alt="GitHub" />
   </a>
-  <a href="https://www.linkedin.com/in/sridhar-m-b4557b286/)">
+  <a href="https://www.linkedin.com/in/sridhar-m-b4557b286/">
     <img src="https://img.shields.io/badge/LinkedIn-Sridhar-blue?style=for-the-badge&logo=linkedin" alt="LinkedIn" />
   </a>
   <a href="https://sridhar-mani.vercel.app">
