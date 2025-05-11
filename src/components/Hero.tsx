@@ -62,7 +62,7 @@ export function Hero() {
             <Mail size={24} />
           </a>
           <a
-            href="https://drive.google.com/file/d/1h6BT5wqIrP04oXXl_Tk4JHs9SFug1T-y/view?usp=sharing"
+            href="https://docs.google.com/document/d/1cbinV5TDE7qA6XC9rUaVnMCwr8ht0rDTXzajp1ZrTeg/edit?usp=sharing"
             target="_blank"
             className="text-white hover:text-indigo-400 transition-colors transform hover:scale-110"
             title="Resume"
