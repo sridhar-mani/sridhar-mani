@@ -84,6 +84,32 @@ function Background() {
 }
 
 export default function Scene() {
+
+  const [vis, setVis] = useState(false);
+
+  useEffect(() => {
+    const heroSection = document.querySelector("#home");
+
+    if (!heroSection) return;
+
+    const observer = new IntersectionObserver(
+      (each) => {
+        each.forEach((entry) => setVis(entry.isIntersecting));
+      },
+      {
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(heroSection);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  console.log(vis);
+
   const cameraRef = useRef();
   const [wolf, setWolf] = useState(null);
 
@@ -152,7 +178,7 @@ export default function Scene() {
         <FloatingRing position={[0, 0, 0]} color="#4834d4" />
       </Float> */}
 
-      <primitive object={scene} position={[0, -0.5, 0]} />
+      {vis ? <primitive object={scene} position={[0, -0.5, 0]} /> : <></>}
 
       {/* <Float
         speed={1.5}
@@ -172,14 +198,16 @@ export default function Scene() {
 
       <Background />
 
-      <ContactShadows
-        opacity={0.5}
-        scale={10}
-        blur={1}
-        far={10}
-        resolution={256}
-        color="#000000"
-      />
+      {vis && (
+        <ContactShadows
+          opacity={0.5}
+          scale={10}
+          blur={1}
+          far={10}
+          resolution={256}
+          color="#000000"
+        />
+      )}
 
       <Environment preset="sunset" />
     </>

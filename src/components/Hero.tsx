@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Github, Linkedin, Mail, BookOpen } from "lucide-react";
 
 export function Hero() {
+
   return (
     <div
       id="home"
@@ -30,8 +31,9 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="text-lg mb-8 text-gray-400 max-w-2xl mx-auto"
         >
-          Full Stack Developer with expertise in React.js, Next.js,Vue.js, Flask
-          and .NET Core. Passionate about creating impactful solutions.
+          Full Stack GenAI Developer with expertise in React.js, Next.js,Vue.js,
+          Flask, FastAPI, React Native and Node.js. Passionate about creating
+          impactful solutions.
         </motion.p>
         <motion.div
           initial={{ opacity: 0 }}
