@@ -1,0 +1,523 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Polar IDE Theme */
+    --background: 210 20% 98%;
+    --foreground: 220 25% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 10%;
+
+    --primary: 220 25% 10%;
+    --primary-foreground: 210 20% 98%;
+
+    --secondary: 210 15% 95%;
+    --secondary-foreground: 220 25% 10%;
+
+    --muted: 210 15% 92%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 210 15% 95%;
+    --accent-foreground: 220 25% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 188 80% 45%;
+
+    --radius: 0.5rem;
+
+    /* Syntax Highlighting Colors */
+    --syntax-cyan: 188 80% 45%;
+    --syntax-orange: 25 95% 55%;
+    --syntax-green: 145 65% 42%;
+    --syntax-purple: 270 60% 60%;
+    --syntax-pink: 330 80% 65%;
+    --syntax-yellow: 45 90% 50%;
+
+    /* Code Editor Colors - Light Theme */
+    --editor-bg: 0 0% 100%;
+    --editor-surface: 210 20% 98%;
+    --editor-border: 214 20% 88%;
+    --editor-line: 210 15% 95%;
+    --editor-text: 220 25% 15%;
+    --editor-comment: 220 10% 50%;
+
+    /* Terminal Colors - Light Theme */
+    --terminal-bg: 210 20% 98%;
+    --terminal-text: 220 25% 20%;
+    --terminal-prompt: 188 80% 40%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--syntax-cyan)), hsl(var(--syntax-purple)));
+    --gradient-warm: linear-gradient(135deg, hsl(var(--syntax-orange)), hsl(var(--syntax-pink)));
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(220 25% 10% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(220 25% 10% / 0.07), 0 2px 4px -2px hsl(220 25% 10% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(220 25% 10% / 0.08), 0 4px 6px -4px hsl(220 25% 10% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(220 25% 10% / 0.1), 0 8px 10px -6px hsl(220 25% 10% / 0.08);
+    --shadow-card: 0 0 0 1px hsl(var(--border)), 0 4px 12px -2px hsl(220 25% 10% / 0.08);
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 220 20% 10%;
+    --foreground: 210 15% 90%;
+    --card: 220 18% 14%;
+    --card-foreground: 210 15% 90%;
+    --popover: 220 18% 14%;
+    --popover-foreground: 210 15% 90%;
+    --primary: 210 15% 90%;
+    --primary-foreground: 220 20% 10%;
+    --secondary: 220 15% 18%;
+    --secondary-foreground: 210 15% 90%;
+    --muted: 220 15% 20%;
+    --muted-foreground: 210 10% 55%;
+    --accent: 220 15% 18%;
+    --accent-foreground: 210 15% 90%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 15% 90%;
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 188 80% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  /* IDE Window */
+  .ide-window {
+    @apply bg-card rounded-lg overflow-hidden;
+    box-shadow: var(--shadow-card);
+  }
+
+  .ide-header {
+    @apply flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/50;
+  }
+
+  .ide-dot {
+    @apply w-3 h-3 rounded-full;
+  }
+
+  .ide-dot-red {
+    @apply bg-red-500;
+  }
+
+  .ide-dot-yellow {
+    @apply bg-yellow-500;
+  }
+
+  .ide-dot-green {
+    @apply bg-green-500;
+  }
+
+  /* Code Editor */
+  .code-editor {
+    @apply rounded-lg overflow-hidden;
+    background: hsl(var(--editor-bg));
+  }
+
+  .code-line {
+    @apply flex items-start py-0.5 px-4 hover:bg-white/5 transition-colors;
+  }
+
+  .line-number {
+    @apply w-8 text-right mr-4 select-none;
+    color: hsl(var(--editor-comment));
+  }
+
+  .syntax-key {
+    color: hsl(var(--syntax-cyan));
+  }
+
+  .syntax-string {
+    color: hsl(var(--syntax-orange));
+  }
+
+  .syntax-number {
+    color: hsl(var(--syntax-purple));
+  }
+
+  .syntax-bracket {
+    color: hsl(var(--syntax-yellow));
+  }
+
+  .syntax-comment {
+    color: hsl(var(--editor-comment));
+    font-style: italic;
+  }
+
+  /* Terminal */
+  .terminal {
+    @apply rounded-lg overflow-hidden;
+    background: hsl(var(--terminal-bg));
+  }
+
+  .terminal-header {
+    @apply flex items-center gap-2 px-4 py-3;
+    background: hsl(var(--editor-surface));
+  }
+
+  .terminal-body {
+    @apply p-6 font-mono text-sm;
+    color: hsl(var(--terminal-text));
+  }
+
+  .terminal-prompt {
+    color: hsl(var(--terminal-prompt));
+  }
+
+  .terminal-command {
+    color: hsl(var(--syntax-green));
+  }
+
+  .terminal-path {
+    color: hsl(var(--syntax-cyan));
+  }
+
+  /* Project Cards */
+  .project-card {
+    @apply bg-card rounded-lg p-6 transition-all duration-300;
+    box-shadow: var(--shadow-card);
+  }
+
+  .project-card:hover {
+    @apply -translate-y-1;
+    box-shadow: var(--shadow-xl);
+  }
+
+  .project-icon {
+    @apply w-14 h-14 rounded-xl flex items-center justify-center text-white;
+  }
+
+  /* Git Timeline */
+  .git-commit {
+    @apply relative pl-8 pb-8;
+  }
+
+  .git-commit::before {
+    content: '';
+    @apply absolute left-3 top-2 bottom-0 w-0.5;
+    background: linear-gradient(to bottom, hsl(var(--syntax-cyan)), hsl(var(--syntax-purple)));
+  }
+
+  .git-commit:last-child::before {
+    @apply bottom-auto h-4;
+  }
+
+  .git-dot {
+    @apply absolute left-1 top-1.5 w-5 h-5 rounded-full border-4 border-background;
+  }
+
+  /* Install Button States */
+  .btn-install {
+    @apply relative overflow-hidden font-mono text-sm font-medium px-6 py-2.5 rounded-md transition-all duration-300;
+    background: hsl(var(--syntax-cyan));
+    color: white;
+  }
+
+  .btn-install:hover {
+    @apply scale-105;
+    box-shadow: 0 0 20px hsl(var(--syntax-cyan) / 0.4);
+  }
+
+  .btn-install.installed {
+    background: hsl(var(--syntax-green));
+  }
+
+  .btn-readme {
+    @apply font-mono text-sm font-medium px-6 py-2.5 rounded-md border border-border bg-card transition-all duration-300;
+  }
+
+  .btn-readme:hover {
+    @apply bg-muted;
+  }
+
+  /* Text Decrypt Animation */
+  @keyframes decrypt {
+    0% { opacity: 0; transform: translateY(5px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-decrypt {
+    animation: decrypt 0.6s ease-out forwards;
+  }
+
+  /* Glitch Effect */
+  @keyframes glitch {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+  }
+
+  .hover-glitch:hover {
+    animation: glitch 0.3s ease-in-out;
+  }
+
+  /* Chromatic Aberration */
+  .chromatic-hover:hover {
+    text-shadow: 
+      -2px 0 hsl(var(--syntax-cyan)),
+      2px 0 hsl(var(--syntax-orange));
+  }
+
+  /* Section Labels */
+  .section-label {
+    @apply font-mono text-sm tracking-widest uppercase;
+    color: hsl(var(--syntax-cyan));
+  }
+
+  .section-title {
+    @apply font-mono text-4xl md:text-5xl font-bold tracking-tight;
+  }
+
+  /* Navigation */
+  .nav-link {
+    @apply font-mono text-sm tracking-wide transition-colors duration-200;
+  }
+
+  .nav-link:hover {
+    color: hsl(var(--syntax-cyan));
+  }
+
+  .nav-link.active {
+    color: hsl(var(--syntax-cyan));
+  }
+
+  /* Verified Badge */
+  .verified-badge {
+    @apply inline-flex items-center justify-center w-5 h-5 rounded-full ml-2;
+    background: hsl(var(--syntax-cyan));
+  }
+
+  /* Stats */
+  .stat-icon {
+    @apply w-4 h-4 mr-1;
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* Progress Bar Animation */
+  @keyframes progress {
+    0% { width: 0%; }
+    100% { width: 100%; }
+  }
+
+  .animate-progress {
+    animation: progress 1.5s ease-out forwards;
+  }
+
+  /* Floating animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Pulse glow */
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 5px hsl(var(--syntax-cyan) / 0.5); }
+    50% { box-shadow: 0 0 20px hsl(var(--syntax-cyan) / 0.8); }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  /* Blink cursor */
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  .animate-blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(188 80% 45%), hsl(270 60% 60%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Grid pattern background */
+  .grid-pattern {
+    background-image: 
+      radial-gradient(circle at 1px 1px, hsl(var(--border)) 1px, transparent 0);
+    background-size: 40px 40px;
+  }
+
+  /* Scroll reveal animations */
+  .reveal-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-fade {
+    opacity: 0;
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal-fade.visible {
+    opacity: 1;
+  }
+
+  /* Staggered reveal children */
+  .stagger-children > * {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .stagger-children.visible > *:nth-child(1) { transition-delay: 0ms; opacity: 1; transform: translateY(0); }
+  .stagger-children.visible > *:nth-child(2) { transition-delay: 100ms; opacity: 1; transform: translateY(0); }
+  .stagger-children.visible > *:nth-child(3) { transition-delay: 200ms; opacity: 1; transform: translateY(0); }
+  .stagger-children.visible > *:nth-child(4) { transition-delay: 300ms; opacity: 1; transform: translateY(0); }
+  .stagger-children.visible > *:nth-child(5) { transition-delay: 400ms; opacity: 1; transform: translateY(0); }
+  .stagger-children.visible > *:nth-child(6) { transition-delay: 500ms; opacity: 1; transform: translateY(0); }
+
+  /* Glow hover effect */
+  .hover-glow {
+    transition: all 0.3s ease;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 30px hsl(var(--syntax-cyan) / 0.4), 0 0 60px hsl(var(--syntax-cyan) / 0.2);
+  }
+
+  /* RGB shift on hover */
+  .rgb-shift {
+    position: relative;
+  }
+
+  .rgb-shift::before,
+  .rgb-shift::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .rgb-shift:hover::before {
+    opacity: 0.15;
+    background: hsl(var(--syntax-cyan));
+    transform: translate(-3px, 0);
+    mix-blend-mode: screen;
+  }
+
+  .rgb-shift:hover::after {
+    opacity: 0.15;
+    background: hsl(var(--syntax-orange));
+    transform: translate(3px, 0);
+    mix-blend-mode: screen;
+  }
+
+  /* Magnetic cursor effect placeholder */
+  .magnetic {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Premium button shimmer */
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .btn-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: translateX(-100%);
+  }
+
+  .btn-shimmer:hover::after {
+    animation: shimmer 0.8s ease-out;
+  }
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection */
+::selection {
+  background: hsl(var(--syntax-cyan) / 0.3);
+  color: hsl(var(--foreground));
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
