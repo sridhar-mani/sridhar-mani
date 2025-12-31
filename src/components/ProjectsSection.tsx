@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { motion, useInView, AnimatePresence, useSpring, useMotionValue, useTransform } from 'framer-motion';
 import { Check, Star, X, ExternalLink, Github, Code2, Sparkles } from 'lucide-react';
 import projectsData from '@/data/projects.json';
 
@@ -69,7 +69,7 @@ const ProjectModal = ({ project, isOpen, onClose }: { project: Project; isOpen: 
                 {/* Project Icon */}
                 <div className={`w-20 h-20 rounded-2xl ${project.iconBg} p-1 mb-5 shadow-lg flex items-center justify-center overflow-hidden`}>
                   <img 
-                    src={`/icons/${project.iconName}.png`} 
+                    src={`${import.meta.env.BASE_URL}icons/${project.iconName}.png`} 
                     alt={project.title}
                     className="w-16 h-16 object-contain"
                   />
@@ -170,8 +170,34 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
   const [isInstalling, setIsInstalling] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  const handleInstall = () => {
+  // 3D Tilt effect - same as HoloCard
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const mouseX = useSpring(x, { stiffness: 400, damping: 30 });
+  const mouseY = useSpring(y, { stiffness: 400, damping: 30 });
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], [8, -8]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], [-8, 8]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const normalizedX = (e.clientX - rect.left) / width - 0.5;
+    const normalizedY = (e.clientY - rect.top) / height - 0.5;
+    x.set(normalizedX);
+    y.set(normalizedY);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  const handleInstall = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (isInstalled || isInstalling) return;
     
     setIsInstalling(true);
@@ -196,114 +222,140 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: index * 0.1 }}
-        viewport={{ once: true }}
-        className="group relative p-6 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
-        whileHover={{ y: -4 }}
-        onDoubleClick={handleDoubleClick}
-      >
-        {/* Double-click hint */}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <span className="text-[10px] text-gray-400 font-mono bg-gray-50 px-2 py-1 rounded">double-click</span>
-        </div>
+      <div style={{ perspective: 1000 }}>
+        <motion.div
+          ref={cardRef}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: index * 0.1 }}
+          viewport={{ once: true }}
+          className="group relative p-6 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
+          style={{
+            rotateX,
+            rotateY,
+            transformStyle: 'preserve-3d',
+          }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          onDoubleClick={handleDoubleClick}
+          whileHover={{ scale: 1.02 }}
+        >
+          {/* Holographic sheen effect */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-0 group-hover:opacity-40 transition-opacity duration-500 rounded-xl"
+            style={{
+              background: 'linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.8) 45%, rgba(255, 255, 255, 0.5) 50%, transparent 54%)',
+            }}
+          />
+          {/* Rainbow holographic overlay */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-xl"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,0,150,0.3) 0%, rgba(0,255,255,0.3) 25%, rgba(255,255,0,0.3) 50%, rgba(0,255,150,0.3) 75%, rgba(150,0,255,0.3) 100%)',
+              mixBlendMode: 'color-dodge',
+            }}
+          />
 
-        {/* Header */}
-        <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
-          <div className={`project-icon shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg flex items-center justify-center overflow-hidden shadow-sm ${project.iconBg}`}>
-            <img 
-              src={`/icons/${project.iconName}.png`} 
-              alt={project.title}
-              className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
-            />
+          {/* Double-click hint */}
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-[10px] text-gray-400 font-mono bg-gray-50/80 px-2 py-1 rounded backdrop-blur-sm">double-click</span>
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-mono font-semibold text-base sm:text-lg text-gray-900">{project.title}</h3>
-              {project.verified && (
-                <span className="shrink-0 flex items-center justify-center w-4 h-4 rounded-full bg-syntax-green text-white">
-                  <Check size={10} />
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-3 sm:gap-4 mt-1 text-xs sm:text-sm text-gray-500 font-mono">
-              <span className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded">
-                {project.tech}
-              </span>
-              <span className="flex items-center gap-1">
-                <Star size={12} className="sm:w-3.5 sm:h-3.5 text-yellow-500" />
-                {project.stars}
-              </span>
-            </div>
-          </div>
-        </div>
 
-        {/* Description */}
-        <p className="font-mono text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 leading-relaxed">
-          {project.description}
-        </p>
-
-        {/* Actions */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <motion.button
-            onClick={handleInstall}
-            disabled={isInstalled}
-            className={`flex-1 text-xs sm:text-sm py-2 sm:py-2.5 relative rounded-lg font-mono font-medium transition-colors ${
-              isInstalled 
-                ? 'bg-gray-100 text-syntax-green' 
-                : 'bg-syntax-cyan text-white hover:bg-cyan-500 shadow-sm hover:shadow'
-            }`}
-            whileHover={{ scale: isInstalled ? 1 : 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            {isInstalling ? (
-              <div className="relative w-full h-full flex items-center justify-center">
-                <motion.div 
-                  className="absolute inset-0 bg-white/20 rounded-lg"
-                  initial={{ width: '0%' }}
-                  animate={{ width: `${progress}%` }}
-                />
-                <span className="relative z-10">{progress}%</span>
+          {/* Header */}
+          <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4" style={{ transform: 'translateZ(20px)' }}>
+            <div className={`project-icon shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg flex items-center justify-center overflow-hidden shadow-sm ${project.iconBg}`}>
+              <img 
+                src={`${import.meta.env.BASE_URL}icons/${project.iconName}.png`} 
+                alt={project.title}
+                className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-mono font-semibold text-base sm:text-lg text-gray-900">{project.title}</h3>
+                {project.verified && (
+                  <span className="shrink-0 flex items-center justify-center w-4 h-4 rounded-full bg-syntax-green text-white">
+                    <Check size={10} />
+                  </span>
+                )}
               </div>
-            ) : isInstalled ? (
-              <span className="flex items-center justify-center gap-2">
-                <Check size={14} />
-                Installed
-              </span>
-            ) : (
-              'Install'
+              <div className="flex items-center gap-3 sm:gap-4 mt-1 text-xs sm:text-sm text-gray-500 font-mono">
+                <span className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded">
+                  {project.tech}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Star size={12} className="sm:w-3.5 sm:h-3.5 text-yellow-500" />
+                  {project.stars}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Description */}
+          <p className="font-mono text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 leading-relaxed" style={{ transform: 'translateZ(10px)' }}>
+            {project.description}
+          </p>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 sm:gap-3" style={{ transform: 'translateZ(15px)' }}>
+            <motion.button
+              onClick={handleInstall}
+              disabled={isInstalled}
+              className={`flex-1 text-xs sm:text-sm py-2 sm:py-2.5 relative rounded-lg font-mono font-medium transition-colors ${
+                isInstalled 
+                  ? 'bg-gray-100 text-syntax-green' 
+                  : 'bg-syntax-cyan text-white hover:bg-cyan-500 shadow-sm hover:shadow'
+              }`}
+              whileHover={{ scale: isInstalled ? 1 : 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {isInstalling ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <motion.div 
+                    className="absolute inset-0 bg-white/20 rounded-lg"
+                    initial={{ width: '0%' }}
+                    animate={{ width: `${progress}%` }}
+                  />
+                  <span className="relative z-10">{progress}%</span>
+                </div>
+              ) : isInstalled ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Check size={14} />
+                  Installed
+                </span>
+              ) : (
+                'Install'
+              )}
+            </motion.button>
+            {project.repoUrl && (
+              <motion.a 
+                href={project.repoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 text-xs sm:text-sm py-2 sm:py-2.5 flex items-center justify-center text-center cursor-pointer rounded-lg border border-gray-200 text-gray-600 hover:border-syntax-cyan hover:text-syntax-cyan transition-colors bg-white font-mono font-medium"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                Code
+              </motion.a>
             )}
-          </motion.button>
-          {project.repoUrl && (
-            <motion.a 
-              href={project.repoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 text-xs sm:text-sm py-2 sm:py-2.5 flex items-center justify-center text-center cursor-pointer rounded-lg border border-gray-200 text-gray-600 hover:border-syntax-cyan hover:text-syntax-cyan transition-colors bg-white font-mono font-medium"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              Code
-            </motion.a>
-          )}
-          {project.liveUrl && (
-            <motion.a 
-              href={project.liveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 text-xs sm:text-sm py-2 sm:py-2.5 flex items-center justify-center text-center cursor-pointer rounded-lg border border-syntax-green text-syntax-green hover:bg-syntax-green hover:text-white transition-colors bg-white font-mono font-medium"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              Live
-            </motion.a>
-          )}
-        </div>
-      </motion.div>
+            {project.liveUrl && (
+              <motion.a 
+                href={project.liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 text-xs sm:text-sm py-2 sm:py-2.5 flex items-center justify-center text-center cursor-pointer rounded-lg border border-syntax-green text-syntax-green hover:bg-syntax-green hover:text-white transition-colors bg-white font-mono font-medium"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                Live
+              </motion.a>
+            )}
+          </div>
+        </motion.div>
+      </div>
 
       {/* Project Modal */}
       <ProjectModal project={project} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
