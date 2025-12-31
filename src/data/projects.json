@@ -1,0 +1,94 @@
+[
+  {
+    "id": "influencer-hub",
+    "title": "InfluencerHub",
+    "description": "Full-stack application built with Vue3 and Flask, featuring user authentication and CRUD operations.",
+    "iconName": "influencer_hub",
+    "iconBg": "bg-gradient-to-br from-syntax-purple to-syntax-pink",
+    "tech": "Vue3 + Flask",
+    "stars": 4,
+    "verified": true,
+    "repoUrl": "https://github.com/sridhar-mani/InfluencerHub"
+  },
+  {
+    "id": "pdf-editor",
+    "title": "PDF Editor",
+    "description": "Modern and responsive fully frontend PDF editor with web workers and WASM libraries.",
+    "iconName": "pdf_editor",
+    "iconBg": "bg-gradient-to-br from-syntax-orange to-syntax-yellow",
+    "tech": "React + WASM",
+    "stars": 5,
+    "verified": true,
+    "repoUrl": "",
+    "liveUrl": "https://freepdf.rest/"
+  },
+  {
+    "id": "project-forum",
+    "title": "Project Forum",
+    "description": "Modern, responsive forum website built with Next.js, Postgres, Prisma and Tailwind CSS.",
+    "iconName": "project_forum",
+    "iconBg": "bg-gradient-to-br from-syntax-cyan to-syntax-purple",
+    "tech": "Next.js + Prisma",
+    "stars": 4,
+    "verified": true,
+    "repoUrl": "https://github.com/sridhar-mani/project-forum",
+    "liveUrl": "https://moody-blues.vercel.app/landing"
+  },
+  {
+    "id": "ai-analyzer",
+    "title": "AI-Analyzer",
+    "description": "Python application utilizing LLMs and Ollama for data analysis with Flask backend.",
+    "iconName": "ai_analyzer",
+    "iconBg": "bg-gradient-to-br from-syntax-green to-syntax-cyan",
+    "tech": "Python + LLMs",
+    "stars": 5,
+    "verified": true,
+    "repoUrl": "https://github.com/sridhar-mani/ai-analyzer"
+  },
+  {
+    "id": "chromadb-ui",
+    "title": "ChromaDB-UI",
+    "description": "Web-based DB manager for ChromaDB vector database. (Beta Version)",
+    "iconName": "chromadb_ui",
+    "iconBg": "bg-gradient-to-br from-syntax-purple to-syntax-cyan",
+    "tech": "React + ChromaDB",
+    "stars": 3,
+    "verified": true,
+    "repoUrl": "https://github.com/sridhar-mani/chromadb-ui",
+    "liveUrl": "https://www.npmjs.com/package/@sridhar-mani/chromadb-ui"
+  },
+  {
+    "id": "cfd-toolkit",
+    "title": "CFD-Toolkit",
+    "description": "CFD toolkit with helper functions to view OpenFOAM simulation output files.",
+    "iconName": "cfd_toolkit",
+    "iconBg": "bg-gradient-to-br from-syntax-orange to-syntax-purple",
+    "tech": "VTK.js",
+    "stars": 4,
+    "verified": true,
+    "repoUrl": "https://github.com/sridhar-mani/cfd-toolkit",
+    "liveUrl": "https://www.npmjs.com/package/cfd-toolkit"
+  },
+  {
+    "id": "spend-flow",
+    "title": "SpendFlow",
+    "description": "Smart spending tracker with advanced visualization and mapping, React Native New Architecture.",
+    "iconName": "spend_flow",
+    "iconBg": "bg-gradient-to-br from-syntax-green to-syntax-yellow",
+    "tech": "React Native",
+    "stars": 4,
+    "verified": true,
+    "repoUrl": "https://github.com/sridhar-mani/SpendFlow"
+  },
+  {
+    "id": "feascript-core",
+    "title": "FEAScript-Core",
+    "description": "Contributor to a JavaScript based simulation library useful for education.",
+    "iconName": "feascript_core",
+    "iconBg": "bg-gradient-to-br from-syntax-cyan to-syntax-green",
+    "tech": "JavaScript",
+    "stars": 3,
+    "verified": true,
+    "repoUrl": "https://github.com/sridhar-mani/FEAScript-Core"
+  }
+]

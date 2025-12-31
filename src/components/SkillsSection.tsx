@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import skillsData from '@/data/skills.json';
 
 interface Skill {
   name: string;
@@ -9,18 +10,7 @@ interface Skill {
   projects: number;
 }
 
-const skills: Skill[] = [
-  { name: 'react', version: '^18.2.0', years: 2, projects: 12 },
-  { name: 'typescript', version: '^5.0.0', years: 2, projects: 10 },
-  { name: 'python', version: '^3.11.0', years: 3, projects: 15 },
-  { name: 'fastapi', version: '^0.109.0', years: 2, projects: 8 },
-  { name: 'three.js', version: '^0.160.0', years: 2, projects: 6 },
-  { name: 'langchain', version: '^0.1.0', years: 1, projects: 5 },
-  { name: 'chromadb', version: '^0.4.0', years: 1, projects: 4 },
-  { name: 'docker', version: '^24.0.0', years: 2, projects: 10 },
-  { name: 'postgresql', version: '^15.0', years: 2, projects: 6 },
-  { name: 'vtk.js', version: '^30.0.0', years: 2, projects: 4 },
-];
+const skills: Skill[] = skillsData;
 
 const CodeLine = ({ lineNumber, children }: { lineNumber: number; children: React.ReactNode }) => (
   <div className="code-line group">
