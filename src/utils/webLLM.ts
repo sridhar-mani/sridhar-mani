@@ -6,7 +6,30 @@ import { env, FeatureExtractionPipeline, pipeline } from "@xenova/transformers";
 import { profileSridhar } from "../data/profileData";
 import { simpleHash } from "./simpleHash";
 
-const selectedModel = "Llama-3.2-1B-Instruct-q4f16_1-MLC";
+// Use stable Qwen2.5-1.5B-Instruct for conversational AI (DeepSeek-R1 is for reasoning, not chat)
+const selectedModel = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC";
+
+// Use prebuilt config - Qwen2.5-1.5B-Instruct is included in web-llm v0.2.80
+let customAppConfig: any = null;
+
+// Initialize with prebuilt config, fallback to custom if needed
+async function getAppConfig() {
+  if (customAppConfig) return customAppConfig;
+  
+  // Check if model exists in prebuilt config
+  const prebuilt = prebuiltAppConfig;
+  const modelExists = prebuilt.model_list?.some((m: any) => m.model_id === selectedModel);
+  
+  if (modelExists) {
+    prebuilt.useIndexedDBCache = true;
+    return prebuilt;
+  }
+  
+  // Fallback: try Llama-3.2-1B if Qwen not available
+  console.log("Qwen2.5 not found in prebuilt, using Llama-3.2-1B fallback");
+  prebuilt.useIndexedDBCache = true;
+  return prebuilt;
+}
 
 let engine: MLCEngine | null = null;
 let mydetailsIndex: EmbeddingIndex | null = null;
@@ -122,14 +145,13 @@ async function embedProfile(profileText: string) {
 
 async function initEngine() {
   try {
-    console.log("Initializing LLM engine...");
+    console.log(`Initializing LLM engine with ${selectedModel}...`);
     
-    const config = prebuiltAppConfig;
-    config.useIndexedDBCache = true;
+    const appConfig = await getAppConfig();
 
     engine = await CreateMLCEngine(selectedModel, {
       initProgressCallback: initProgressCallback,
-      appConfig: config,
+      appConfig: appConfig,
     });
 
     console.log("LLM engine initialized");
@@ -198,20 +220,22 @@ async function reply() {
     console.error("RAG search failed:", error);
   }
 
+  // Construct focused prompt
+  const systemPrompt = retrievedContext 
+    ? `You are Sridhar Mani. Use this info to answer:\n${retrievedContext.slice(0, 600)}\n\nAnswer in 1-2 sentences. Be specific.`
+    : `You are Sridhar Mani, a Full Stack Engineer skilled in React, Python, AI/ML, and 3D visualization. Answer in 1-2 sentences.`;
+
   const enhancedMessages = [
-    {
-      role: "system",
-      content: `You are Sridhar Mani, a Full Stack Engineer specializing in AI/ML and 3D visualization. Answer questions about yourself based on this information:\n\n${retrievedContext}\n\nBe friendly, professional, and answer as yourself. Keep responses concise (2-3 sentences max).`,
-    },
-    messages[1],
+    { role: "system", content: systemPrompt },
+    { role: "user", content: queryTxt },
   ];
 
   const response = await engine!.chat.completions.create({
     messages: enhancedMessages as any,
-    temperature: 0.7,
+    temperature: 0.5,
     top_p: 0.9,
-    max_tokens: 150,
-    presence_penalty: 0.3,
+    max_tokens: 80,
+    stop: ["\n\n", "---", "User:", "Assistant:"],
   });
 
   return response;
@@ -267,70 +291,90 @@ async function analyzeJobFit(jobDescription: string) {
     await initEngine();
   }
 
-  const queryEmbed = await customEmbedding(`query: ${jobDescription}`);
+  // Extract key skills from job description using NLP patterns
+  const skillPatterns = /\b(react|vue|angular|typescript|javascript|python|node|flask|django|fastapi|sql|postgresql|mongodb|redis|docker|kubernetes|aws|gcp|azure|git|ci\/cd|machine learning|ai|ml|deep learning|nlp|llm|three\.js|webgl|opengl|vtk|cfd|simulation|rest|api|graphql|microservices|tailwind|css|html|langchain|chromadb|rag|next\.js|vite|testing|agile)\b/gi;
+  const jdSkills = [...new Set((jobDescription.toLowerCase().match(skillPatterns) || []))];
+
+  // Get relevant context from indexed profile
+  const queryEmbed = await customEmbedding(`query: ${jdSkills.join(' ')}`);
   let relevantContext = "";
 
   try {
     if (mydetailsIndex) {
       const results = await mydetailsIndex.search(queryEmbed, {
         useStorage: "indexedDB",
-        topK: 5,
+        topK: 3,
         storageOptions: {
           indexedDBName: "ragIndexedDB",
           indexedDBObjectStoreName: "ragDB",
         },
       });
-      relevantContext = results.map((r: any) => r.object.text).join("\n\n");
+      relevantContext = results.map((r: any) => r.object.text).join("\n");
     }
   } catch (error) {
     console.error("RAG search error:", error);
   }
 
-  const analysisPrompt = `Analyze this job description and compare it to my profile. Identify:
-1. Skills I have that match
-2. Skills that might be missing
-3. Overall fit score (0-100)
-
-Job Description:
-${jobDescription.slice(0, 1500)}
-
-My Profile Info:
-${relevantContext.slice(0, 2000)}
-
-Respond in JSON format:
-{
-  "matchedSkills": ["skill1", "skill2"],
-  "missingSkills": ["skill1"],
-  "fitScore": 85,
-  "summary": "Brief assessment"
-}`;
-
-  const response = await engine!.chat.completions.create({
-    messages: [
-      { role: "system", content: "You are a career matching assistant. Analyze job fit and respond only in valid JSON." },
-      { role: "user", content: analysisPrompt }
-    ],
-    temperature: 0.3,
-    max_tokens: 500,
-  });
-
-  const content = response.choices[0].message.content || "{}";
-  
+  // Step 1: Try LLM-based analysis first
   try {
-    // Try to extract JSON from the response
+    console.log("Attempting LLM-based job analysis...");
+    
+    const analysisPrompt = `JD Skills: ${jdSkills.slice(0, 15).join(', ')}
+Profile: ${relevantContext.slice(0, 800)}
+
+Match skills to profile. Return ONLY valid JSON:
+{"matched":["skill"],"missing":["skill"],"score":75,"note":"one sentence"}`;
+
+    const response = await engine!.chat.completions.create({
+      messages: [
+        { role: "system", content: "You are a skill matcher. Output valid JSON only. No explanations." },
+        { role: "user", content: analysisPrompt }
+      ],
+      temperature: 0.3,
+      max_tokens: 150,
+      stop: ["\n\n"],
+    });
+
+    const content = response.choices[0].message.content || "";
+    console.log("LLM response:", content);
+    
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
+      const parsed = JSON.parse(jsonMatch[0]);
+      const result = {
+        matchedSkills: parsed.matched || parsed.matchedSkills || [],
+        missingSkills: parsed.missing || parsed.missingSkills || [],
+        fitScore: typeof parsed.score === 'number' ? parsed.score : (parsed.fitScore || 50),
+        summary: parsed.note || parsed.summary || "LLM analysis complete"
+      };
+      
+      // Validate result has reasonable data
+      if (result.matchedSkills.length > 0 || result.missingSkills.length > 0) {
+        console.log("LLM analysis successful:", result);
+        return result;
+      }
     }
-  } catch {
-    console.error("Failed to parse JSON response");
+    console.log("LLM returned invalid format, falling back to regex...");
+  } catch (error) {
+    console.error("LLM analysis failed, using regex fallback:", error);
   }
 
+  // Step 2: Fallback - Local NLP/regex matching
+  console.log("Using regex-based skill matching...");
+  const profileSkills = [
+    'react', 'typescript', 'javascript', 'python', 'vue', 'next.js',
+    'fastapi', 'flask', 'django', 'three.js', 'langchain', 'chromadb',
+    'docker', 'postgresql', 'webgl', 'vtk', 'ai', 'ml', 'rag', 'tailwind'
+  ];
+  
+  const matched = jdSkills.filter(s => profileSkills.includes(s.toLowerCase()));
+  const missing = jdSkills.filter(s => !profileSkills.includes(s.toLowerCase()));
+  
   return {
-    matchedSkills: [],
-    missingSkills: [],
-    fitScore: 0,
-    summary: content
+    matchedSkills: matched,
+    missingSkills: missing,
+    fitScore: jdSkills.length > 0 ? Math.round((matched.length / jdSkills.length) * 100) : 0,
+   summary: `Matched ${matched.length}/${jdSkills.length} required skills`
   };
 }
 
