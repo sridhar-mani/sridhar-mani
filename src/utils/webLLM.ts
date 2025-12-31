@@ -217,4 +217,139 @@ async function reply() {
   return response;
 }
 
-Comlink.expose({ initEngine, reply, changeMsg, getProgress });
+async function indexDocument(text: string, source: string) {
+  if (!mydetailsIndex) {
+    await initEngine();
+  }
+
+  const chunks = text
+    .split(/\n\n+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 50);
+
+  let indexedCount = 0;
+
+  for (const chunk of chunks) {
+    const uniqueId = `doc_${source}_${simpleHash(chunk)}`;
+    
+    // Check if already indexed
+    let existingDb: any[] = [];
+    try {
+      existingDb = (await mydetailsIndex!.getAllObjectsFromIndexedDB(
+        "ragIndexedDB",
+        "ragDB"
+      )) || [];
+    } catch {
+      existingDb = [];
+    }
+
+    if (existingDb.some((item: any) => item.id === uniqueId)) {
+      continue;
+    }
+
+    const embedding = await customEmbedding(chunk);
+    mydetailsIndex!.add({
+      id: uniqueId,
+      name: source,
+      text: chunk,
+      embedding: embedding,
+    });
+    indexedCount++;
+  }
+
+  await mydetailsIndex!.saveToIndexedDB("ragIndexedDB", "ragDB");
+  console.log(`Indexed ${indexedCount} chunks from ${source}`);
+  return indexedCount;
+}
+
+async function analyzeJobFit(jobDescription: string) {
+  if (!engine) {
+    await initEngine();
+  }
+
+  const queryEmbed = await customEmbedding(`query: ${jobDescription}`);
+  let relevantContext = "";
+
+  try {
+    if (mydetailsIndex) {
+      const results = await mydetailsIndex.search(queryEmbed, {
+        useStorage: "indexedDB",
+        topK: 5,
+        storageOptions: {
+          indexedDBName: "ragIndexedDB",
+          indexedDBObjectStoreName: "ragDB",
+        },
+      });
+      relevantContext = results.map((r: any) => r.object.text).join("\n\n");
+    }
+  } catch (error) {
+    console.error("RAG search error:", error);
+  }
+
+  const analysisPrompt = `Analyze this job description and compare it to my profile. Identify:
+1. Skills I have that match
+2. Skills that might be missing
+3. Overall fit score (0-100)
+
+Job Description:
+${jobDescription.slice(0, 1500)}
+
+My Profile Info:
+${relevantContext.slice(0, 2000)}
+
+Respond in JSON format:
+{
+  "matchedSkills": ["skill1", "skill2"],
+  "missingSkills": ["skill1"],
+  "fitScore": 85,
+  "summary": "Brief assessment"
+}`;
+
+  const response = await engine!.chat.completions.create({
+    messages: [
+      { role: "system", content: "You are a career matching assistant. Analyze job fit and respond only in valid JSON." },
+      { role: "user", content: analysisPrompt }
+    ],
+    temperature: 0.3,
+    max_tokens: 500,
+  });
+
+  const content = response.choices[0].message.content || "{}";
+  
+  try {
+    // Try to extract JSON from the response
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+  } catch {
+    console.error("Failed to parse JSON response");
+  }
+
+  return {
+    matchedSkills: [],
+    missingSkills: [],
+    fitScore: 0,
+    summary: content
+  };
+}
+
+async function getIndexedSources() {
+  if (!mydetailsIndex) {
+    return [];
+  }
+
+  try {
+    const existingDb = (await mydetailsIndex.getAllObjectsFromIndexedDB(
+      "ragIndexedDB",
+      "ragDB"
+    )) || [];
+
+    const sources = [...new Set(existingDb.map((item: any) => item.name))];
+    return sources;
+  } catch {
+    return [];
+  }
+}
+
+Comlink.expose({ initEngine, reply, changeMsg, getProgress, indexDocument, analyzeJobFit, getIndexedSources });
