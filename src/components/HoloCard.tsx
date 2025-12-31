@@ -65,7 +65,7 @@ export const HoloCard = () => {
               className="bg-white/70 backdrop-blur-md border border-white/60 shadow-lg rounded-2xl p-3 flex items-center gap-3 overflow-hidden relative group"
             >
               <div className="relative shrink-0 w-10 h-10 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 border border-white shadow-sm flex items-center justify-center overflow-hidden">
-                 <img src="/sridhar-mani/profile.png" alt="Sridhar Mani" className="w-full h-full object-cover" />
+                 <img src="/profile.png" alt="Sridhar Mani" className="w-full h-full object-cover" />
                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full" />
               </div>
 
@@ -122,7 +122,7 @@ export const HoloCard = () => {
                        {/* Header */}
                       <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-gray-50 to-gray-100 p-1 mb-4 shadow-inner">
                          <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden border border-gray-100">
-                           <img src="/sridhar-mani/profile.png" alt="Sridhar Mani" className="w-full h-full object-cover" />
+                           <img src="/profile.png" alt="Sridhar Mani" className="w-full h-full object-cover" />
                          </div>
                       </div>
                       

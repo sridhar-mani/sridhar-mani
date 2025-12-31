@@ -189,7 +189,7 @@ export const IdentityPanel = () => {
                   }}
                 >
                   <img 
-                    src="/sridhar-mani/profile.png" 
+                    src="/profile.png" 
                     alt="Profile" 
                     className="w-full h-full object-cover"
                   />
@@ -264,7 +264,7 @@ export const IdentityPanel = () => {
           <div className="absolute inset-0 bg-gradient-to-tr from-white/50 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
           <div className="absolute inset-0 flex items-center px-1.5 gap-3">
             <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 border-2 border-white shadow-md">
-              <img src="/sridhar-mani/profile.png" alt="Profile" className="w-full h-full object-cover" />
+              <img src="/profile.png" alt="Profile" className="w-full h-full object-cover" />
             </div>
             <div className="flex flex-col justify-center min-w-0 pr-2">
               <span className="text-[10px] font-bold text-slate-800 leading-tight truncate">SRIDHAR MANI</span>

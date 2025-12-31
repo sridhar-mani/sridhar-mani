@@ -14,6 +14,6 @@ export default defineConfig(() => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: '/sridhar-mani/'
+  base: '/'
 }));
 

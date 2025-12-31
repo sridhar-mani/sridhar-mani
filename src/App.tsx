@@ -17,7 +17,7 @@ const App = () => (
       <AIChatbot />
       <Toaster />
       <Sonner />
-      <BrowserRouter basename="/sridhar-mani">
+      <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
