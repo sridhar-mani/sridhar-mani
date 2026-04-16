@@ -74,7 +74,6 @@ export const AIChatbot = () => {
 
   return (
     <>
-      {/* Floating Chat Button */}
       <motion.button
         onClick={handleOpen}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-full shadow-lg hidden md:flex items-center justify-center text-white hover:shadow-xl transition-shadow"
@@ -86,7 +85,6 @@ export const AIChatbot = () => {
         <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full animate-pulse" />
       </motion.button>
 
-      {/* Chat Modal */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -95,7 +93,6 @@ export const AIChatbot = () => {
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             className="fixed bottom-24 right-6 z-50 w-[400px] max-w-[calc(100vw-48px)] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
           >
-            {/* Header with Tabs */}
             <div className="bg-gradient-to-r from-cyan-500 to-purple-600 p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
@@ -118,7 +115,6 @@ export const AIChatbot = () => {
                 </button>
               </div>
 
-              {/* Tab Buttons */}
               <div className="flex gap-2">
                 <button
                   onClick={() => setActiveTab('chat')}
@@ -145,10 +141,8 @@ export const AIChatbot = () => {
               </div>
             </div>
 
-            {/* Tab Content */}
             {activeTab === 'chat' ? (
               <>
-                {/* Messages */}
                 <div className="h-[350px] overflow-y-auto p-4 space-y-4 bg-gray-50">
                   {isInitializing && (
                     <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-200">
@@ -212,7 +206,6 @@ export const AIChatbot = () => {
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input */}
                 <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200 bg-white">
                   <div className="flex gap-2">
                     <input

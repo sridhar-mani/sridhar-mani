@@ -45,6 +45,20 @@ const experiences: Experience[] = [
     ],
   },
   {
+    id: 'iit-madras-programming',
+    hash: '#4f7cff',
+    type: 'feat',
+    title: 'Diploma in Programming',
+    company: 'IIT Madras Online',
+    period: '2023 - 2025',
+    current: false,
+    changes: [
+      { type: 'add', text: 'Completed Programming in Java, Programming in Python, and Advanced SQL' },
+      { type: 'add', text: 'Built web applications and APIs with Database Design coursework' },
+      { type: 'add', text: 'Completed both IIT Madras diplomas' },
+    ],
+  },
+  {
     id: 'btech',
     hash: '#5e2d8a',
     type: 'feat',
@@ -54,7 +68,6 @@ const experiences: Experience[] = [
     current: false,
     changes: [
       { type: 'add', text: 'Bachelor of Technology with 7.78 CGPA' },
-      { type: 'add', text: 'Completed IIT Madras Diploma in Programming (7.3 CGPA)' },
     ],
   },
 ];
@@ -68,7 +81,6 @@ const CommitCard = ({ experience, index }: { experience: Experience; index: numb
       viewport={{ once: true, margin: '-50px' }}
       className="git-commit group"
     >
-      {/* Commit dot with pulse animation on hover */}
       <motion.div 
         className="git-dot transition-all duration-300 group-hover:scale-125"
         style={{ 
@@ -83,7 +95,6 @@ const CommitCard = ({ experience, index }: { experience: Experience; index: numb
         }}
       />
 
-      {/* Commit card with glassmorphism */}
       <motion.div 
         className="relative bg-card/80 backdrop-blur-sm rounded-xl border border-border/50 p-5 sm:p-6 ml-4 overflow-hidden group-hover:border-syntax-cyan/30 transition-all duration-300"
         whileHover={{ 
@@ -92,10 +103,8 @@ const CommitCard = ({ experience, index }: { experience: Experience; index: numb
         }}
         transition={{ duration: 0.3 }}
       >
-        {/* Gradient overlay on hover */}
         <div className="absolute inset-0 bg-gradient-to-br from-syntax-cyan/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-        {/* Header */}
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4 mb-4">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
@@ -116,7 +125,6 @@ const CommitCard = ({ experience, index }: { experience: Experience; index: numb
           <span className="font-mono text-[10px] text-muted-foreground/60 bg-muted/50 px-2 py-1 rounded">{experience.hash}</span>
         </div>
 
-        {/* Changes (diff style) */}
         <div className="relative z-10 space-y-2 font-mono text-xs sm:text-sm border-l-2 border-border/50 pl-4 ml-1">
           {experience.changes.map((change, i) => (
             <motion.div
@@ -154,7 +162,6 @@ export const ExperienceSection = () => {
   return (
     <section id="experience" ref={sectionRef} className="py-16 sm:py-24 lg:py-32 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6">
-        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -165,7 +172,6 @@ export const ExperienceSection = () => {
           <h2 className="section-title mt-3 sm:mt-4 text-3xl sm:text-4xl md:text-5xl font-mono font-bold text-gray-900">git-history.log</h2>
         </motion.div>
 
-        {/* Timeline */}
         <div className="max-w-3xl mx-auto">
           {experiences.map((exp, index) => (
             <CommitCard key={exp.id} experience={exp} index={index} />

@@ -10,10 +10,8 @@ export const IdentityPanel = () => {
   const expandedCardRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
 
-  // Store initial rect for FLIP animation
   const initialRect = useRef<DOMRect | null>(null);
 
-  // GSAP quick setters for smooth animations
   const miniTiltX = useRef<gsap.QuickToFunc>();
   const miniTiltY = useRef<gsap.QuickToFunc>();
   
@@ -22,7 +20,6 @@ export const IdentityPanel = () => {
   const imageOffsetX = useRef<gsap.QuickToFunc>();
   const imageOffsetY = useRef<gsap.QuickToFunc>();
 
-  // Setup GSAP quickTo functions
   useLayoutEffect(() => {
     if (miniCardRef.current) {
       miniTiltX.current = gsap.quickTo(miniCardRef.current, "rotationX", { duration: 0.4, ease: "power3.out" });
@@ -33,22 +30,18 @@ export const IdentityPanel = () => {
 
   useEffect(() => {
     if (isExpanded && expandedCardRef.current && imageRef.current) {
-      // Setup expanded card 3D
       gsap.set(expandedCardRef.current, { transformPerspective: 1000, transformStyle: "preserve-3d" });
       
       cardTiltX.current = gsap.quickTo(expandedCardRef.current, "rotationX", { duration: 0.5, ease: "power2.out" });
       cardTiltY.current = gsap.quickTo(expandedCardRef.current, "rotationY", { duration: 0.5, ease: "power2.out" });
       
-      // Image moves with mouse - creating depth inside the card (Lando Norris style)
       imageOffsetX.current = gsap.quickTo(imageRef.current, "x", { duration: 0.3, ease: "power2.out" });
       imageOffsetY.current = gsap.quickTo(imageRef.current, "y", { duration: 0.3, ease: "power2.out" });
       
-      // Set perspective layer for image (bring it forward in Z)
       gsap.set(imageRef.current, { z: 30 });
     }
   }, [isExpanded]);
 
-  // Handle mini card tilt
   const handleMiniMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!miniCardRef.current) return;
     const rect = miniCardRef.current.getBoundingClientRect();
@@ -65,7 +58,6 @@ export const IdentityPanel = () => {
     miniTiltY.current?.(0);
   };
 
-  // Handle expanded card 3D effect (window-level mouse)
   useEffect(() => {
     if (!isExpanded) return;
 
@@ -76,14 +68,11 @@ export const IdentityPanel = () => {
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
       
-      // Card tilt (subtle: max 8 degrees)
       const tiltY = ((e.clientX - centerX) / (window.innerWidth / 2)) * 8;
       const tiltX = -((e.clientY - centerY) / (window.innerHeight / 2)) * 8;
       cardTiltX.current?.(tiltX);
       cardTiltY.current?.(tiltY);
       
-      // Image parallax (more pronounced: moves up to 15px)
-      // This creates the "depth" effect where the image seems to float above the card
       const imgOffsetX = ((e.clientX - window.innerWidth / 2) / (window.innerWidth / 2)) * 15;
       const imgOffsetY = ((e.clientY - window.innerHeight / 2) / (window.innerHeight / 2)) * 15;
       imageOffsetX.current?.(imgOffsetX);
@@ -96,13 +85,11 @@ export const IdentityPanel = () => {
 
   const toggleExpand = () => {
     if (!isExpanded) {
-      // Save position before expanding
       if (miniCardRef.current) {
         initialRect.current = miniCardRef.current.getBoundingClientRect();
       }
       setIsExpanded(true);
       
-      // Animate in after render
       requestAnimationFrame(() => {
         if (!expandedCardRef.current || !initialRect.current) return;
         
@@ -115,17 +102,14 @@ export const IdentityPanel = () => {
 
         const tl = gsap.timeline();
         
-        // Overlay
         tl.to(".identity-overlay", { opacity: 1, pointerEvents: "auto", duration: 0.4 }, 0);
         
-        // Card FLIP animation
         tl.fromTo(expandedCardRef.current,
           { x: deltaX, y: deltaY, scale: 0.3, opacity: 0, rotationY: -15 },
           { x: 0, y: 0, scale: 1, opacity: 1, rotationY: 0, duration: 0.6, ease: "back.out(1.4)" },
           0
         );
         
-        // Stagger content
         tl.fromTo(".expanded-item",
           { y: 30, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: "power2.out" },
@@ -133,7 +117,6 @@ export const IdentityPanel = () => {
         );
       });
     } else {
-      // COLLAPSE
       const tl = gsap.timeline({ onComplete: () => setIsExpanded(false) });
       
       tl.to(".identity-overlay", { opacity: 0, pointerEvents: "none", duration: 0.3 }, 0);
@@ -152,7 +135,6 @@ export const IdentityPanel = () => {
 
   return (
     <>
-      {/* Fixed Overlay & Expanded Card */}
       <div className={cn(
         "fixed inset-0 z-[100] flex items-center justify-center pointer-events-none",
         isExpanded ? "pointer-events-auto" : ""
@@ -168,7 +150,6 @@ export const IdentityPanel = () => {
             className="relative w-[420px] bg-white/80 backdrop-blur-2xl border border-white/60 shadow-2xl rounded-3xl overflow-visible"
             style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}
           >
-            {/* EXPANDED CONTENT */}
             <div className="p-8 flex flex-col relative text-left">
               <button 
                 onClick={(e) => { e.stopPropagation(); toggleExpand(); }}
@@ -179,7 +160,6 @@ export const IdentityPanel = () => {
               </button>
 
               <div className="expanded-item flex items-start gap-6 mb-8">
-                {/* 3D Profile Image Container */}
                 <div 
                   ref={imageRef}
                   className="w-36 h-36 rounded-2xl overflow-hidden border-4 border-white shadow-2xl shrink-0 bg-gradient-to-br from-cyan-400 to-purple-500"
@@ -236,14 +216,13 @@ export const IdentityPanel = () => {
                   <Mail size={16} /> Contact Me
                 </a>
                 <a href="https://github.com/sridhar-mani" target="_blank" rel="noopener noreferrer" className="w-14 flex items-center justify-center rounded-xl border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors text-slate-600"><Github size={22} /></a>
-                <a href="https://www.linkedin.com/in/sridhar-m-b4557b286/" target="_blank" rel="noopener noreferrer" className="w-14 flex items-center justify-center rounded-xl border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors text-slate-600"><Linkedin size={22} /></a>
+                <a href="https://www.linkedin.com/in/sridharmanimuthusamy" target="_blank" rel="noopener noreferrer" className="w-14 flex items-center justify-center rounded-xl border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors text-slate-600"><Linkedin size={22} /></a>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Mini Card */}
       <div 
         ref={containerRef}
         className={cn("relative z-[50] inline-block", isExpanded ? "opacity-0 pointer-events-none" : "opacity-100")}

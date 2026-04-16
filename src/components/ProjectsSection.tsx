@@ -19,7 +19,6 @@ interface Project {
 
 const projects: Project[] = projectsData;
 
-// Portal component
 const Portal = ({ children }: { children: React.ReactNode }) => {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -27,7 +26,6 @@ const Portal = ({ children }: { children: React.ReactNode }) => {
   return createPortal(children, document.body);
 };
 
-// Project Detail Modal
 const ProjectModal = ({ project, isOpen, onClose }: { project: Project; isOpen: boolean; onClose: () => void }) => {
   useEffect(() => {
     if (isOpen) {
@@ -57,7 +55,6 @@ const ProjectModal = ({ project, isOpen, onClose }: { project: Project; isOpen: 
               className="bg-white/95 backdrop-blur-xl border border-white/50 shadow-2xl rounded-3xl overflow-hidden relative w-full max-w-[420px]"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close Button */}
               <button 
                 onClick={onClose}
                 className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition-colors z-10"
@@ -66,7 +63,6 @@ const ProjectModal = ({ project, isOpen, onClose }: { project: Project; isOpen: 
               </button>
 
               <div className="p-8 flex flex-col items-center text-center">
-                {/* Project Icon */}
                 <div className={`w-20 h-20 rounded-2xl ${project.iconBg} p-1 mb-5 shadow-lg flex items-center justify-center overflow-hidden`}>
                   <img 
                     src={`${import.meta.env.BASE_URL}icons/${project.iconName}.png`} 
@@ -75,7 +71,6 @@ const ProjectModal = ({ project, isOpen, onClose }: { project: Project; isOpen: 
                   />
                 </div>
                 
-                {/* Title & Verified Badge */}
                 <div className="flex items-center gap-2 mb-2">
                   <h2 className="text-2xl font-bold text-gray-900">{project.title}</h2>
                   {project.verified && (
@@ -85,7 +80,6 @@ const ProjectModal = ({ project, isOpen, onClose }: { project: Project; isOpen: 
                   )}
                 </div>
 
-                {/* Tech & Stars */}
                 <div className="flex items-center gap-3 mb-4">
                   <span className="px-3 py-1 bg-gray-100 rounded-full text-xs font-mono text-gray-600">
                     {project.tech}
@@ -96,12 +90,10 @@ const ProjectModal = ({ project, isOpen, onClose }: { project: Project; isOpen: 
                   </span>
                 </div>
 
-                {/* Description */}
                 <p className="text-sm text-gray-600 leading-relaxed mb-6 max-w-[90%]">
                   {project.description}
                 </p>
 
-                {/* Features/Highlights */}
                 <div className="w-full grid grid-cols-1 gap-2 mb-6">
                   <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 flex items-center gap-3">
                     <div className="p-1.5 bg-cyan-50 text-cyan-600 rounded-md">
@@ -123,7 +115,6 @@ const ProjectModal = ({ project, isOpen, onClose }: { project: Project; isOpen: 
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex w-full gap-3">
                   {project.repoUrl && (
                     <a 
@@ -172,7 +163,6 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
   const [isModalOpen, setIsModalOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // 3D Tilt effect - same as HoloCard
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const mouseX = useSpring(x, { stiffness: 400, damping: 30 });
@@ -240,14 +230,12 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
           onDoubleClick={handleDoubleClick}
           whileHover={{ scale: 1.02 }}
         >
-          {/* Holographic sheen effect */}
           <motion.div
             className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-0 group-hover:opacity-40 transition-opacity duration-500 rounded-xl"
             style={{
               background: 'linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.8) 45%, rgba(255, 255, 255, 0.5) 50%, transparent 54%)',
             }}
           />
-          {/* Rainbow holographic overlay */}
           <motion.div
             className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-xl"
             style={{
@@ -256,12 +244,10 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
             }}
           />
 
-          {/* Double-click hint */}
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <span className="text-[10px] text-gray-400 font-mono bg-gray-50/80 px-2 py-1 rounded backdrop-blur-sm">double-click</span>
           </div>
 
-          {/* Header */}
           <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4" style={{ transform: 'translateZ(20px)' }}>
             <div className={`project-icon shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg flex items-center justify-center overflow-hidden shadow-sm ${project.iconBg}`}>
               <img 
@@ -291,12 +277,10 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
             </div>
           </div>
 
-          {/* Description */}
           <p className="font-mono text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 leading-relaxed" style={{ transform: 'translateZ(10px)' }}>
             {project.description}
           </p>
 
-          {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-3" style={{ transform: 'translateZ(15px)' }}>
             <motion.button
               onClick={handleInstall}
@@ -357,7 +341,6 @@ const ProjectCard = ({ project, index }: { project: Project; index: number }) =>
         </motion.div>
       </div>
 
-      {/* Project Modal */}
       <ProjectModal project={project} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );
@@ -370,7 +353,6 @@ export const ProjectsSection = () => {
   return (
     <section id="work" ref={sectionRef} className="py-16 sm:py-24 lg:py-32 bg-white">
       <div className="container mx-auto px-4 sm:px-6">
-        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -381,7 +363,6 @@ export const ProjectsSection = () => {
           <h2 className="section-title mt-3 sm:mt-4 text-3xl sm:text-4xl md:text-5xl font-mono font-bold text-gray-900">extensions.json</h2>
         </motion.div>
 
-        {/* Projects grid */}
         <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 max-w-5xl">
           {projects.map((project, index) => (
             <ProjectCard key={project.id} project={project} index={index} />

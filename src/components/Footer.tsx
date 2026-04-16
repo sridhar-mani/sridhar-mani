@@ -12,7 +12,6 @@ export const Footer = () => {
           viewport={{ once: true }}
           className="flex flex-col sm:flex-row items-center justify-between gap-4"
         >
-          {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-editor-bg flex items-center justify-center border border-editor-border">
               <span className="text-syntax-cyan font-mono text-[10px] sm:text-xs font-bold">SM</span>
@@ -22,7 +21,6 @@ export const Footer = () => {
             </span>
           </div>
 
-          {/* Status bar style info */}
           <div className="flex items-center gap-2 sm:gap-4 font-mono text-[10px] sm:text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-syntax-green" />
@@ -32,7 +30,6 @@ export const Footer = () => {
             <span className="hidden sm:inline">v2.0.0</span>
           </div>
 
-          {/* Copyright */}
           <div className="font-mono text-[10px] sm:text-xs text-muted-foreground">
             © {currentYear} Sridhar Mani
           </div>

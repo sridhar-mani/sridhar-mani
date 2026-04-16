@@ -67,7 +67,7 @@ GitHub: github.com/sridhar-mani/FEAScript-Core
 ## Contact
 - Email: sridharmani510@gmail.com
 - GitHub: github.com/sridhar-mani
-- LinkedIn: linkedin.com/in/sridhar-m-b4557b286
+- LinkedIn: linkedin.com/in/sridharmanimuthusamy
 - Portfolio: sridhar-mani.vercel.app
 
 ## Philosophy

@@ -10,17 +10,14 @@ import { GlobalOrb } from '@/components/GlobalOrb';
 import { useSmoothScroll } from '@/hooks/useSmoothScroll';
 
 const Index = () => {
-  // Enable smooth scrolling with Lenis
   useSmoothScroll();
 
-  // Scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Global Orb - Persistent background element */}
       <GlobalOrb />
       
       <Navigation />

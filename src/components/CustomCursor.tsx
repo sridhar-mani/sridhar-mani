@@ -8,16 +8,13 @@ export const CustomCursor = () => {
   const [isVisible, setIsVisible] = useState(false);
   const cursorRef = useRef<HTMLDivElement>(null);
   
-  // Motion values for smooth cursor movement
   const cursorX = useMotionValue(0);
   const cursorY = useMotionValue(0);
   
-  // Spring animation for smoother movement
   const springConfig = { damping: 25, stiffness: 400, mass: 0.5 };
   const cursorXSpring = useSpring(cursorX, springConfig);
   const cursorYSpring = useSpring(cursorY, springConfig);
 
-  // Rotation value for dynamic effects
   const rotation = useMotionValue(0);
   const rotationSpring = useSpring(rotation, { damping: 15, stiffness: 150 });
 
@@ -26,7 +23,6 @@ export const CustomCursor = () => {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
       
-      // Subtle rotation based on mouse velocity
       const velocityX = e.movementX;
       rotation.set(velocityX * 2); // Max ~20deg rotation
       
@@ -38,32 +34,26 @@ export const CustomCursor = () => {
     const handleMouseEnter = () => setIsVisible(true);
     const handleMouseLeave = () => setIsVisible(false);
 
-    // Detect element types for cursor mode
     const handleElementHover = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       
-      // Priority 1: Close buttons
       const isClose = target.closest('[data-cursor="close"]') ||
                       target.closest('button[aria-label*="close"]') ||
                       target.closest('.close-button') ||
                       (target.closest('button') && target.closest('button')?.querySelector('svg[class*="X"]'));
       
-      // Priority 2: Cards
       const isCard = target.closest('[data-cursor="card"]') || 
                      target.closest('.project-card') ||
                      target.closest('[class*="card"]');
       
-      // Priority 3: Links and buttons
       const isLink = target.closest('a') || 
                      target.closest('button') ||
                      target.closest('[data-cursor="pointer"]') ||
                      target.closest('[role="button"]');
       
-      // Priority 4: Draggable
       const isDrag = target.closest('[data-cursor="drag"]') ||
                      target.closest('[draggable="true"]');
       
-      // Priority 5: Text elements (headings, paragraphs, spans with text)
       const isText = target.closest('[data-cursor="text"]') ||
                      target.matches('h1, h2, h3, h4, h5, h6, p, span, li') ||
                      target.closest('h1, h2, h3, h4, h5, h6, p');
@@ -96,7 +86,6 @@ export const CustomCursor = () => {
     };
   }, [cursorX, cursorY, isVisible, rotation]);
 
-  // Cursor size based on mode
   const getCursorSize = () => {
     switch (cursorMode) {
       case 'card': return 70;
@@ -108,7 +97,6 @@ export const CustomCursor = () => {
     }
   };
 
-  // Cursor style based on mode
   const getCursorStyle = () => {
     switch (cursorMode) {
       case 'card':
@@ -126,14 +114,12 @@ export const CustomCursor = () => {
     }
   };
 
-  // Hide on touch devices
   if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) {
     return null;
   }
 
   return (
     <>
-      {/* Hide default cursor globally (except inputs) */}
       <style>{`
         *:not(input):not(textarea):not([contenteditable="true"]) {
           cursor: none !important;
@@ -143,7 +129,6 @@ export const CustomCursor = () => {
         }
       `}</style>
       
-      {/* Main cursor circle */}
       <motion.div
         ref={cursorRef}
         className="fixed top-0 left-0 pointer-events-none z-[9999] rounded-full flex items-center justify-center"
@@ -169,7 +154,6 @@ export const CustomCursor = () => {
         }}
       >
         <AnimatePresence mode="wait">
-          {/* Close icon */}
           {cursorMode === 'close' && (
             <motion.div
               key="close"
@@ -186,7 +170,6 @@ export const CustomCursor = () => {
             </motion.div>
           )}
           
-          {/* Arrow for cards */}
           {cursorMode === 'card' && (
             <motion.div
               key="card"
@@ -201,7 +184,6 @@ export const CustomCursor = () => {
             </motion.div>
           )}
           
-          {/* Drag indicator */}
           {cursorMode === 'drag' && (
             <motion.div
               key="drag"
@@ -219,7 +201,6 @@ export const CustomCursor = () => {
         </AnimatePresence>
       </motion.div>
 
-      {/* Center dot (only for default/link modes) */}
       <motion.div
         className="fixed top-0 left-0 pointer-events-none z-[9999] w-1.5 h-1.5 rounded-full bg-cyan-500"
         style={{

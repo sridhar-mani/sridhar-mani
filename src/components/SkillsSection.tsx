@@ -73,7 +73,6 @@ export const SkillsSection = () => {
   return (
     <section id="expertise" ref={sectionRef} className="py-16 sm:py-24 lg:py-32 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6">
-        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -84,14 +83,12 @@ export const SkillsSection = () => {
           <h2 className="section-title mt-3 sm:mt-4 text-3xl sm:text-4xl md:text-5xl font-mono font-bold text-gray-900">package.json</h2>
         </motion.div>
 
-        {/* Code editor window */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.2 }}
           className="code-editor max-w-4xl overflow-hidden"
         >
-          {/* Editor tabs */}
           <div className="flex items-center border-b border-editor-border bg-editor-surface overflow-x-auto">
             <button
               onClick={() => setActiveTab('package.json')}
@@ -121,7 +118,6 @@ export const SkillsSection = () => {
             </button>
           </div>
 
-          {/* Editor content */}
           <div className="py-3 sm:py-4 overflow-x-auto">
             {activeTab === 'package.json' ? (
               <>
@@ -167,7 +163,6 @@ export const SkillsSection = () => {
               </>
             ) : (
               <>
-                {/* projects.json style content */}
                 <CodeLine lineNumber={1}>
                   <span className="syntax-bracket">{'{'}</span>
                 </CodeLine>
@@ -203,7 +198,6 @@ export const SkillsSection = () => {
                   </span>
                 </CodeLine>
                 
-                {/* Project 1 */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -260,7 +254,6 @@ export const SkillsSection = () => {
                   </CodeLine>
                 </motion.div>
 
-                {/* Project 2 */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -317,7 +310,6 @@ export const SkillsSection = () => {
                   </CodeLine>
                 </motion.div>
 
-                {/* Project 3 */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -401,7 +393,6 @@ export const SkillsSection = () => {
             )}
           </div>
 
-          {/* Editor footer */}
           <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-editor-surface border-t border-editor-border text-[10px] sm:text-xs font-mono text-editor-comment overflow-x-auto">
             <div className="flex items-center gap-2 sm:gap-4 whitespace-nowrap">
               <span className="flex items-center gap-1">

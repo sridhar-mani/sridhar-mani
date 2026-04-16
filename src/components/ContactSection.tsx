@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
+import emailjs from '@emailjs/browser';
 
 interface TerminalLine {
   type: 'command' | 'output' | 'input' | 'prompt';
@@ -11,11 +12,15 @@ export const ContactSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' });
   const inputRef = useRef<HTMLInputElement>(null);
+  const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+  const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+  const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
   
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [command, setCommand] = useState('');
   const [currentField, setCurrentField] = useState<'command' | 'email' | 'message' | 'done'>('command');
+  const [isSending, setIsSending] = useState(false);
   const [terminalLines] = useState<TerminalLine[]>([
     { type: 'command', content: 'cat README.md', path: '~/contact' },
     { type: 'output', content: "# Let's build something amazing together" },
@@ -56,7 +61,7 @@ export const ContactSection = () => {
         case 'socials':
           outputLines = [
             { type: 'output', content: 'GitHub: github.com/sridhar-mani' },
-            { type: 'output', content: 'LinkedIn: linkedin.com/in/sridhar-m-b4557b286' },
+            { type: 'output', content: 'LinkedIn: linkedin.com/in/sridharmanimuthusamy' },
             { type: 'output', content: 'Email: sridharmani510@gmail.com' },
           ];
           setSubmittedLines([...newLines, ...outputLines]);
@@ -83,30 +88,64 @@ export const ContactSection = () => {
     }
   };
 
-  const handleMessageSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && message) {
+  const handleMessageSubmit = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && message && !isSending) {
+      setIsSending(true);
       setSubmittedLines(prev => [
         ...prev,
         { type: 'input', content: message },
         { type: 'output', content: '' },
         { type: 'output', content: '> Message queued for delivery...' },
-        { type: 'output', content: '> ✓ Connection established' },
-        { type: 'output', content: '> ✓ Message sent successfully!' },
-        { type: 'output', content: '' },
-        { type: 'output', content: "Thanks for reaching out! I'll get back to you soon." },
-        { type: 'output', content: '' },
-        { type: 'output', content: 'Type "help" for more commands.' },
       ]);
-      setCurrentField('command');
-      setEmail('');
-      setMessage('');
+
+      try {
+        if (!serviceId || !templateId || !publicKey) {
+          throw new Error('EmailJS configuration is missing.');
+        }
+
+        await emailjs.send(
+          serviceId,
+          templateId,
+          {
+            email,
+            to_email: email,
+            from_name: 'Sridhar Mani',
+            reply_to: 'sridharmani510@gmail.com',
+            message,
+          },
+          {
+            publicKey,
+          },
+        );
+
+        setSubmittedLines(prev => [
+          ...prev,
+          { type: 'output', content: '> ✓ Connection established' },
+          { type: 'output', content: '> ✓ Message sent successfully!' },
+          { type: 'output', content: '' },
+          { type: 'output', content: "Thanks for reaching out! I'll get back to you soon." },
+          { type: 'output', content: '' },
+          { type: 'output', content: 'Type "help" for more commands.' },
+        ]);
+        setCurrentField('command');
+        setEmail('');
+        setMessage('');
+      } catch {
+        setSubmittedLines(prev => [
+          ...prev,
+          { type: 'output', content: '> ✗ Delivery failed' },
+          { type: 'output', content: '> Please try again in a moment or email me directly.' },
+        ]);
+        setCurrentField('command');
+      } finally {
+        setIsSending(false);
+      }
     }
   };
 
   return (
     <section id="contact" ref={sectionRef} className="py-16 sm:py-24 lg:py-32 bg-white">
       <div className="container mx-auto px-4 sm:px-6">
-        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -117,14 +156,12 @@ export const ContactSection = () => {
           <h2 className="section-title mt-3 sm:mt-4 text-3xl sm:text-4xl md:text-5xl font-mono font-bold text-gray-900">terminal.sh</h2>
         </motion.div>
 
-        {/* Terminal window */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.2 }}
           className="terminal max-w-3xl mx-auto"
         >
-          {/* Terminal header */}
           <div className="terminal-header">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="ide-dot ide-dot-red w-2.5 h-2.5 sm:w-3 sm:h-3" />
@@ -136,7 +173,6 @@ export const ContactSection = () => {
             </span>
           </div>
 
-          {/* Terminal body */}
           <div className="terminal-body space-y-2 sm:space-y-3 text-xs sm:text-sm p-4 sm:p-6">
             {terminalLines.map((line, index) => (
               <motion.div
@@ -158,7 +194,6 @@ export const ContactSection = () => {
               </motion.div>
             ))}
 
-            {/* Submitted lines */}
             {submittedLines.map((line, index) => (
               <div key={`submitted-${index}`}>
                 {line.type === 'command' && (
@@ -177,7 +212,6 @@ export const ContactSection = () => {
               </div>
             ))}
 
-            {/* Input prompts */}
             {currentField === 'command' && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -239,8 +273,9 @@ export const ContactSection = () => {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={handleMessageSubmit}
-                    placeholder="Hello, I'd like to discuss..."
+                    placeholder={isSending ? 'Sending message...' : "Hello, I'd like to discuss..."}
                     className="flex-1 bg-transparent text-syntax-cyan font-mono text-xs sm:text-sm outline-none placeholder:text-editor-comment min-w-0"
+                    disabled={isSending}
                   />
                   <span className="animate-blink text-syntax-cyan shrink-0">▋</span>
                 </div>
@@ -249,7 +284,6 @@ export const ContactSection = () => {
           </div>
         </motion.div>
 
-        {/* Alternative contact methods */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -264,7 +298,7 @@ export const ContactSection = () => {
           </a>
           <span className="text-border hidden sm:inline">|</span>
           <a
-            href="https://www.linkedin.com/in/sridhar-m-b4557b286/"
+            href="https://www.linkedin.com/in/sridharmanimuthusamy"
             target="_blank"
             rel="noopener noreferrer"
             className="font-mono text-xs sm:text-sm text-muted-foreground hover:text-syntax-cyan transition-colors"

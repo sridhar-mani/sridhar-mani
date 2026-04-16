@@ -20,7 +20,6 @@ export const Navigation = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
 
-      // Check if at bottom of page - if so, highlight Contact
       const isAtBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 50;
       if (isAtBottom) {
         setActiveSection('contact');
@@ -63,12 +62,10 @@ export const Navigation = () => {
           : 'bg-transparent'
       }`}
     >
-      {/* Gradient line at top */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-syntax-cyan/50 to-transparent" />
 
       <nav className="container mx-auto px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <Magnetic strength={0.2}>
             <motion.a
               href="#home"
@@ -88,7 +85,6 @@ export const Navigation = () => {
             </motion.a>
           </Magnetic>
 
-          {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1 bg-white/80 backdrop-blur-md rounded-full px-3 py-2 border border-gray-200 shadow-sm">
             {navItems.map((item) => {
               const isActive = activeSection === item.href.slice(1);
@@ -104,7 +100,6 @@ export const Navigation = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    {/* Active underline indicator */}
                     {isActive && (
                       <motion.span
                         className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-syntax-cyan rounded-full"
@@ -125,7 +120,6 @@ export const Navigation = () => {
             })}
           </div>
 
-          {/* CTA Button */}
           <Magnetic strength={0.2}>
             <motion.a
               href="#contact"
@@ -137,7 +131,6 @@ export const Navigation = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              {/* Shimmer effect */}
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
               <span className="relative">Let's Talk</span>
               <motion.span 
@@ -150,7 +143,6 @@ export const Navigation = () => {
             </motion.a>
           </Magnetic>
 
-          {/* Mobile Menu Button */}
           <motion.button
             className="lg:hidden p-2.5 hover:bg-editor-surface rounded-xl border border-transparent hover:border-editor-border transition-all"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -182,7 +174,6 @@ export const Navigation = () => {
           </motion.button>
         </div>
 
-        {/* Mobile Navigation */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
