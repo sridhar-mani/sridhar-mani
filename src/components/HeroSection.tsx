@@ -104,21 +104,21 @@ export const HeroSection = () => {
             className="flex items-center gap-4"
           >
             {[
-              { icon: Github, href: 'https://github.com/sridhar-mani', label: 'GitHub', hoverBg: 'group-hover:bg-[#24292e]' },
-              { icon: Linkedin, href: 'https://www.linkedin.com/in/sridharmanimuthusamy', label: 'LinkedIn', hoverBg: 'group-hover:bg-[#0A66C2]' },
-              { icon: Mail, href: 'mailto:sridharmani510@gmail.com', label: 'Email', hoverBg: 'group-hover:bg-syntax-orange' },
+              { icon: Github, href: 'https://github.com/sridhar-mani', label: 'GitHub', hoverBg: 'hover:bg-[#24292e]' },
+              { icon: Linkedin, href: 'https://www.linkedin.com/in/sridharmanimuthusamy', label: 'LinkedIn', hoverBg: 'hover:bg-[#0A66C2]' },
+              { icon: Mail, href: 'mailto:sridharmani510@gmail.com', label: 'Email', hoverBg: 'hover:bg-syntax-orange' },
             ].map(({ icon: Icon, href, label, hoverBg }) => (
               <motion.a
                 key={label}
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`group relative p-4 bg-gray-100 rounded-xl text-gray-600 transition-all duration-300 shadow-sm hover:shadow-md hover:text-white ${hoverBg} group-hover:text-white`}
+                className={`group relative p-4 bg-gray-100 rounded-xl text-gray-600 transition-all duration-300 shadow-sm hover:shadow-md hover:text-white ${hoverBg}`}
                 whileHover={{ scale: 1.1, y: -4 }}
                 whileTap={{ scale: 0.95 }}
                 aria-label={label}
               >
-                <Icon size={24} className="relative z-10 text-inherit transition-colors duration-300 group-hover:text-white" />
+                <Icon size={24} className="relative z-10 text-inherit transition-colors duration-300" />
               </motion.a>
             ))}
           </motion.div>

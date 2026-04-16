@@ -45,10 +45,25 @@ export const Navigation = () => {
 
   const handleNavClick = (href: string) => {
     setIsMobileMenuOpen(false);
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    const sectionId = href.startsWith('#') ? href.slice(1) : href;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const element = document.getElementById(sectionId);
+        if (!element) {
+          return;
+        }
+
+        const headerOffset = 96;
+        const elementTop = element.getBoundingClientRect().top + window.scrollY;
+        const offsetTop = Math.max(elementTop - headerOffset, 0);
+
+        window.scrollTo({
+          top: offsetTop,
+          behavior: 'smooth',
+        });
+      });
+    });
   };
 
   return (
@@ -59,7 +74,7 @@ export const Navigation = () => {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled 
           ? 'bg-white/90 backdrop-blur-xl shadow-sm border-b border-gray-100' 
-          : 'bg-transparent'
+          : 'bg-white/90 backdrop-blur-xl shadow-sm border-b border-white/60 lg:bg-transparent lg:backdrop-blur-none lg:shadow-none lg:border-b-0'
       }`}
     >
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-syntax-cyan/50 to-transparent" />
