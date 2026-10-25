@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, Sparkles, Footprints, Heart, Compass, Disc, Crosshair } from 'lucide-react';
+import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, X, Crosshair, Sparkles } from 'lucide-react';
 import { petAudio } from './PixelPetAudio';
 
 export type PetId = 'shiba' | 'fox' | 'crab' | 'duck' | 'clippy' | 'totoro' | 'zappy';
@@ -28,8 +28,8 @@ export const PET_CATALOG: PetMeta[] = [
       "Woof! Sridhar is building high-impact AI agents at Zenteiq! ⚡",
       "I love clean TypeScript, WebGPU shaders, and zero bugs! 🐾",
       "Try dragging and tossing me in the air! 🪂",
-      "Click 'Fetch' to throw a tennis ball for me to catch! 🎾",
-      "Type 'agent' in the terminal to watch a simulated autonomous coding agent! 🤖"
+      "Click on me to open treats and settings! 🎾",
+      "Type 'agent' in the terminal to watch autonomous coding agents! 🤖"
     ]
   },
   {
@@ -177,22 +177,21 @@ export const PixelPet = () => {
     }
   });
 
-  const [state, setState] = useState<PetState>('idle');
-  const [x, setX] = useState<number>(140);
-  const [y, setY] = useState<number>(0); // Vertical altitude above floor (px)
+  const [state, setState] = useState<PetState>('walk');
+  const [x, setX] = useState<number>(80);
+  const [y, setY] = useState<number>(0);
   const [facing, setFacing] = useState<'left' | 'right'>('right');
   const [isMuted, setIsMuted] = useState(true);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // Default hidden: no permanent HUD
   const [dialogue, setDialogue] = useState<string>('');
   const [showDialogue, setShowDialogue] = useState(true);
   const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
   const [isLevelingUp, setIsLevelingUp] = useState(false);
-  const [isWalking, setIsWalking] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [laserActive, setLaserActive] = useState(false);
   const [laserPos, setLaserPos] = useState<{ x: number; y: number } | null>(null);
 
-  // Tennis Ball Physics State
+  // Tennis Ball State
   const [tennisBall, setTennisBall] = useState<{
     x: number;
     y: number;
@@ -202,24 +201,31 @@ export const PixelPet = () => {
   } | null>(null);
 
   const prevLevelRef = useRef<number>(getLevelInfo(xp).level);
-  const targetXRef = useRef<number>(x);
-  const currentXRef = useRef<number>(x);
+  const currentXRef = useRef<number>(80);
   const currentYRef = useRef<number>(0);
   const velXRef = useRef<number>(0);
   const velYRef = useRef<number>(0);
+  const directionRef = useRef<1 | -1>(1); // 1 = moving right, -1 = moving left
+  const pauseUntilRef = useRef<number>(0); // Timestamp when pause ends
+  const targetXOverrideRef = useRef<number | null>(null);
   const animFrameRef = useRef<number>(0);
-  const isRoamingRef = useRef<boolean>(true);
   const dragStartRef = useRef<{ mouseX: number; mouseY: number; startX: number; startY: number } | null>(null);
   const lastMousePosRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const screenWidthRef = useRef<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
   const currentPet = PET_CATALOG.find((p) => p.id === petId) || PET_CATALOG[0];
   const levelInfo = getLevelInfo(xp);
 
-  // Sync ref
-  currentXRef.current = x;
-  currentYRef.current = y;
+  // Update screen width on resize
+  useEffect(() => {
+    const handleResize = () => {
+      screenWidthRef.current = window.innerWidth;
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-  // Persist selections
+  // Save pet selections
   useEffect(() => {
     try {
       localStorage.setItem('portfolio_pet_id', petId);
@@ -231,11 +237,11 @@ export const PixelPet = () => {
   useEffect(() => {
     setDialogue(currentPet.dialogues[0]);
     setShowDialogue(true);
-    const t = setTimeout(() => setShowDialogue(false), 7000);
+    const t = setTimeout(() => setShowDialogue(false), 6000);
     return () => clearTimeout(t);
   }, [petId]);
 
-  // Listen for terminal custom event to switch pet or trigger tricks
+  // Terminal event bridge
   useEffect(() => {
     const handlePetEvent = (e: CustomEvent) => {
       if (e.detail?.petId) {
@@ -261,34 +267,35 @@ export const PixelPet = () => {
 
       const timer = setTimeout(() => {
         setIsLevelingUp(false);
-        setState('idle');
+        setState('walk');
       }, 3500);
       return () => clearTimeout(timer);
     }
     prevLevelRef.current = currentLvl;
   }, [xp, levelInfo.title]);
 
-  // Spawn Bouncing Tennis Ball for Fetch
+  // Spawn Tennis Ball for Fetch
   const spawnTennisBall = useCallback(() => {
     petAudio.playChirp();
-    const startX = currentXRef.current + (facing === 'right' ? 60 : -60);
-    const targetThrowX = facing === 'right' ? startX + 280 : startX - 280;
-    const clampedThrowX = Math.max(60, Math.min(window.innerWidth - 80, targetThrowX));
-    const dist = clampedThrowX - startX;
+    const curX = currentXRef.current;
+    const facingRight = directionRef.current === 1;
+    const targetThrowX = facingRight ? curX + 280 : curX - 280;
+    const clampedThrowX = Math.max(50, Math.min(screenWidthRef.current - 90, targetThrowX));
+    const dist = clampedThrowX - curX;
 
     setTennisBall({
-      x: startX,
-      y: 120,
-      vx: dist * 1.5,
-      vy: 240,
+      x: curX + (facingRight ? 40 : -40),
+      y: 110,
+      vx: dist * 1.6,
+      vy: 260,
       active: true
     });
 
-    setDialogue(`Woof! Fetch the ball! 🎾`);
+    setDialogue(`Fetch the ball! 🎾`);
     setShowDialogue(true);
-  }, [facing]);
+  }, []);
 
-  // Comprehensive 60FPS Physics Engine (Movement, Drag & Toss, Ball Physics)
+  // CONTINUOUS 60FPS PATROL PHYSICS LOOP ACROSS THE SCREEN
   useEffect(() => {
     let lastTime = performance.now();
 
@@ -296,26 +303,27 @@ export const PixelPet = () => {
       const dt = Math.min((time - lastTime) / 1000, 0.1);
       lastTime = time;
 
+      const minX = 20;
+      const maxX = Math.max(minX + 120, screenWidthRef.current - 80);
+
       // 1. TENNIS BALL PHYSICS
       if (tennisBall && tennisBall.active) {
         let bx = tennisBall.x + tennisBall.vx * dt;
         let by = tennisBall.y + tennisBall.vy * dt;
-        let bvy = tennisBall.vy - 980 * dt; // gravity
-        let bvx = tennisBall.vx * (1 - 0.5 * dt); // friction
+        let bvy = tennisBall.vy - 980 * dt;
+        let bvx = tennisBall.vx * (1 - 0.4 * dt);
 
-        // Bounce on floor
         if (by <= 0) {
           by = 0;
-          bvy = -bvy * 0.6; // restitution
+          bvy = -bvy * 0.6;
           if (Math.abs(bvy) < 40) bvy = 0;
         }
 
-        // Clamp inside screen bounds
-        if (bx < 40) {
-          bx = 40;
+        if (bx < minX) {
+          bx = minX;
           bvx = -bvx * 0.7;
-        } else if (bx > window.innerWidth - 60) {
-          bx = window.innerWidth - 60;
+        } else if (bx > maxX) {
+          bx = maxX;
           bvx = -bvx * 0.7;
         }
 
@@ -327,14 +335,13 @@ export const PixelPet = () => {
           active: true
         });
 
-        // Pet chases the ball!
-        targetXRef.current = bx;
-        setFacing(bx > currentXRef.current ? 'right' : 'left');
+        // Pet sprints to catch tennis ball
+        targetXOverrideRef.current = bx;
 
-        // Check if pet caught the ball
         if (Math.abs(currentXRef.current - bx) < 25 && by <= 20) {
           petAudio.playMunch();
           setTennisBall(null);
+          targetXOverrideRef.current = null;
           setState('happy');
           setXp((p) => p + 30);
           setDialogue(`Caught the ball! Amazing fetch! (+30 XP) 🎾🏆`);
@@ -342,10 +349,12 @@ export const PixelPet = () => {
 
           const newHeart = { id: Date.now(), x: 0, y: -30 };
           setHearts((h) => [...h, newHeart]);
+          pauseUntilRef.current = time + 2000;
+
           setTimeout(() => {
             setHearts((h) => h.filter((item) => item.id !== newHeart.id));
-            setState('idle');
-          }, 2400);
+            setState('walk');
+          }, 2000);
         }
       }
 
@@ -353,11 +362,10 @@ export const PixelPet = () => {
       if (!isDragging) {
         if (currentYRef.current > 0 || velYRef.current !== 0) {
           let newY = currentYRef.current + velYRef.current * dt;
-          let newVelY = velYRef.current - 1400 * dt; // gravity
+          let newVelY = velYRef.current - 1400 * dt;
 
           if (newY <= 0) {
             newY = 0;
-            // Floor bounce
             if (Math.abs(newVelY) > 120) {
               newVelY = -newVelY * 0.45;
               petAudio.playChirp();
@@ -369,39 +377,79 @@ export const PixelPet = () => {
           velYRef.current = newVelY;
           setY(newY);
 
-          // Horizontal drift while in air
           if (velXRef.current !== 0) {
             let newX = currentXRef.current + velXRef.current * dt;
             velXRef.current *= 1 - 1.2 * dt;
-            newX = Math.max(30, Math.min(window.innerWidth - 80, newX));
+            newX = Math.max(minX, Math.min(maxX, newX));
             currentXRef.current = newX;
             setX(newX);
           }
         } else {
-          // 3. HORIZONTAL WALKING ALONG FLOOR
-          const targetX = targetXRef.current;
-          const curX = currentXRef.current;
-          const diff = targetX - curX;
+          // 3. CONTINUOUS PATROL HORIZONTAL WALKING ACROSS FULL SCREEN
+          const isPaused = time < pauseUntilRef.current;
 
-          const baseSpeed = 85 + (levelInfo.level - 1) * 15;
-          const speed = tennisBall ? baseSpeed * 2.2 : laserActive ? baseSpeed * 1.8 : baseSpeed;
-
-          if (Math.abs(diff) > 4) {
-            const step = Math.sign(diff) * Math.min(Math.abs(diff), speed * dt);
-            const newX = curX + step;
-            currentXRef.current = newX;
-            setX(newX);
-            setIsWalking(true);
-            if (state !== 'walk' && state !== 'happy' && !isLevelingUp) {
-              setState('walk');
+          if (isPaused || state === 'sleep' || isLevelingUp) {
+            // Pet is temporarily paused/sniffing
+            if (state !== 'happy' && state !== 'sleep' && !isLevelingUp) {
+              setState('idle');
             }
           } else {
-            if (isWalking) {
-              setIsWalking(false);
-              if (state === 'walk') {
+            // Base walking speed (increases with level)
+            const baseSpeed = 75 + (levelInfo.level - 1) * 12;
+            const speed = tennisBall ? baseSpeed * 2.3 : laserActive ? baseSpeed * 1.8 : baseSpeed;
+
+            let curX = currentXRef.current;
+
+            // Target destination override (from user click, tennis ball, or laser)
+            if (targetXOverrideRef.current !== null) {
+              const diff = targetXOverrideRef.current - curX;
+              if (Math.abs(diff) > 4) {
+                const step = Math.sign(diff) * Math.min(Math.abs(diff), speed * dt);
+                curX += step;
+                const newFacing = diff > 0 ? 'right' : 'left';
+                directionRef.current = diff > 0 ? 1 : -1;
+                setFacing(newFacing);
+                setState('walk');
+              } else {
+                targetXOverrideRef.current = null;
+                pauseUntilRef.current = time + 1400; // Brief pause at target
                 setState('idle');
               }
+            } else {
+              // AUTOMATIC CONTINUOUS PATROL ACROSS THE SCREEN
+              curX += directionRef.current * speed * dt;
+
+              // Check right boundary -> turnaround
+              if (curX >= maxX) {
+                curX = maxX;
+                directionRef.current = -1;
+                setFacing('left');
+                pauseUntilRef.current = time + 1200; // Brief 1.2s sniff pause before walking back
+                setState('idle');
+
+                if (Math.random() < 0.3) {
+                  const remark = currentPet.dialogues[Math.floor(Math.random() * currentPet.dialogues.length)];
+                  setDialogue(remark);
+                  setShowDialogue(true);
+                  setTimeout(() => setShowDialogue(false), 5000);
+                }
+              }
+              // Check left boundary -> turnaround
+              else if (curX <= minX) {
+                curX = minX;
+                directionRef.current = 1;
+                setFacing('right');
+                pauseUntilRef.current = time + 1200; // Brief 1.2s sniff pause before walking back
+                setState('idle');
+              } else {
+                if (state !== 'walk' && state !== 'happy') {
+                  setState('walk');
+                }
+              }
             }
+
+            currentXRef.current = curX;
+            setX(curX);
           }
         }
       }
@@ -411,44 +459,9 @@ export const PixelPet = () => {
 
     animFrameRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [tennisBall, isDragging, state, isWalking, levelInfo.level, isLevelingUp, laserActive]);
+  }, [tennisBall, isDragging, state, levelInfo.level, isLevelingUp, laserActive, currentPet]);
 
-  // Autonomous wandering scheduler across the screen
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-
-    const scheduleWander = () => {
-      const delay = Math.random() * 4000 + 4000;
-      timer = setTimeout(() => {
-        if (!isRoamingRef.current || state === 'sleep' || tennisBall || isLevelingUp || isDragging || laserActive) {
-          scheduleWander();
-          return;
-        }
-
-        const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
-        const minX = 40;
-        const maxX = Math.max(minX + 80, screenWidth - 100);
-
-        const nextX = Math.floor(Math.random() * (maxX - minX) + minX);
-        targetXRef.current = nextX;
-        setFacing(nextX > currentXRef.current ? 'right' : 'left');
-
-        if (Math.random() < 0.25) {
-          const remark = currentPet.dialogues[Math.floor(Math.random() * currentPet.dialogues.length)];
-          setDialogue(remark);
-          setShowDialogue(true);
-          setTimeout(() => setShowDialogue(false), 5500);
-        }
-
-        scheduleWander();
-      }, delay);
-    };
-
-    scheduleWander();
-    return () => clearTimeout(timer);
-  }, [currentPet, state, tennisBall, isLevelingUp, isDragging, laserActive]);
-
-  // Mouse drag & toss handlers for Desktop Pet ragdoll physics
+  // Drag & toss handlers
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -466,9 +479,11 @@ export const PixelPet = () => {
     const handleMouseMove = (moveEvent: MouseEvent) => {
       if (!dragStartRef.current) return;
       const dx = moveEvent.clientX - dragStartRef.current.mouseX;
-      const dy = dragStartRef.current.mouseY - moveEvent.clientY; // invert Y for altitude
+      const dy = dragStartRef.current.mouseY - moveEvent.clientY;
 
-      const newX = Math.max(30, Math.min(window.innerWidth - 80, dragStartRef.current.startX + dx));
+      const minX = 20;
+      const maxX = Math.max(minX + 100, screenWidthRef.current - 80);
+      const newX = Math.max(minX, Math.min(maxX, dragStartRef.current.startX + dx));
       const newY = Math.max(0, dragStartRef.current.startY + dy);
 
       currentXRef.current = newX;
@@ -476,7 +491,6 @@ export const PixelPet = () => {
       setX(newX);
       setY(newY);
 
-      // Track release velocity
       const now = performance.now();
       if (lastMousePosRef.current) {
         const dt = (now - lastMousePosRef.current.time) / 1000;
@@ -492,7 +506,7 @@ export const PixelPet = () => {
       setIsDragging(false);
       dragStartRef.current = null;
       lastMousePosRef.current = null;
-      setState('idle');
+      setState('walk');
 
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
@@ -512,7 +526,7 @@ export const PixelPet = () => {
     const handleMouseMove = (e: MouseEvent) => {
       if (e.clientY > window.innerHeight * 0.45) {
         setLaserPos({ x: e.clientX, y: window.innerHeight - e.clientY });
-        targetXRef.current = Math.max(30, Math.min(window.innerWidth - 80, e.clientX - 25));
+        targetXOverrideRef.current = Math.max(20, Math.min(screenWidthRef.current - 80, e.clientX - 25));
         setFacing(e.clientX > currentXRef.current ? 'right' : 'left');
       }
     };
@@ -529,10 +543,11 @@ export const PixelPet = () => {
         return;
       }
 
-      if (e.clientY > window.innerHeight * 0.5) {
-        const targetX = Math.max(30, Math.min(e.clientX - 25, window.innerWidth - 80));
-        targetXRef.current = targetX;
+      if (e.clientY > window.innerHeight * 0.55) {
+        const targetX = Math.max(20, Math.min(e.clientX - 25, screenWidthRef.current - 80));
+        targetXOverrideRef.current = targetX;
         setFacing(targetX > currentXRef.current ? 'right' : 'left');
+        directionRef.current = targetX > currentXRef.current ? 1 : -1;
         petAudio.playChirp();
       }
     };
@@ -540,6 +555,20 @@ export const PixelPet = () => {
     window.addEventListener('click', handleScreenClick);
     return () => window.removeEventListener('click', handleScreenClick);
   }, []);
+
+  // Click pet to open Settings & Treat Drawer
+  const handlePetClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    petAudio.playChirp();
+    setIsMenuOpen((v) => !v);
+    setXp((p) => p + 6);
+
+    const newHeart = { id: Date.now(), x: Math.random() * 24 - 12, y: -25 };
+    setHearts((prev) => [...prev, newHeart]);
+    setTimeout(() => {
+      setHearts((prev) => prev.filter((h) => h.id !== newHeart.id));
+    }, 1200);
+  };
 
   // Double click pet to do backflip trick
   const handleDoubleClick = (e: React.MouseEvent) => {
@@ -550,17 +579,17 @@ export const PixelPet = () => {
     setDialogue(`⭐ Backflip trick! Woohoo! (+15 XP) ⭐`);
     setShowDialogue(true);
 
-    velYRef.current = 400; // pop into air!
+    velYRef.current = 400;
     const newHeart = { id: Date.now(), x: 0, y: -40 };
     setHearts((h) => [...h, newHeart]);
 
     setTimeout(() => {
       setHearts((h) => h.filter((item) => item.id !== newHeart.id));
-      setState('idle');
+      setState('walk');
     }, 2000);
   };
 
-  const feedSnack = (snackName: string, xpGain: number, icon: string) => {
+  const feedSnack = (snackName: string, xpGain: number) => {
     petAudio.playMunch();
     setState('happy');
     setXp((prev) => prev + xpGain);
@@ -571,7 +600,7 @@ export const PixelPet = () => {
     setHearts((h) => [...h, newHeart]);
     setTimeout(() => {
       setHearts((h) => h.filter((item) => item.id !== newHeart.id));
-      setState('idle');
+      setState('walk');
     }, 2000);
   };
 
@@ -594,10 +623,10 @@ export const PixelPet = () => {
       {tennisBall && (
         <div
           style={{
-            transform: `translate3d(${tennisBall.x}px, ${-tennisBall.y}px, 0)`,
-            transition: 'none'
+            left: `${tennisBall.x}px`,
+            bottom: `${tennisBall.y + 8}px`
           }}
-          className="fixed bottom-2 z-40 text-2xl pointer-events-none drop-shadow-[0_4px_10px_rgba(0,0,0,0.6)] animate-spin"
+          className="fixed z-40 text-2xl pointer-events-none drop-shadow-[0_4px_10px_rgba(0,0,0,0.6)] animate-spin"
         >
           🎾
         </div>
@@ -614,12 +643,12 @@ export const PixelPet = () => {
         />
       )}
 
-      {/* FREESTANDING SCREEN PET WITH GRAVITY & DRAG PHYSICS */}
+      {/* FREESTANDING SCREEN PET (NO PERMANENT SCREEN HUD!) */}
       <div
         className="fixed bottom-2 z-40 select-none pointer-events-auto"
         style={{
-          transform: `translate3d(${x}px, ${-y}px, 0)`,
-          transition: 'none',
+          left: `${x}px`,
+          bottom: `${y + 8}px`,
           cursor: isDragging ? 'grabbing' : 'grab'
         }}
         onMouseDown={handleMouseDown}
@@ -654,7 +683,7 @@ export const PixelPet = () => {
             </motion.div>
           ))}
 
-          {/* Level Up Celebration */}
+          {/* Level Up Golden Burst */}
           {isLevelingUp && (
             <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
@@ -668,8 +697,9 @@ export const PixelPet = () => {
 
           {/* THE FREESTANDING PET SPRITE WITH VISUAL EVOLUTIONS */}
           <div
-            className="relative p-1 flex items-center justify-center"
-            title={`Drag & toss me! Double-click for backflip trick! (${levelInfo.title} • Lv.${lvl})`}
+            onClick={handlePetClick}
+            className="relative p-1 flex items-center justify-center cursor-pointer group"
+            title={`Click to open ${currentPet.name}'s menu & treats! Drag to toss! (${levelInfo.title} • Lv.${lvl})`}
           >
             {/* EVOLUTION 3: Cosmic / Super Saiyan Aura (Lv.5+) */}
             {hasCosmicAura && (
@@ -707,7 +737,7 @@ export const PixelPet = () => {
               />
             )}
 
-            {/* Raw Pixel Art Sprite Image (No bounding box!) */}
+            {/* Pixel Sprite Image (Flips direction based on facing) */}
             <motion.div
               animate={{
                 rotate: isDragging ? [0, 10, -10, 0] : y > 20 ? [0, 360] : 0
@@ -729,8 +759,8 @@ export const PixelPet = () => {
               />
             </motion.div>
 
-            {/* Floating Level Tag Pill */}
-            <div className="absolute -bottom-2 bg-slate-900/90 text-cyan-400 border border-cyan-500/40 shadow-md rounded-full px-1.5 py-0.2 text-[9px] font-mono font-bold flex items-center gap-0.5">
+            {/* Mini subtle level tag */}
+            <div className="absolute -bottom-2 bg-slate-900/90 text-cyan-400 border border-cyan-500/40 shadow-md rounded-full px-1.5 py-0.2 text-[9px] font-mono font-bold flex items-center gap-0.5 pointer-events-none">
               <span>Lv.{lvl}</span>
               <span className="text-white/70 text-[8px]">{currentPet.name}</span>
             </div>
@@ -738,93 +768,70 @@ export const PixelPet = () => {
         </div>
       </div>
 
-      {/* FLOATING ACTION HUD DOCK (Bottom-Left Corner) */}
-      <div className="fixed bottom-4 left-4 z-40 select-none">
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className="bg-slate-900/90 text-white backdrop-blur-md border border-cyan-500/30 shadow-2xl rounded-2xl p-2.5 flex items-center gap-2.5"
-          data-pet-menu
-        >
-          {/* Companion Selector & Quick Level */}
-          <button
-            onClick={() => setIsMenuOpen((v) => !v)}
-            className="flex items-center gap-1.5 p-1 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
-            title="Open Pet Companions & Treat Tray"
+      {/* ON-DEMAND SETTINGS & COMPANION POPOVER (Only opens when clicking pet) */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+            onClick={() => setIsMenuOpen(false)}
           >
-            <span className="text-lg">{currentPet.icon}</span>
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-mono font-bold text-white leading-none">
-                {currentPet.name}
-              </span>
-              <span className="text-[9px] font-mono text-cyan-400">
-                Lv.{lvl} • {levelInfo.title}
-              </span>
-            </div>
-          </button>
-
-          {/* Mini XP Bar */}
-          <div className="w-16 bg-slate-800 rounded-full h-1.5 overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full"
-              animate={{ width: `${levelInfo.progress}%` }}
-              transition={{ duration: 0.3 }}
-            />
-          </div>
-
-          {/* PLAY FETCH TENNIS BALL BUTTON */}
-          <button
-            onClick={spawnTennisBall}
-            className="p-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 transition-colors flex items-center gap-1 text-[10px] font-mono font-semibold"
-            title="Play Fetch! Throws a tennis ball for pet to chase (+30 XP)"
-          >
-            <span>🎾</span>
-            <span className="hidden sm:inline">Fetch</span>
-          </button>
-
-          {/* LASER POINTER TOGGLE */}
-          <button
-            onClick={() => setLaserActive((l) => !l)}
-            className={`p-1 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-mono font-semibold ${
-              laserActive ? 'bg-rose-500/30 text-rose-300 shadow-[0_0_8px_#f43f5e]' : 'bg-slate-800 text-slate-400 hover:text-white'
-            }`}
-            title="Toggle Laser Pointer Mode (Pet chases red dot)"
-          >
-            <Crosshair size={12} className={laserActive ? 'text-rose-400 animate-spin' : ''} />
-            <span className="hidden sm:inline">Laser</span>
-          </button>
-
-          {/* Quick Sound Toggle */}
-          <button
-            onClick={toggleSound}
-            className="text-slate-400 hover:text-cyan-400 transition-colors p-1"
-            title={isMuted ? 'Unmute 8-bit Sound' : 'Mute Sound'}
-          >
-            {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} className="text-cyan-400" />}
-          </button>
-
-          {/* Toggle Menu */}
-          <button
-            onClick={() => setIsMenuOpen((v) => !v)}
-            className="px-2 py-0.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-mono text-[10px] font-semibold transition-colors"
-          >
-            {isMenuOpen ? 'Close' : 'Menu'}
-          </button>
-        </motion.div>
-
-        {/* EXPANDED PET SELECTOR & FEEDING DRAWER */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="mt-2 bg-slate-900/95 backdrop-blur-md border border-cyan-500/40 shadow-2xl rounded-2xl p-3 w-[310px] flex flex-col gap-3 text-white"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-slate-900/95 border border-cyan-500/40 shadow-2xl rounded-2xl p-4 w-full max-w-[340px] flex flex-col gap-3 text-white"
+              onClick={(e) => e.stopPropagation()}
               data-pet-menu
             >
-              {/* Pet Companions Selector (All 7 Pets!) */}
+              {/* Header */}
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{currentPet.icon}</span>
+                  <div>
+                    <h3 className="font-mono text-sm font-bold text-white flex items-center gap-1.5">
+                      {currentPet.name}
+                      <span className="text-[10px] text-cyan-400 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800">
+                        Lv.{lvl} {levelInfo.title}
+                      </span>
+                    </h3>
+                    <p className="text-[10px] text-slate-400 font-mono">{currentPet.species}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={toggleSound}
+                    className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-cyan-400 transition-colors"
+                    title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
+                  >
+                    {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} className="text-cyan-400" />}
+                  </button>
+                  <button
+                    onClick={() => setIsMenuOpen(false)}
+                    className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {/* XP Progress Bar */}
+              <div>
+                <div className="flex justify-between text-[10px] font-mono text-slate-400 mb-1">
+                  <span>Level Progress</span>
+                  <span>{xp} Total XP</span>
+                </div>
+                <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full"
+                    animate={{ width: `${levelInfo.progress}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Choose Companion (7 pets) */}
               <div>
                 <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 font-bold block mb-1.5">
-                  Select Companion (7 Available)
+                  Select Companion
                 </span>
                 <div className="grid grid-cols-7 gap-1">
                   {PET_CATALOG.map((p) => {
@@ -841,7 +848,7 @@ export const PixelPet = () => {
                             ? 'bg-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.6)] scale-105'
                             : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300'
                         }`}
-                        title={`${p.name} - ${p.title} (${p.species})`}
+                        title={`${p.name} (${p.species})`}
                       >
                         <span className="text-base">{p.icon}</span>
                         <span className="text-[8px] font-mono mt-0.5 truncate max-w-full">
@@ -853,71 +860,77 @@ export const PixelPet = () => {
                 </div>
               </div>
 
-              {/* Feeding Treats & Level Boost */}
+              {/* Feed Treats & Mini Games */}
               <div>
                 <span className="text-[10px] font-mono uppercase tracking-wider text-purple-400 font-bold block mb-1.5">
-                  Toss Treats & Level Up XP
+                  Treats & Mini-Games
                 </span>
                 <div className="grid grid-cols-4 gap-1.5">
                   <button
-                    onClick={() => feedSnack('Coffee', 15, '☕')}
+                    onClick={() => feedSnack('Coffee', 15)}
                     className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 flex flex-col items-center gap-0.5 transition-colors text-[10px] font-mono"
-                    title="Toss Coffee (+15 XP)"
+                    title="Feed Coffee (+15 XP)"
                   >
-                    <Coffee size={13} className="text-amber-400" />
+                    <Coffee size={14} className="text-amber-400" />
                     <span>Coffee</span>
                     <span className="text-[8px] text-slate-400">+15 XP</span>
                   </button>
 
                   <button
-                    onClick={() => feedSnack('Byte Cookie', 20, '🍪')}
+                    onClick={() => feedSnack('Cookie', 20)}
                     className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-200 flex flex-col items-center gap-0.5 transition-colors text-[10px] font-mono"
-                    title="Toss Cookie (+20 XP)"
+                    title="Feed Cookie (+20 XP)"
                   >
-                    <Cookie size={13} className="text-amber-300" />
+                    <Cookie size={14} className="text-amber-300" />
                     <span>Cookie</span>
                     <span className="text-[8px] text-slate-400">+20 XP</span>
                   </button>
 
                   <button
-                    onClick={() => feedSnack('Bug Treat', 30, '🐛')}
+                    onClick={() => {
+                      spawnTennisBall();
+                      setIsMenuOpen(false);
+                    }}
                     className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 flex flex-col items-center gap-0.5 transition-colors text-[10px] font-mono"
-                    title="Squash Bug Treat (+30 XP)"
+                    title="Play Fetch! Throws tennis ball on screen"
                   >
-                    <Bug size={13} className="text-emerald-400" />
-                    <span>Bug</span>
+                    <span className="text-sm">🎾</span>
+                    <span>Fetch</span>
                     <span className="text-[8px] text-slate-400">+30 XP</span>
                   </button>
 
                   <button
-                    onClick={() => feedSnack('Neural Boost', 50, '⚡')}
-                    className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 flex flex-col items-center gap-0.5 transition-colors text-[10px] font-mono"
-                    title="Supercharge (+50 XP)"
+                    onClick={() => {
+                      setLaserActive((l) => !l);
+                      setIsMenuOpen(false);
+                    }}
+                    className={`p-1.5 rounded-xl flex flex-col items-center gap-0.5 transition-colors text-[10px] font-mono ${
+                      laserActive ? 'bg-rose-500/30 text-rose-300' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    }`}
+                    title="Toggle Laser Pointer"
                   >
-                    <Zap size={13} className="text-cyan-400" />
-                    <span>Boost</span>
-                    <span className="text-[8px] text-slate-400">+50 XP</span>
+                    <Crosshair size={14} className="text-rose-400" />
+                    <span>Laser</span>
+                    <span className="text-[8px] text-slate-400">{laserActive ? 'ON' : 'OFF'}</span>
                   </button>
                 </div>
               </div>
 
-              {/* Evolution Perks Info */}
-              <div className="bg-slate-800/60 rounded-xl p-2 text-[9px] font-mono text-slate-300 border border-slate-700/60 space-y-1">
-                <div className="flex items-center justify-between text-cyan-400 font-bold">
-                  <span>Current: {levelInfo.title}</span>
-                  <span>{xp} Total XP</span>
-                </div>
-                <p className="text-slate-400">
-                  • 🪂 <strong>Drag & Toss:</strong> Click and throw pet with real physics!<br />
-                  • 🎾 <strong>Play Fetch:</strong> Toss tennis ball for pet to chase!<br />
-                  • ⭐ <strong>Trick:</strong> Double-click pet for acrobatic backflip!<br />
-                  • Lv.3+ Cyber Halo • Lv.4+ Orbiting Wisps • Lv.5+ Saiyan Aura
+              {/* Instructions */}
+              <div className="bg-slate-800/60 rounded-xl p-2.5 text-[10px] font-mono text-slate-300 border border-slate-700/60 space-y-1">
+                <p className="text-cyan-400 font-bold flex items-center gap-1">
+                  <Sparkles size={11} /> Interactive Controls:
+                </p>
+                <p className="text-slate-400 leading-relaxed">
+                  • 🪂 <strong>Drag & Throw:</strong> Click & toss pet anywhere on screen!<br />
+                  • ⭐ <strong>Double-Click:</strong> Pet does an acrobatic backflip trick!<br />
+                  • 🐾 <strong>Floor Click:</strong> Click floor to call pet to that spot.
                 </p>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
