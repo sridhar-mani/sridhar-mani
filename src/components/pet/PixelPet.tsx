@@ -1,12 +1,124 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, VolumeX, Coffee, Cookie, Bug, ChevronUp, ChevronDown, Sparkles, Footprints, Anchor, Zap } from 'lucide-react';
+import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, Sparkles, Footprints, Heart, X, MessageSquare, Compass } from 'lucide-react';
 import { petAudio } from './PixelPetAudio';
 
-export type PetType = 'shiba' | 'fox';
-export type PetState = 'idle' | 'happy' | 'walk' | 'sleep';
+export type PetId = 'shiba' | 'fox' | 'crab' | 'duck' | 'clippy' | 'totoro' | 'zappy';
+export type PetState = 'idle' | 'walk' | 'happy' | 'sleep';
 
-// Continuous dynamic RPG progression formula
+export interface PetMeta {
+  id: PetId;
+  name: string;
+  title: string;
+  species: string;
+  icon: string;
+  color: string;
+  dialogues: string[];
+}
+
+export const PET_CATALOG: PetMeta[] = [
+  {
+    id: 'shiba',
+    name: 'Byte',
+    title: 'Cyber Familiar',
+    species: 'Shiba Inu',
+    icon: '🐕',
+    color: 'from-amber-400 to-orange-500',
+    dialogues: [
+      "Woof! Sridhar is building high-impact AI agents at Zenteiq! ⚡",
+      "I love clean TypeScript, WebGPU shaders, and zero bugs! 🐾",
+      "Check out NPC Code & WebGPU Worker in the projects section! 🚀",
+      "Click anywhere on the ground to make me fetch! 🎾",
+      "Type 'email' in the terminal to connect with Sridhar! 📬"
+    ]
+  },
+  {
+    id: 'fox',
+    name: 'Kitsune',
+    title: 'Neural Scout',
+    species: 'Cyber Fox',
+    icon: '🦊',
+    color: 'from-orange-500 to-rose-600',
+    dialogues: [
+      "Neural pathways synchronized! High-FPS WebGPU graphics! 🦊",
+      "Sly algorithms optimize every single frame and pipeline.",
+      "Check out Code-DCR research repository on GitHub! 📜",
+      "FastAPI + LangGraph agent orchestration running smoothly. ⚡"
+    ]
+  },
+  {
+    id: 'crab',
+    name: 'Ferris',
+    title: 'Concurrency Master',
+    species: 'Rust Crab',
+    icon: '🦀',
+    color: 'from-red-500 to-amber-600',
+    dialogues: [
+      "Fearless concurrency! Zero-cost abstractions & memory safety! 🦀",
+      "No data races allowed in this portfolio! 🛡️",
+      "Check out the React Native TurboModule & WebAssembly builds! ⚡",
+      "Rust + C++ simulation pipelines run at native hardware speed!"
+    ]
+  },
+  {
+    id: 'duck',
+    name: 'Ducky',
+    title: 'Debugger Prime',
+    species: 'Rubber Duck',
+    icon: '🦆',
+    color: 'from-yellow-400 to-amber-500',
+    dialogues: [
+      "Quack! Explain your toughest bug to me, I'm listening! 🦆",
+      "Talking through code with me solves 95% of logic issues!",
+      "Clean architecture makes complex agent workflows simple! ✨",
+      "Quack! Don't forget to test edge cases in production!"
+    ]
+  },
+  {
+    id: 'clippy',
+    name: 'Clippy-AI',
+    title: 'Retro Orchestrator',
+    species: 'Office Familiar',
+    icon: '📎',
+    color: 'from-cyan-400 to-blue-600',
+    dialogues: [
+      "It looks like you're browsing Sridhar's portfolio. Want to hire him? 📎",
+      "I can assist with reviewing the ATS resume and GitHub repositories!",
+      "Try out the Job Fit Analyzer to match your JD in real-time! 🎯",
+      "Everything here runs local WebGPU and client-side intelligence!"
+    ]
+  },
+  {
+    id: 'totoro',
+    name: 'Totoro',
+    title: 'Forest Guardian',
+    species: 'Ghibli Spirit',
+    icon: '🍃',
+    color: 'from-emerald-400 to-teal-600',
+    dialogues: [
+      "Rooaaar! Gentle giant guarding the distributed architecture! 🍃",
+      "Deep roots in high-performance CFD simulation & OpenFOAM.",
+      "A calm mind writes the most elegant asynchronous code. 🌲",
+      "Resting under the canopy of clean pull requests... 🌿"
+    ]
+  },
+  {
+    id: 'zappy',
+    name: 'Zappy',
+    title: 'High-Voltage AI',
+    species: 'Volt Familiar',
+    icon: '⚡',
+    color: 'from-yellow-300 to-cyan-400',
+    dialogues: [
+      "BZZZZT! 1.21 Gigawatts of agentic reasoning online! ⚡",
+      "Direct neural link to GPU shader pipelines active! ⚡",
+      "PyTorch tensor acceleration running with maximum throughput!",
+      "Supercharged with autonomous coding agents! 🔌"
+    ]
+  }
+];
+
+// Continuous RPG progression formula
 export interface LevelInfo {
   level: number;
   title: string;
@@ -16,19 +128,18 @@ export interface LevelInfo {
 }
 
 export const getLevelInfo = (xp: number): LevelInfo => {
-  const thresholds = [0, 40, 100, 180, 300, 460, 660, 920, 1240, 1620, 2100];
+  const thresholds = [0, 50, 120, 220, 360, 540, 780, 1080, 1450, 1900];
   const titles = [
-    'Cyber Pup',
+    'Pup / Novice',
     'Neon Scout',
     'Cyber Familiar',
     'Neural Vanguard',
     'Quantum Hound',
     'Matrix Sentinel',
     'AI Orchestrator',
-    'Byte Overlord',
     'Tech Titan',
     'Singularity Apex',
-    'Cosmic Entity'
+    'Cosmic Deity'
   ];
 
   let level = 1;
@@ -49,135 +160,160 @@ export const getLevelInfo = (xp: number): LevelInfo => {
 };
 
 export const PixelPet = () => {
-  const [xp, setXp] = useState<number>(() => {
+  const [petId, setPetId] = useState<PetId>(() => {
     try {
-      const saved = localStorage.getItem('portfolio_pet_xp');
-      return saved ? parseInt(saved, 10) : 45;
+      const saved = localStorage.getItem('portfolio_pet_id');
+      return (saved as PetId) || 'shiba';
     } catch {
-      return 45;
+      return 'shiba';
     }
   });
 
-  const [petType, setPetType] = useState<PetType>('shiba');
+  const [xp, setXp] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('portfolio_pet_xp');
+      return saved ? parseInt(saved, 10) : 60;
+    } catch {
+      return 60;
+    }
+  });
+
   const [state, setState] = useState<PetState>('idle');
-  const [isMuted, setIsMuted] = useState(true);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isRoaming, setIsRoaming] = useState(true); // Roaming screen enabled by default
+  const [x, setX] = useState<number>(120); // free X coordinate across screen
   const [facing, setFacing] = useState<'left' | 'right'>('right');
-  const [positionX, setPositionX] = useState(80); // X position in pixels
+  const [isMuted, setIsMuted] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [dialogue, setDialogue] = useState<string>('');
+  const [showDialogue, setShowDialogue] = useState(true);
   const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
   const [treatTarget, setTreatTarget] = useState<{ x: number; icon: string } | null>(null);
-  const [dialogue, setDialogue] = useState<string>("Hi! I'm Byte, Sridhar's cyber familiar! 🐾");
-  const [showDialogue, setShowDialogue] = useState(true);
+  const [isLevelingUp, setIsLevelingUp] = useState(false);
+  const [isWalking, setIsWalking] = useState(false);
 
-  const prevLevelRef = useRef(getLevelInfo(xp).level);
+  const prevLevelRef = useRef<number>(getLevelInfo(xp).level);
+  const targetXRef = useRef<number>(x);
+  const currentXRef = useRef<number>(x);
+  const animFrameRef = useRef<number>(0);
+  const isRoamingRef = useRef<boolean>(true);
+
+  const currentPet = PET_CATALOG.find((p) => p.id === petId) || PET_CATALOG[0];
   const levelInfo = getLevelInfo(xp);
 
-  // Save XP & handle level-up celebrations
+  // Keep refs in sync
+  currentXRef.current = x;
+
+  // Persist selections
   useEffect(() => {
     try {
+      localStorage.setItem('portfolio_pet_id', petId);
       localStorage.setItem('portfolio_pet_xp', xp.toString());
     } catch {}
+  }, [petId, xp]);
 
-    const currentLevel = getLevelInfo(xp).level;
-    if (currentLevel > prevLevelRef.current) {
+  // Initial greeting
+  useEffect(() => {
+    setDialogue(currentPet.dialogues[0]);
+    setShowDialogue(true);
+    const t = setTimeout(() => setShowDialogue(false), 7000);
+    return () => clearTimeout(t);
+  }, [petId]);
+
+  // Check for Level Up evolution fanfare
+  useEffect(() => {
+    const currentLvl = getLevelInfo(xp).level;
+    if (currentLvl > prevLevelRef.current) {
       petAudio.playLevelUp();
-      setDialogue(`🎉 LEVEL UP! Byte evolved to Lv.${currentLevel} ${levelInfo.title}! ✨`);
-      setShowDialogue(true);
+      setIsLevelingUp(true);
       setState('happy');
-      setTimeout(() => setState('idle'), 3000);
+      setDialogue(`✨ EVOLVED TO LEVEL ${currentLvl}! ${levelInfo.title.toUpperCase()}! 🎉`);
+      setShowDialogue(true);
+
+      const timer = setTimeout(() => {
+        setIsLevelingUp(false);
+        setState('idle');
+      }, 3500);
+      return () => clearTimeout(timer);
     }
-    prevLevelRef.current = currentLevel;
+    prevLevelRef.current = currentLvl;
   }, [xp, levelInfo.title]);
 
-  // Contextual portfolio dialogue based on scroll position
+  // Continuous physics loop for free smooth screen wandering
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
+    let lastTime = performance.now();
 
-    const handleScroll = () => {
-      const scrollPos = window.scrollY;
-      const height = document.body.scrollHeight - window.innerHeight;
-      const progress = scrollPos / (height > 0 ? height : 1);
+    const loop = (time: number) => {
+      const dt = Math.min((time - lastTime) / 1000, 0.1);
+      lastTime = time;
 
-      if (progress < 0.2) {
-        setDialogue("Sridhar is building AI agents at Zenteiq! ⚡");
-      } else if (progress < 0.4) {
-        setDialogue("Check out the package.json tech stack! 📦");
-      } else if (progress < 0.65) {
-        setDialogue("NPC Code & WebGPU Worker are my favorites! 🚀");
-      } else if (progress < 0.85) {
-        setDialogue("Explore the research papers & deep learning repos! 📜");
+      const targetX = targetXRef.current;
+      const curX = currentXRef.current;
+      const diff = targetX - curX;
+
+      // Speed scales with level!
+      const baseSpeed = 85 + (levelInfo.level - 1) * 15;
+      const speed = treatTarget ? baseSpeed * 1.7 : baseSpeed;
+
+      if (Math.abs(diff) > 4) {
+        const step = Math.sign(diff) * Math.min(Math.abs(diff), speed * dt);
+        const newX = curX + step;
+        setX(newX);
+        setIsWalking(true);
+        if (state !== 'walk' && state !== 'happy' && !isLevelingUp) {
+          setState('walk');
+        }
       } else {
-        setDialogue("Type 'email' in the terminal to connect with Sridhar! 📬");
+        if (isWalking) {
+          setIsWalking(false);
+          if (state === 'walk') {
+            setState('idle');
+          }
+        }
       }
 
-      setShowDialogue(true);
-      clearTimeout(timeout);
-      timeout = setTimeout(() => setShowDialogue(false), 5500);
+      animFrameRef.current = requestAnimationFrame(loop);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearTimeout(timeout);
-    };
-  }, []);
+    animFrameRef.current = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animFrameRef.current);
+  }, [state, isWalking, treatTarget, levelInfo.level, isLevelingUp]);
 
-  // Autonomous Roaming Logic across screen
+  // Autonomous wandering scheduler across the screen
   useEffect(() => {
-    if (!isRoaming || state === 'sleep' || treatTarget) return;
+    let timer: NodeJS.Timeout;
 
-    let roamTimer: NodeJS.Timeout;
-
-    const planNextMove = () => {
-      // Wander interval between 5 to 9 seconds
-      const delay = Math.random() * 4000 + 5000;
-
-      roamTimer = setTimeout(() => {
-        if (state === 'sleep' || treatTarget) return;
-
-        // Pick a destination along the bottom of the screen (leaving margins)
-        const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
-        const minX = 60;
-        const maxX = Math.max(minX + 100, screenWidth - 140);
-        const targetX = Math.floor(Math.random() * (maxX - minX) + minX);
-
-        const distance = Math.abs(targetX - positionX);
-
-        if (distance > 30) {
-          const newFacing = targetX > positionX ? 'right' : 'left';
-          setFacing(newFacing);
-          setState('walk');
-          setPositionX(targetX);
-
-          // Calculate walk duration (approx 80px per second)
-          const walkDuration = Math.min(6, Math.max(1.2, distance / 75));
-
-          setTimeout(() => {
-            setState('idle');
-            // 25% chance to bark / speak a tip when arriving
-            if (Math.random() < 0.25) {
-              const remarks = [
-                "Sniffing for clean pull requests... 🔍",
-                "Patrolling the WebGPU buffer! ⚡",
-                "Byte is on duty! 🐾",
-                "All systems operational! 🟢",
-                "Ready for new high-impact challenges! 🚀"
-              ];
-              setDialogue(remarks[Math.floor(Math.random() * remarks.length)]);
-              setShowDialogue(true);
-            }
-          }, walkDuration * 1000);
+    const scheduleWander = () => {
+      // Pick next destination every 4 - 8 seconds
+      const delay = Math.random() * 4000 + 4000;
+      timer = setTimeout(() => {
+        if (!isRoamingRef.current || state === 'sleep' || treatTarget || isLevelingUp) {
+          scheduleWander();
+          return;
         }
 
-        planNextMove();
+        const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+        const minX = 40;
+        const maxX = Math.max(minX + 80, screenWidth - 100);
+
+        // Pick a random target anywhere on the screen
+        const nextX = Math.floor(Math.random() * (maxX - minX) + minX);
+        targetXRef.current = nextX;
+        setFacing(nextX > currentXRef.current ? 'right' : 'left');
+
+        // 30% chance to say a dialogue remark on destination
+        if (Math.random() < 0.3) {
+          const remark = currentPet.dialogues[Math.floor(Math.random() * currentPet.dialogues.length)];
+          setDialogue(remark);
+          setShowDialogue(true);
+          setTimeout(() => setShowDialogue(false), 5500);
+        }
+
+        scheduleWander();
       }, delay);
     };
 
-    planNextMove();
-
-    return () => clearTimeout(roamTimer);
-  }, [isRoaming, state, positionX, treatTarget]);
+    scheduleWander();
+    return () => clearTimeout(timer);
+  }, [currentPet, state, treatTarget, isLevelingUp]);
 
   // Inactivity detection -> sleep
   useEffect(() => {
@@ -186,15 +322,16 @@ export const PixelPet = () => {
     const resetSleepTimer = () => {
       if (state === 'sleep') {
         setState('idle');
-        setDialogue("Byte woke up and is ready to explore! 🐾");
+        setDialogue(`${currentPet.name} woke up and is ready to explore! 🐾`);
         setShowDialogue(true);
+        setTimeout(() => setShowDialogue(false), 4000);
       }
       clearTimeout(sleepTimer);
       sleepTimer = setTimeout(() => {
         setState('sleep');
-        setDialogue("Zzz... dreaming of clean pull requests... 🌙");
+        setDialogue("Zzz... dreaming of clean code and fast shaders... 🌙");
         setShowDialogue(true);
-      }, 45000);
+      }, 50000);
     };
 
     window.addEventListener('mousemove', resetSleepTimer, { passive: true });
@@ -206,279 +343,402 @@ export const PixelPet = () => {
       window.removeEventListener('scroll', resetSleepTimer);
       clearTimeout(sleepTimer);
     };
-  }, [state]);
+  }, [state, currentPet.name]);
 
-  const triggerPet = () => {
+  // Click on screen floor / background to run there
+  useEffect(() => {
+    const handleScreenClick = (e: MouseEvent) => {
+      // If clicking on an interactive button or input, ignore
+      const target = e.target as HTMLElement;
+      if (target.closest('button') || target.closest('a') || target.closest('input') || target.closest('[data-pet-menu]')) {
+        return;
+      }
+
+      // If clicked near the bottom half of the screen, run to that X
+      if (e.clientY > window.innerHeight * 0.45) {
+        const targetX = Math.max(30, Math.min(e.clientX - 25, window.innerWidth - 80));
+        targetXRef.current = targetX;
+        setFacing(targetX > currentXRef.current ? 'right' : 'left');
+        petAudio.playChirp();
+      }
+    };
+
+    window.addEventListener('click', handleScreenClick);
+    return () => window.removeEventListener('click', handleScreenClick);
+  }, []);
+
+  // Petting interaction
+  const handlePetClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     petAudio.playChirp();
     setState('happy');
+    setXp((prev) => prev + 8);
 
-    setXp((prev) => prev + 6);
-
-    const newHeart = { id: Date.now(), x: Math.random() * 24 - 12, y: -20 };
-    setHearts((h) => [...h, newHeart]);
+    const newHeart = { id: Date.now(), x: Math.random() * 30 - 15, y: -25 };
+    setHearts((prev) => [...prev, newHeart]);
     setTimeout(() => {
-      setHearts((h) => h.filter((item) => item.id !== newHeart.id));
+      setHearts((prev) => prev.filter((h) => h.id !== newHeart.id));
     }, 1200);
 
-    setTimeout(() => setState('idle'), 2200);
+    setDialogue(`Loved being petted! (+8 XP) 💕`);
+    setShowDialogue(true);
+    setTimeout(() => {
+      setState('idle');
+      setShowDialogue(false);
+    }, 2400);
   };
 
-  // Feed treat with walk-over animation
-  const feedSnack = useCallback((snackName: string, xpGain: number, icon: string) => {
-    // If roaming, throw treat slightly ahead of pet to chase
-    if (isRoaming) {
-      const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
-      const throwDistance = facing === 'right' ? 90 : -90;
-      const snackX = Math.min(Math.max(60, positionX + throwDistance), screenWidth - 140);
+  // Toss treat across screen for pet to chase
+  const feedSnack = (snackName: string, xpGain: number, icon: string) => {
+    const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const throwDistance = facing === 'right' ? 140 : -140;
+    const snackX = Math.min(Math.max(40, currentXRef.current + throwDistance), screenWidth - 80);
 
-      setTreatTarget({ x: snackX, icon });
-      setFacing(snackX > positionX ? 'right' : 'left');
-      setState('walk');
-      setPositionX(snackX);
+    setTreatTarget({ x: snackX, icon });
+    targetXRef.current = snackX;
+    setFacing(snackX > currentXRef.current ? 'right' : 'left');
 
-      // Pet runs to treat
-      setTimeout(() => {
-        petAudio.playMunch();
-        setTreatTarget(null);
-        setState('happy');
-        setXp((prev) => prev + xpGain);
-        setDialogue(`Nom nom! Byte loved the ${snackName}! (+${xpGain} XP) 🍪`);
-        setShowDialogue(true);
-
-        const newHeart = { id: Date.now(), x: 0, y: -30 };
-        setHearts((h) => [...h, newHeart]);
-        setTimeout(() => {
-          setHearts((h) => h.filter((item) => item.id !== newHeart.id));
-        }, 1200);
-
-        setTimeout(() => setState('idle'), 2200);
-      }, 1100);
-    } else {
+    setTimeout(() => {
       petAudio.playMunch();
+      setTreatTarget(null);
       setState('happy');
       setXp((prev) => prev + xpGain);
-      setDialogue(`Yum! Thanks for the ${snackName}! (+${xpGain} XP)`);
+      setDialogue(`Yum! ${currentPet.name} devoured the ${snackName}! (+${xpGain} XP) 🌟`);
       setShowDialogue(true);
+
+      const newHeart = { id: Date.now(), x: 0, y: -30 };
+      setHearts((h) => [...h, newHeart]);
+      setTimeout(() => {
+        setHearts((h) => h.filter((item) => item.id !== newHeart.id));
+      }, 1200);
+
       setTimeout(() => setState('idle'), 2200);
-    }
-  }, [facing, isRoaming, positionX]);
+    }, 1200);
+  };
 
   const toggleSound = () => {
-    const nextMuted = !isMuted;
-    setIsMuted(nextMuted);
-    petAudio.isMuted = nextMuted;
-    if (!nextMuted) {
-      petAudio.playChirp();
-    }
+    const next = !isMuted;
+    setIsMuted(next);
+    petAudio.isMuted = next;
+    if (!next) petAudio.playChirp();
   };
 
-  // Sprite selection
-  const spriteSrc = `${import.meta.env.BASE_URL}pets/${petType}_${state}.gif`;
+  // Sprite URL based on petId and state
+  const spriteSrc = `${import.meta.env.BASE_URL}pets/${petId}_${state}.gif`;
 
-  // Visual scaling based on dynamic level
-  const getPetScaleClass = () => {
-    if (levelInfo.level === 1) return 'scale-90';
-    if (levelInfo.level === 2) return 'scale-100';
-    if (levelInfo.level <= 4) return 'scale-105 drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]';
-    return 'scale-115 drop-shadow-[0_0_12px_rgba(168,85,247,0.6)]';
-  };
+  // Visual Evolution Tiers based on Level:
+  const lvl = levelInfo.level;
+  const hasHalo = lvl >= 3; // Cyber halo at Lv.3+
+  const hasOrbiters = lvl >= 4; // Orbiting energy wisps at Lv.4+
+  const hasCosmicAura = lvl >= 5; // Super Saiyan / Cosmic Aura at Lv.5+
 
   return (
-    <div className="select-none pointer-events-none">
-      {/* Treat Item On Floor When Thrown */}
+    <>
+      {/* Treat Tossed On Screen */}
       {treatTarget && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.4, y: -30 }}
-          animate={{ opacity: 1, scale: 1.1, y: 0 }}
+          initial={{ opacity: 0, scale: 0.2, y: -40 }}
+          animate={{ opacity: 1, scale: 1.2, y: 0 }}
           exit={{ opacity: 0, scale: 0 }}
-          style={{ left: `${treatTarget.x + 20}px` }}
-          className="fixed bottom-4 z-40 text-xl pointer-events-none drop-shadow-md"
+          style={{ left: `${treatTarget.x}px` }}
+          className="fixed bottom-3 z-40 text-2xl pointer-events-none drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
         >
           {treatTarget.icon}
         </motion.div>
       )}
 
-      {/* Roaming Pet Entity */}
-      <motion.div
-        className="fixed bottom-4 z-40 pointer-events-auto flex flex-col items-center"
-        animate={{
-          left: isRoaming ? `${positionX}px` : '24px',
-          bottom: '16px'
-        }}
-        transition={{
-          type: 'tween',
-          ease: 'easeInOut',
-          duration: state === 'walk' ? 1.4 : 0.4
+      {/* FREESTANDING SCREEN PET (NO BOX CONTAINER) */}
+      <div
+        className="fixed bottom-2 z-40 select-none pointer-events-auto"
+        style={{
+          transform: `translateX(${x}px)`,
+          transition: 'none' // Position driven purely by 60FPS physics loop
         }}
       >
-        {/* Dialogue Speech Bubble */}
-        <AnimatePresence>
-          {showDialogue && (
+        <div className="relative flex flex-col items-center">
+          {/* Floating Speech Bubble */}
+          <AnimatePresence>
+            {showDialogue && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.85 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8, y: 5 }}
+                className="mb-2 bg-slate-900/95 text-white border border-cyan-400/60 backdrop-blur-md rounded-2xl px-3 py-1.5 text-xs font-mono shadow-[0_8px_24px_rgba(0,0,0,0.4)] max-w-[240px] text-center pointer-events-none"
+              >
+                <p className="leading-snug">{dialogue}</p>
+                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-r border-b border-cyan-400/60 rotate-45" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Floating Hearts */}
+          {hearts.map((h) => (
             <motion.div
-              initial={{ opacity: 0, y: 8, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="mb-2 bg-slate-900/95 text-white border border-cyan-400/50 backdrop-blur-md rounded-xl px-3 py-1.5 text-xs font-mono shadow-2xl max-w-[230px] relative pointer-events-none text-center"
+              key={h.id}
+              initial={{ opacity: 1, y: 0, x: h.x, scale: 0.8 }}
+              animate={{ opacity: 0, y: -60, scale: 1.6 }}
+              transition={{ duration: 1.2, ease: 'easeOut' }}
+              className="absolute -top-6 pointer-events-none text-rose-500 font-bold text-lg"
             >
-              <p className="leading-snug">{dialogue}</p>
-              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-r border-b border-cyan-400/50 rotate-45" />
+              ❤️
+            </motion.div>
+          ))}
+
+          {/* Level Up Golden Burst Ceremony */}
+          {isLevelingUp && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: [1, 1.4, 1] }}
+              transition={{ duration: 1, repeat: 2 }}
+              className="absolute -top-10 pointer-events-none text-amber-400 font-mono font-extrabold text-sm drop-shadow-[0_0_12px_rgba(251,191,36,0.9)] whitespace-nowrap"
+            >
+              ⭐ LEVEL UP! ⭐
             </motion.div>
           )}
-        </AnimatePresence>
 
-        {/* Floating Hearts Animation */}
-        {hearts.map((h) => (
-          <motion.div
-            key={h.id}
-            initial={{ opacity: 1, y: 0, x: h.x, scale: 0.8 }}
-            animate={{ opacity: 0, y: -55, scale: 1.5 }}
-            transition={{ duration: 1.1, ease: 'easeOut' }}
-            className="absolute -top-4 pointer-events-none text-rose-500 font-bold text-base"
-          >
-            ❤️
-          </motion.div>
-        ))}
-
-        {/* Main Pet Control Pill */}
-        <motion.div
-          whileHover={{ scale: 1.03 }}
-          className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 shadow-2xl hover:shadow-cyan-500/20 rounded-2xl p-2 flex items-center gap-2.5 transition-shadow"
-        >
-          {/* Animated Interactive Sprite */}
+          {/* THE FREESTANDING PET SPRITE WITH VISUAL EVOLUTIONS */}
           <div
-            onClick={triggerPet}
-            className="cursor-pointer p-1 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 hover:bg-cyan-50 dark:hover:bg-slate-700/80 transition-colors flex items-center justify-center min-w-[50px] min-h-[50px] overflow-hidden"
-            title="Click to pet Byte & earn XP!"
-            style={{
-              transform: facing === 'left' ? 'scaleX(-1)' : 'scaleX(1)',
-              transition: 'transform 0.2s ease-out'
-            }}
+            onClick={handlePetClick}
+            className="relative cursor-pointer group p-1 flex items-center justify-center"
+            title={`Click to pet ${currentPet.name}! (${levelInfo.title} • Lv.${lvl})`}
           >
-            <img
-              src={spriteSrc}
-              alt="Byte Pixel Companion"
-              className={`w-12 h-12 object-contain transition-transform duration-300 ${getPetScaleClass()}`}
-              style={{
-                imageRendering: 'pixelated',
+            {/* EVOLUTION 3: Cosmic / Super Saiyan Aura (Lv.5+) */}
+            {hasCosmicAura && (
+              <motion.div
+                animate={{
+                  scale: [1, 1.25, 1],
+                  opacity: [0.6, 0.9, 0.6]
+                }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute inset-0 -m-3 rounded-full bg-gradient-to-t from-cyan-500/40 via-purple-500/30 to-amber-400/40 blur-md pointer-events-none"
+              />
+            )}
+
+            {/* EVOLUTION 2: Orbiting Plasma Wisps (Lv.4+) */}
+            {hasOrbiters && (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                className="absolute w-16 h-16 pointer-events-none"
+              >
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee] animate-pulse" />
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-purple-400 shadow-[0_0_8px_#c084fc] animate-pulse" />
+              </motion.div>
+            )}
+
+            {/* EVOLUTION 1: Holographic Cyber Halo (Lv.3+) */}
+            {hasHalo && (
+              <motion.div
+                animate={{
+                  y: [-2, 2, -2],
+                  scale: [1, 1.05, 1]
+                }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute -top-3 w-8 h-2.5 rounded-full border border-cyan-300 bg-cyan-400/30 shadow-[0_0_10px_#22d3ee] pointer-events-none"
+              />
+            )}
+
+            {/* Raw Pixel Art Sprite Image (No bounding box!) */}
+            <motion.div
+              animate={{
+                y: isLevelingUp ? [-20, 0, -15, 0] : 0,
+                rotate: isLevelingUp ? [0, 360] : 0
               }}
+              transition={{ duration: 0.8 }}
+              style={{
+                transform: facing === 'left' ? 'scaleX(-1)' : 'scaleX(1)',
+                transition: 'transform 0.15s ease-out'
+              }}
+            >
+              <img
+                src={spriteSrc}
+                alt={currentPet.name}
+                className={`w-14 h-14 object-contain filter ${
+                  lvl >= 5 ? 'drop-shadow-[0_0_14px_rgba(6,182,212,0.8)]' : lvl >= 3 ? 'drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]'
+                }`}
+                style={{ imageRendering: 'pixelated' }}
+              />
+            </motion.div>
+
+            {/* Floating Level Tag Pill */}
+            <div className="absolute -bottom-2 bg-slate-900/90 text-cyan-400 border border-cyan-500/40 shadow-md rounded-full px-1.5 py-0.2 text-[9px] font-mono font-bold flex items-center gap-0.5">
+              <span>Lv.{lvl}</span>
+              <span className="text-white/70 text-[8px]">{currentPet.name}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FLOATING ACTION HUD DOCK (Bottom-Left Corner) */}
+      <div className="fixed bottom-4 left-4 z-40 select-none">
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          className="bg-slate-900/90 text-white backdrop-blur-md border border-cyan-500/30 shadow-2xl rounded-2xl p-2.5 flex items-center gap-2.5"
+          data-pet-menu
+        >
+          {/* Pet Active Icon & Quick Level */}
+          <button
+            onClick={() => setIsMenuOpen((v) => !v)}
+            className="flex items-center gap-1.5 p-1 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
+            title="Open Pet Companions & Treat Tray"
+          >
+            <span className="text-lg">{currentPet.icon}</span>
+            <div className="flex flex-col text-left">
+              <span className="text-xs font-mono font-bold text-white leading-none">
+                {currentPet.name}
+              </span>
+              <span className="text-[9px] font-mono text-cyan-400">
+                Lv.{lvl} • {levelInfo.title}
+              </span>
+            </div>
+          </button>
+
+          {/* Mini XP Bar */}
+          <div className="w-16 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <motion.div
+              className="h-full bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full"
+              animate={{ width: `${levelInfo.progress}%` }}
+              transition={{ duration: 0.3 }}
             />
           </div>
 
-          {/* Dynamic Info & RPG Level Meter */}
-          <div className="flex flex-col min-w-[110px]">
-            <div className="flex items-center justify-between gap-1.5">
-              <span className="font-mono text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1">
-                Byte
-                <span className="text-[10px] text-cyan-600 dark:text-cyan-400 font-semibold bg-cyan-50 dark:bg-cyan-950/50 px-1.5 py-0.5 rounded-full border border-cyan-200 dark:border-cyan-800" title={levelInfo.title}>
-                  Lv.{levelInfo.level}
-                </span>
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setIsRoaming((r) => !r)}
-                  className={`p-0.5 rounded transition-colors ${isRoaming ? 'text-cyan-600' : 'text-slate-400'}`}
-                  title={isRoaming ? 'Roaming screen enabled (Click to dock in corner)' : 'Docked in corner (Click to roam)'}
-                  aria-label="Toggle Roam Mode"
-                >
-                  {isRoaming ? <Footprints size={12} /> : <Anchor size={12} />}
-                </button>
-                <button
-                  onClick={toggleSound}
-                  className="text-slate-400 hover:text-cyan-600 transition-colors p-0.5"
-                  title={isMuted ? 'Enable retro 8-bit sound' : 'Mute sound'}
-                  aria-label="Toggle Pet Sound"
-                >
-                  {isMuted ? <VolumeX size={12} /> : <Volume2 size={12} className="text-cyan-600" />}
-                </button>
-              </div>
-            </div>
+          {/* Quick Sound Toggle */}
+          <button
+            onClick={toggleSound}
+            className="text-slate-400 hover:text-cyan-400 transition-colors p-1"
+            title={isMuted ? 'Unmute 8-bit Sound' : 'Mute Sound'}
+          >
+            {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} className="text-cyan-400" />}
+          </button>
 
-            {/* Title */}
-            <span className="text-[9px] font-mono text-cyan-700 dark:text-cyan-400 font-medium truncate max-w-[115px]">
-              {levelInfo.title}
-            </span>
+          {/* Whistle / Call Pet to here */}
+          <button
+            onClick={() => {
+              targetXRef.current = 140;
+              setFacing('left');
+              petAudio.playChirp();
+            }}
+            className="text-slate-400 hover:text-cyan-400 transition-colors p-1"
+            title="Call Pet back to corner dock"
+          >
+            <Compass size={13} />
+          </button>
 
-            {/* Continuous XP Progress Bar */}
-            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mt-1 overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 rounded-full"
-                animate={{ width: `${levelInfo.progress}%` }}
-                transition={{ duration: 0.4 }}
-              />
-            </div>
-
-            <div className="flex items-center justify-between mt-1 text-[9px] font-mono text-slate-500 dark:text-slate-400">
-              <span>{xp} XP</span>
-              <button
-                onClick={() => setIsExpanded((v) => !v)}
-                className="hover:text-cyan-600 transition-colors flex items-center gap-0.5 font-medium"
-              >
-                {isExpanded ? 'Hide' : 'Menu'}
-                {isExpanded ? <ChevronDown size={10} /> : <ChevronUp size={10} />}
-              </button>
-            </div>
-          </div>
+          {/* Toggle Menu */}
+          <button
+            onClick={() => setIsMenuOpen((v) => !v)}
+            className="px-2 py-0.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-mono text-[10px] font-semibold transition-colors"
+          >
+            {isMenuOpen ? 'Close' : 'Menu'}
+          </button>
         </motion.div>
 
-        {/* Expandable Feeding & Actions Drawer */}
+        {/* EXPANDED PET SELECTOR & FEEDING DRAWER */}
         <AnimatePresence>
-          {isExpanded && (
+          {isMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -6, scale: 0.94 }}
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.94 }}
-              className="mt-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 shadow-2xl rounded-xl p-2 flex items-center gap-1.5"
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              className="mt-2 bg-slate-900/95 backdrop-blur-md border border-cyan-500/40 shadow-2xl rounded-2xl p-3 w-[310px] flex flex-col gap-3 text-white"
+              data-pet-menu
             >
-              <button
-                onClick={() => feedSnack('Coffee', 15, '☕')}
-                className="flex-1 flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-cyan-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-cyan-700 transition-colors text-[10px] font-mono"
-                title="Feed Coffee (+15 XP)"
-              >
-                <Coffee size={13} className="text-amber-600" />
-                <span>Coffee</span>
-              </button>
+              {/* Pet Companions Selector (All 7 Pets!) */}
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 font-bold block mb-1.5">
+                  Select Companion (7 Available)
+                </span>
+                <div className="grid grid-cols-7 gap-1">
+                  {PET_CATALOG.map((p) => {
+                    const isSelected = p.id === petId;
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => {
+                          setPetId(p.id);
+                          petAudio.playChirp();
+                        }}
+                        className={`p-1.5 rounded-xl flex flex-col items-center justify-center transition-all ${
+                          isSelected
+                            ? 'bg-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.6)] scale-105'
+                            : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300'
+                        }`}
+                        title={`${p.name} - ${p.title} (${p.species})`}
+                      >
+                        <span className="text-base">{p.icon}</span>
+                        <span className="text-[8px] font-mono mt-0.5 truncate max-w-full">
+                          {p.name.slice(0, 4)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-              <button
-                onClick={() => feedSnack('Byte Cookie', 10, '🍪')}
-                className="flex-1 flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-amber-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-amber-700 transition-colors text-[10px] font-mono"
-                title="Feed Cookie (+10 XP)"
-              >
-                <Cookie size={13} className="text-amber-500" />
-                <span>Cookie</span>
-              </button>
+              {/* Feeding Treats & Level Boost */}
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-purple-400 font-bold block mb-1.5">
+                  Toss Treats & Level Up XP
+                </span>
+                <div className="grid grid-cols-4 gap-1.5">
+                  <button
+                    onClick={() => feedSnack('Coffee', 15, '☕')}
+                    className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 flex flex-col items-center gap-0.5 transition-colors text-[10px] font-mono"
+                    title="Toss Coffee (+15 XP)"
+                  >
+                    <Coffee size={13} className="text-amber-400" />
+                    <span>Coffee</span>
+                    <span className="text-[8px] text-slate-400">+15 XP</span>
+                  </button>
 
-              <button
-                onClick={() => feedSnack('Bug Treat', 25, '🐛')}
-                className="flex-1 flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-emerald-700 transition-colors text-[10px] font-mono"
-                title="Squash Bug Treat (+25 XP)"
-              >
-                <Bug size={13} className="text-emerald-600" />
-                <span>Bug</span>
-              </button>
+                  <button
+                    onClick={() => feedSnack('Byte Cookie', 20, '🍪')}
+                    className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-200 flex flex-col items-center gap-0.5 transition-colors text-[10px] font-mono"
+                    title="Toss Cookie (+20 XP)"
+                  >
+                    <Cookie size={13} className="text-amber-300" />
+                    <span>Cookie</span>
+                    <span className="text-[8px] text-slate-400">+20 XP</span>
+                  </button>
 
-              <button
-                onClick={() => feedSnack('Neural Boost', 40, '⚡')}
-                className="flex-1 flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-cyan-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-cyan-600 transition-colors text-[10px] font-mono"
-                title="Supercharge with Neural Boost (+40 XP)"
-              >
-                <Zap size={13} className="text-cyan-500" />
-                <span>Boost</span>
-              </button>
+                  <button
+                    onClick={() => feedSnack('Bug Treat', 30, '🐛')}
+                    className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 flex flex-col items-center gap-0.5 transition-colors text-[10px] font-mono"
+                    title="Squash Bug Treat (+30 XP)"
+                  >
+                    <Bug size={13} className="text-emerald-400" />
+                    <span>Bug</span>
+                    <span className="text-[8px] text-slate-400">+30 XP</span>
+                  </button>
 
-              <div className="w-px h-6 bg-slate-200 dark:bg-slate-700" />
+                  <button
+                    onClick={() => feedSnack('Neural Boost', 50, '⚡')}
+                    className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 flex flex-col items-center gap-0.5 transition-colors text-[10px] font-mono"
+                    title="Supercharge (+50 XP)"
+                  >
+                    <Zap size={13} className="text-cyan-400" />
+                    <span>Boost</span>
+                    <span className="text-[8px] text-slate-400">+50 XP</span>
+                  </button>
+                </div>
+              </div>
 
-              <button
-                onClick={() => setPetType((p) => (p === 'shiba' ? 'fox' : 'shiba'))}
-                className="p-1.5 rounded-lg hover:bg-purple-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-purple-700 transition-colors text-[10px] font-mono flex flex-col items-center gap-0.5"
-                title="Switch between Shiba Dog and Cyber Fox"
-              >
-                <Sparkles size={13} className="text-purple-500" />
-                <span>{petType === 'shiba' ? 'Fox' : 'Shiba'}</span>
-              </button>
+              {/* Evolution Perks Info */}
+              <div className="bg-slate-800/60 rounded-xl p-2 text-[9px] font-mono text-slate-300 border border-slate-700/60 space-y-1">
+                <div className="flex items-center justify-between text-cyan-400 font-bold">
+                  <span>Current: {levelInfo.title}</span>
+                  <span>{xp} Total XP</span>
+                </div>
+                <p className="text-slate-400">
+                  • Lv.3+: Unlocks Holographic Cyber Halo 💫<br />
+                  • Lv.4+: Unlocks Dual Orbiting Plasma Wisps 🔮<br />
+                  • Lv.5+: Unlocks Cosmic Super Saiyan Aura & High Speed 🔥
+                </p>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
-    </div>
+      </div>
+    </>
   );
 };
