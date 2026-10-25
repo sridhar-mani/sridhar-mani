@@ -35,20 +35,82 @@ export const ContactSection = () => {
   const handleCommandSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && command) {
       const newLines = [...submittedLines, { type: 'command' as const, content: command, path: '~/contact' }];
-      const cmd = command.trim().toLowerCase();
+      const rawCmd = command.trim();
+      const cmd = rawCmd.toLowerCase();
+      const parts = cmd.split(' ');
 
       let outputLines: TerminalLine[] = [];
+
+      if (parts[0] === 'pet' && parts[1]) {
+        const petTarget = parts[1];
+        const validPets = ['shiba', 'fox', 'crab', 'duck', 'clippy', 'totoro', 'zappy'];
+        if (validPets.includes(petTarget)) {
+          window.dispatchEvent(new CustomEvent('portfolio-pet-command', { detail: { petId: petTarget } }));
+          outputLines = [
+            { type: 'output', content: `> ✓ Switched active screen companion to: ${petTarget.toUpperCase()}` },
+          ];
+        } else {
+          outputLines = [
+            { type: 'output', content: `Unknown pet "${petTarget}". Available: ${validPets.join(', ')}` },
+          ];
+        }
+        setSubmittedLines([...newLines, ...outputLines]);
+        setCommand('');
+        return;
+      }
 
       switch (cmd) {
         case 'help':
           outputLines = [
-            { type: 'output', content: 'Available commands:' },
-            { type: 'output', content: '  email     - Send me a direct message / inquiry' },
+            { type: 'output', content: 'Available terminal commands:' },
+            { type: 'output', content: '  email     - Send Sridhar a direct email message' },
+            { type: 'output', content: '  agent     - Simulate autonomous coding agent runtime (LangGraph + Zenteiq)' },
+            { type: 'output', content: '  fetch     - Throw tennis ball for your screen pet to chase 🎾' },
+            { type: 'output', content: '  pet <id>  - Switch companion (shiba, fox, crab, duck, clippy, totoro, zappy)' },
+            { type: 'output', content: '  matrix    - Display Matrix digital rain sequence' },
             { type: 'output', content: '  projects  - List active highlighted repositories' },
             { type: 'output', content: '  skills    - Print key technical proficiencies' },
             { type: 'output', content: '  socials   - Display LinkedIn, GitHub, and email' },
             { type: 'output', content: '  whoami    - Display current user context' },
             { type: 'output', content: '  clear     - Clear terminal buffer' },
+          ];
+          setSubmittedLines([...newLines, ...outputLines]);
+          break;
+
+        case 'fetch':
+        case 'ball':
+          window.dispatchEvent(new CustomEvent('portfolio-pet-command', { detail: { action: 'fetch' } }));
+          outputLines = [
+            { type: 'output', content: '> 🎾 Tennis ball thrown across the floor!' },
+            { type: 'output', content: '> Watch your screen companion sprint to catch it!' },
+          ];
+          setSubmittedLines([...newLines, ...outputLines]);
+          break;
+
+        case 'agent':
+          outputLines = [
+            { type: 'output', content: '> Initializing Autonomous Agent Runtime (LangGraph + FastAPI)...' },
+            { type: 'output', content: '> [Graph] Ingesting repository AST, symbol table & dependency graph...' },
+            { type: 'output', content: '> [Tool] Vector DB retrieve: "WebGPU OffscreenCanvas worker architecture"' },
+            { type: 'output', content: '> [Reasoning] Synthesizing zero-regression PyTorch patch...' },
+            { type: 'output', content: '> [Verify] Running test suite: 42 passed, 0 failed in 0.38s' },
+            { type: 'output', content: '> ✓ Agent workflow executed with 100% test coverage.' },
+          ];
+          setSubmittedLines([...newLines, ...outputLines]);
+          break;
+
+        case 'matrix':
+          outputLines = [
+            { type: 'output', content: '01010011 01010010 01001001 01000100 01001000 01000001 01010010' },
+            { type: 'output', content: 'Wake up, Neo... The Matrix has you.' },
+            { type: 'output', content: 'Follow the White Shiba Inu. 🐾' },
+          ];
+          setSubmittedLines([...newLines, ...outputLines]);
+          break;
+
+        case 'sudo':
+          outputLines = [
+            { type: 'output', content: 'user is not in the sudoers file. This incident will be reported to Byte 🐾.' }
           ];
           setSubmittedLines([...newLines, ...outputLines]);
           break;
@@ -70,14 +132,14 @@ export const ContactSection = () => {
           outputLines = [
             { type: 'output', content: 'Technical Proficiencies:' },
             { type: 'output', content: '  Frontend:  TypeScript, React, Next.js, Three.js, WebGPU, WASM' },
-            { type: 'output', content: '  Backend:   Python, PyTorch, FastAPI, Ollama, Node.js, Docker' },
+            { type: 'output', content: '  Backend:   Python, PyTorch, LangGraph, FastAPI, Ollama, Node.js, Docker' },
             { type: 'output', content: '  Mobile:    React Native New Architecture, Android (Kotlin)' },
           ];
           setSubmittedLines([...newLines, ...outputLines]);
           break;
 
         case 'whoami':
-          outputLines = [{ type: 'output', content: 'sridhar-mani@portfolio - Full Stack, AI & 3D Engineer' }];
+          outputLines = [{ type: 'output', content: 'sridhar-mani@portfolio - Software Engineer & AI Engineer @ Zenteiq' }];
           setSubmittedLines([...newLines, ...outputLines]);
           break;
 
@@ -173,7 +235,7 @@ export const ContactSection = () => {
               <div className="ide-dot ide-dot-green w-2.5 h-2.5 sm:w-3 sm:h-3" />
             </div>
             <span className="ml-3 sm:ml-4 font-mono text-xs sm:text-sm text-editor-comment truncate">
-              user@portfolio:~/contact
+              sridhar@portfolio:~/contact
             </span>
           </div>
 
@@ -249,7 +311,7 @@ export const ContactSection = () => {
                 className="flex-1 bg-transparent border-none outline-none font-mono text-editor-text text-xs sm:text-sm p-0 focus:ring-0"
                 placeholder={
                   currentField === 'command'
-                    ? 'type "email" or "help"...'
+                    ? 'type "agent", "fetch", "pet crab" or "help"...'
                     : currentField === 'email'
                     ? 'yourname@domain.com'
                     : 'your message here (press Enter to send)...'

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, Sparkles, Footprints, Heart, X, MessageSquare, Compass } from 'lucide-react';
+import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, Sparkles, Footprints, Heart, Compass, Disc, Crosshair } from 'lucide-react';
 import { petAudio } from './PixelPetAudio';
 
 export type PetId = 'shiba' | 'fox' | 'crab' | 'duck' | 'clippy' | 'totoro' | 'zappy';
@@ -27,9 +27,9 @@ export const PET_CATALOG: PetMeta[] = [
     dialogues: [
       "Woof! Sridhar is building high-impact AI agents at Zenteiq! ⚡",
       "I love clean TypeScript, WebGPU shaders, and zero bugs! 🐾",
-      "Check out NPC Code & WebGPU Worker in the projects section! 🚀",
-      "Click anywhere on the ground to make me fetch! 🎾",
-      "Type 'email' in the terminal to connect with Sridhar! 📬"
+      "Try dragging and tossing me in the air! 🪂",
+      "Click 'Fetch' to throw a tennis ball for me to catch! 🎾",
+      "Type 'agent' in the terminal to watch a simulated autonomous coding agent! 🤖"
     ]
   },
   {
@@ -71,7 +71,7 @@ export const PET_CATALOG: PetMeta[] = [
       "Quack! Explain your toughest bug to me, I'm listening! 🦆",
       "Talking through code with me solves 95% of logic issues!",
       "Clean architecture makes complex agent workflows simple! ✨",
-      "Quack! Don't forget to test edge cases in production!"
+      "Quack! Throw me a ball or drag me around the screen! 🎾"
     ]
   },
   {
@@ -118,7 +118,6 @@ export const PET_CATALOG: PetMeta[] = [
   }
 ];
 
-// Continuous RPG progression formula
 export interface LevelInfo {
   level: number;
   title: string;
@@ -179,28 +178,46 @@ export const PixelPet = () => {
   });
 
   const [state, setState] = useState<PetState>('idle');
-  const [x, setX] = useState<number>(120); // free X coordinate across screen
+  const [x, setX] = useState<number>(140);
+  const [y, setY] = useState<number>(0); // Vertical altitude above floor (px)
   const [facing, setFacing] = useState<'left' | 'right'>('right');
   const [isMuted, setIsMuted] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [dialogue, setDialogue] = useState<string>('');
   const [showDialogue, setShowDialogue] = useState(true);
   const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
-  const [treatTarget, setTreatTarget] = useState<{ x: number; icon: string } | null>(null);
   const [isLevelingUp, setIsLevelingUp] = useState(false);
   const [isWalking, setIsWalking] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [laserActive, setLaserActive] = useState(false);
+  const [laserPos, setLaserPos] = useState<{ x: number; y: number } | null>(null);
+
+  // Tennis Ball Physics State
+  const [tennisBall, setTennisBall] = useState<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    active: boolean;
+  } | null>(null);
 
   const prevLevelRef = useRef<number>(getLevelInfo(xp).level);
   const targetXRef = useRef<number>(x);
   const currentXRef = useRef<number>(x);
+  const currentYRef = useRef<number>(0);
+  const velXRef = useRef<number>(0);
+  const velYRef = useRef<number>(0);
   const animFrameRef = useRef<number>(0);
   const isRoamingRef = useRef<boolean>(true);
+  const dragStartRef = useRef<{ mouseX: number; mouseY: number; startX: number; startY: number } | null>(null);
+  const lastMousePosRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   const currentPet = PET_CATALOG.find((p) => p.id === petId) || PET_CATALOG[0];
   const levelInfo = getLevelInfo(xp);
 
-  // Keep refs in sync
+  // Sync ref
   currentXRef.current = x;
+  currentYRef.current = y;
 
   // Persist selections
   useEffect(() => {
@@ -218,7 +235,21 @@ export const PixelPet = () => {
     return () => clearTimeout(t);
   }, [petId]);
 
-  // Check for Level Up evolution fanfare
+  // Listen for terminal custom event to switch pet or trigger tricks
+  useEffect(() => {
+    const handlePetEvent = (e: CustomEvent) => {
+      if (e.detail?.petId) {
+        setPetId(e.detail.petId);
+      }
+      if (e.detail?.action === 'fetch') {
+        spawnTennisBall();
+      }
+    };
+    window.addEventListener('portfolio-pet-command' as any, handlePetEvent);
+    return () => window.removeEventListener('portfolio-pet-command' as any, handlePetEvent);
+  }, []);
+
+  // Level Up fanfare
   useEffect(() => {
     const currentLvl = getLevelInfo(xp).level;
     if (currentLvl > prevLevelRef.current) {
@@ -237,7 +268,27 @@ export const PixelPet = () => {
     prevLevelRef.current = currentLvl;
   }, [xp, levelInfo.title]);
 
-  // Continuous physics loop for free smooth screen wandering
+  // Spawn Bouncing Tennis Ball for Fetch
+  const spawnTennisBall = useCallback(() => {
+    petAudio.playChirp();
+    const startX = currentXRef.current + (facing === 'right' ? 60 : -60);
+    const targetThrowX = facing === 'right' ? startX + 280 : startX - 280;
+    const clampedThrowX = Math.max(60, Math.min(window.innerWidth - 80, targetThrowX));
+    const dist = clampedThrowX - startX;
+
+    setTennisBall({
+      x: startX,
+      y: 120,
+      vx: dist * 1.5,
+      vy: 240,
+      active: true
+    });
+
+    setDialogue(`Woof! Fetch the ball! 🎾`);
+    setShowDialogue(true);
+  }, [facing]);
+
+  // Comprehensive 60FPS Physics Engine (Movement, Drag & Toss, Ball Physics)
   useEffect(() => {
     let lastTime = performance.now();
 
@@ -245,27 +296,112 @@ export const PixelPet = () => {
       const dt = Math.min((time - lastTime) / 1000, 0.1);
       lastTime = time;
 
-      const targetX = targetXRef.current;
-      const curX = currentXRef.current;
-      const diff = targetX - curX;
+      // 1. TENNIS BALL PHYSICS
+      if (tennisBall && tennisBall.active) {
+        let bx = tennisBall.x + tennisBall.vx * dt;
+        let by = tennisBall.y + tennisBall.vy * dt;
+        let bvy = tennisBall.vy - 980 * dt; // gravity
+        let bvx = tennisBall.vx * (1 - 0.5 * dt); // friction
 
-      // Speed scales with level!
-      const baseSpeed = 85 + (levelInfo.level - 1) * 15;
-      const speed = treatTarget ? baseSpeed * 1.7 : baseSpeed;
-
-      if (Math.abs(diff) > 4) {
-        const step = Math.sign(diff) * Math.min(Math.abs(diff), speed * dt);
-        const newX = curX + step;
-        setX(newX);
-        setIsWalking(true);
-        if (state !== 'walk' && state !== 'happy' && !isLevelingUp) {
-          setState('walk');
+        // Bounce on floor
+        if (by <= 0) {
+          by = 0;
+          bvy = -bvy * 0.6; // restitution
+          if (Math.abs(bvy) < 40) bvy = 0;
         }
-      } else {
-        if (isWalking) {
-          setIsWalking(false);
-          if (state === 'walk') {
+
+        // Clamp inside screen bounds
+        if (bx < 40) {
+          bx = 40;
+          bvx = -bvx * 0.7;
+        } else if (bx > window.innerWidth - 60) {
+          bx = window.innerWidth - 60;
+          bvx = -bvx * 0.7;
+        }
+
+        setTennisBall({
+          x: bx,
+          y: by,
+          vx: bvx,
+          vy: bvy,
+          active: true
+        });
+
+        // Pet chases the ball!
+        targetXRef.current = bx;
+        setFacing(bx > currentXRef.current ? 'right' : 'left');
+
+        // Check if pet caught the ball
+        if (Math.abs(currentXRef.current - bx) < 25 && by <= 20) {
+          petAudio.playMunch();
+          setTennisBall(null);
+          setState('happy');
+          setXp((p) => p + 30);
+          setDialogue(`Caught the ball! Amazing fetch! (+30 XP) 🎾🏆`);
+          setShowDialogue(true);
+
+          const newHeart = { id: Date.now(), x: 0, y: -30 };
+          setHearts((h) => [...h, newHeart]);
+          setTimeout(() => {
+            setHearts((h) => h.filter((item) => item.id !== newHeart.id));
             setState('idle');
+          }, 2400);
+        }
+      }
+
+      // 2. PET VERTICAL GRAVITY & AIR PHYSICS (When tossed)
+      if (!isDragging) {
+        if (currentYRef.current > 0 || velYRef.current !== 0) {
+          let newY = currentYRef.current + velYRef.current * dt;
+          let newVelY = velYRef.current - 1400 * dt; // gravity
+
+          if (newY <= 0) {
+            newY = 0;
+            // Floor bounce
+            if (Math.abs(newVelY) > 120) {
+              newVelY = -newVelY * 0.45;
+              petAudio.playChirp();
+            } else {
+              newVelY = 0;
+            }
+          }
+          currentYRef.current = newY;
+          velYRef.current = newVelY;
+          setY(newY);
+
+          // Horizontal drift while in air
+          if (velXRef.current !== 0) {
+            let newX = currentXRef.current + velXRef.current * dt;
+            velXRef.current *= 1 - 1.2 * dt;
+            newX = Math.max(30, Math.min(window.innerWidth - 80, newX));
+            currentXRef.current = newX;
+            setX(newX);
+          }
+        } else {
+          // 3. HORIZONTAL WALKING ALONG FLOOR
+          const targetX = targetXRef.current;
+          const curX = currentXRef.current;
+          const diff = targetX - curX;
+
+          const baseSpeed = 85 + (levelInfo.level - 1) * 15;
+          const speed = tennisBall ? baseSpeed * 2.2 : laserActive ? baseSpeed * 1.8 : baseSpeed;
+
+          if (Math.abs(diff) > 4) {
+            const step = Math.sign(diff) * Math.min(Math.abs(diff), speed * dt);
+            const newX = curX + step;
+            currentXRef.current = newX;
+            setX(newX);
+            setIsWalking(true);
+            if (state !== 'walk' && state !== 'happy' && !isLevelingUp) {
+              setState('walk');
+            }
+          } else {
+            if (isWalking) {
+              setIsWalking(false);
+              if (state === 'walk') {
+                setState('idle');
+              }
+            }
           }
         }
       }
@@ -275,17 +411,16 @@ export const PixelPet = () => {
 
     animFrameRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [state, isWalking, treatTarget, levelInfo.level, isLevelingUp]);
+  }, [tennisBall, isDragging, state, isWalking, levelInfo.level, isLevelingUp, laserActive]);
 
   // Autonomous wandering scheduler across the screen
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
     const scheduleWander = () => {
-      // Pick next destination every 4 - 8 seconds
       const delay = Math.random() * 4000 + 4000;
       timer = setTimeout(() => {
-        if (!isRoamingRef.current || state === 'sleep' || treatTarget || isLevelingUp) {
+        if (!isRoamingRef.current || state === 'sleep' || tennisBall || isLevelingUp || isDragging || laserActive) {
           scheduleWander();
           return;
         }
@@ -294,13 +429,11 @@ export const PixelPet = () => {
         const minX = 40;
         const maxX = Math.max(minX + 80, screenWidth - 100);
 
-        // Pick a random target anywhere on the screen
         const nextX = Math.floor(Math.random() * (maxX - minX) + minX);
         targetXRef.current = nextX;
         setFacing(nextX > currentXRef.current ? 'right' : 'left');
 
-        // 30% chance to say a dialogue remark on destination
-        if (Math.random() < 0.3) {
+        if (Math.random() < 0.25) {
           const remark = currentPet.dialogues[Math.floor(Math.random() * currentPet.dialogues.length)];
           setDialogue(remark);
           setShowDialogue(true);
@@ -313,49 +446,90 @@ export const PixelPet = () => {
 
     scheduleWander();
     return () => clearTimeout(timer);
-  }, [currentPet, state, treatTarget, isLevelingUp]);
+  }, [currentPet, state, tennisBall, isLevelingUp, isDragging, laserActive]);
 
-  // Inactivity detection -> sleep
-  useEffect(() => {
-    let sleepTimer: NodeJS.Timeout;
+  // Mouse drag & toss handlers for Desktop Pet ragdoll physics
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    setState('happy');
+    petAudio.playChirp();
 
-    const resetSleepTimer = () => {
-      if (state === 'sleep') {
-        setState('idle');
-        setDialogue(`${currentPet.name} woke up and is ready to explore! 🐾`);
-        setShowDialogue(true);
-        setTimeout(() => setShowDialogue(false), 4000);
+    dragStartRef.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      startX: currentXRef.current,
+      startY: currentYRef.current
+    };
+    lastMousePosRef.current = { x: e.clientX, y: e.clientY, time: performance.now() };
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (!dragStartRef.current) return;
+      const dx = moveEvent.clientX - dragStartRef.current.mouseX;
+      const dy = dragStartRef.current.mouseY - moveEvent.clientY; // invert Y for altitude
+
+      const newX = Math.max(30, Math.min(window.innerWidth - 80, dragStartRef.current.startX + dx));
+      const newY = Math.max(0, dragStartRef.current.startY + dy);
+
+      currentXRef.current = newX;
+      currentYRef.current = newY;
+      setX(newX);
+      setY(newY);
+
+      // Track release velocity
+      const now = performance.now();
+      if (lastMousePosRef.current) {
+        const dt = (now - lastMousePosRef.current.time) / 1000;
+        if (dt > 0.015) {
+          velXRef.current = (moveEvent.clientX - lastMousePosRef.current.x) / dt;
+          velYRef.current = (lastMousePosRef.current.y - moveEvent.clientY) / dt;
+          lastMousePosRef.current = { x: moveEvent.clientX, y: moveEvent.clientY, time: now };
+        }
       }
-      clearTimeout(sleepTimer);
-      sleepTimer = setTimeout(() => {
-        setState('sleep');
-        setDialogue("Zzz... dreaming of clean code and fast shaders... 🌙");
-        setShowDialogue(true);
-      }, 50000);
     };
 
-    window.addEventListener('mousemove', resetSleepTimer, { passive: true });
-    window.addEventListener('scroll', resetSleepTimer, { passive: true });
-    resetSleepTimer();
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      dragStartRef.current = null;
+      lastMousePosRef.current = null;
+      setState('idle');
 
-    return () => {
-      window.removeEventListener('mousemove', resetSleepTimer);
-      window.removeEventListener('scroll', resetSleepTimer);
-      clearTimeout(sleepTimer);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [state, currentPet.name]);
 
-  // Click on screen floor / background to run there
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // Laser Pointer follower
+  useEffect(() => {
+    if (!laserActive) {
+      setLaserPos(null);
+      return;
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (e.clientY > window.innerHeight * 0.45) {
+        setLaserPos({ x: e.clientX, y: window.innerHeight - e.clientY });
+        targetXRef.current = Math.max(30, Math.min(window.innerWidth - 80, e.clientX - 25));
+        setFacing(e.clientX > currentXRef.current ? 'right' : 'left');
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [laserActive]);
+
+  // Click on floor to run there
   useEffect(() => {
     const handleScreenClick = (e: MouseEvent) => {
-      // If clicking on an interactive button or input, ignore
       const target = e.target as HTMLElement;
       if (target.closest('button') || target.closest('a') || target.closest('input') || target.closest('[data-pet-menu]')) {
         return;
       }
 
-      // If clicked near the bottom half of the screen, run to that X
-      if (e.clientY > window.innerHeight * 0.45) {
+      if (e.clientY > window.innerHeight * 0.5) {
         const targetX = Math.max(30, Math.min(e.clientX - 25, window.innerWidth - 80));
         targetXRef.current = targetX;
         setFacing(targetX > currentXRef.current ? 'right' : 'left');
@@ -367,53 +541,38 @@ export const PixelPet = () => {
     return () => window.removeEventListener('click', handleScreenClick);
   }, []);
 
-  // Petting interaction
-  const handlePetClick = (e: React.MouseEvent) => {
+  // Double click pet to do backflip trick
+  const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    petAudio.playChirp();
+    petAudio.playLevelUp();
     setState('happy');
-    setXp((prev) => prev + 8);
-
-    const newHeart = { id: Date.now(), x: Math.random() * 30 - 15, y: -25 };
-    setHearts((prev) => [...prev, newHeart]);
-    setTimeout(() => {
-      setHearts((prev) => prev.filter((h) => h.id !== newHeart.id));
-    }, 1200);
-
-    setDialogue(`Loved being petted! (+8 XP) 💕`);
+    setXp((p) => p + 15);
+    setDialogue(`⭐ Backflip trick! Woohoo! (+15 XP) ⭐`);
     setShowDialogue(true);
+
+    velYRef.current = 400; // pop into air!
+    const newHeart = { id: Date.now(), x: 0, y: -40 };
+    setHearts((h) => [...h, newHeart]);
+
     setTimeout(() => {
+      setHearts((h) => h.filter((item) => item.id !== newHeart.id));
       setState('idle');
-      setShowDialogue(false);
-    }, 2400);
+    }, 2000);
   };
 
-  // Toss treat across screen for pet to chase
   const feedSnack = (snackName: string, xpGain: number, icon: string) => {
-    const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
-    const throwDistance = facing === 'right' ? 140 : -140;
-    const snackX = Math.min(Math.max(40, currentXRef.current + throwDistance), screenWidth - 80);
+    petAudio.playMunch();
+    setState('happy');
+    setXp((prev) => prev + xpGain);
+    setDialogue(`Yum! ${currentPet.name} devoured the ${snackName}! (+${xpGain} XP) 🌟`);
+    setShowDialogue(true);
 
-    setTreatTarget({ x: snackX, icon });
-    targetXRef.current = snackX;
-    setFacing(snackX > currentXRef.current ? 'right' : 'left');
-
+    const newHeart = { id: Date.now(), x: 0, y: -30 };
+    setHearts((h) => [...h, newHeart]);
     setTimeout(() => {
-      petAudio.playMunch();
-      setTreatTarget(null);
-      setState('happy');
-      setXp((prev) => prev + xpGain);
-      setDialogue(`Yum! ${currentPet.name} devoured the ${snackName}! (+${xpGain} XP) 🌟`);
-      setShowDialogue(true);
-
-      const newHeart = { id: Date.now(), x: 0, y: -30 };
-      setHearts((h) => [...h, newHeart]);
-      setTimeout(() => {
-        setHearts((h) => h.filter((item) => item.id !== newHeart.id));
-      }, 1200);
-
-      setTimeout(() => setState('idle'), 2200);
-    }, 1200);
+      setHearts((h) => h.filter((item) => item.id !== newHeart.id));
+      setState('idle');
+    }, 2000);
   };
 
   const toggleSound = () => {
@@ -423,37 +582,48 @@ export const PixelPet = () => {
     if (!next) petAudio.playChirp();
   };
 
-  // Sprite URL based on petId and state
   const spriteSrc = `${import.meta.env.BASE_URL}pets/${petId}_${state}.gif`;
-
-  // Visual Evolution Tiers based on Level:
   const lvl = levelInfo.level;
-  const hasHalo = lvl >= 3; // Cyber halo at Lv.3+
-  const hasOrbiters = lvl >= 4; // Orbiting energy wisps at Lv.4+
-  const hasCosmicAura = lvl >= 5; // Super Saiyan / Cosmic Aura at Lv.5+
+  const hasHalo = lvl >= 3;
+  const hasOrbiters = lvl >= 4;
+  const hasCosmicAura = lvl >= 5;
 
   return (
     <>
-      {/* Treat Tossed On Screen */}
-      {treatTarget && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.2, y: -40 }}
-          animate={{ opacity: 1, scale: 1.2, y: 0 }}
-          exit={{ opacity: 0, scale: 0 }}
-          style={{ left: `${treatTarget.x}px` }}
-          className="fixed bottom-3 z-40 text-2xl pointer-events-none drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+      {/* Bouncing Tennis Ball On Screen */}
+      {tennisBall && (
+        <div
+          style={{
+            transform: `translate3d(${tennisBall.x}px, ${-tennisBall.y}px, 0)`,
+            transition: 'none'
+          }}
+          className="fixed bottom-2 z-40 text-2xl pointer-events-none drop-shadow-[0_4px_10px_rgba(0,0,0,0.6)] animate-spin"
         >
-          {treatTarget.icon}
-        </motion.div>
+          🎾
+        </div>
       )}
 
-      {/* FREESTANDING SCREEN PET (NO BOX CONTAINER) */}
+      {/* Red Laser Pointer Dot */}
+      {laserActive && laserPos && (
+        <div
+          style={{
+            left: `${laserPos.x}px`,
+            bottom: `${laserPos.y}px`
+          }}
+          className="fixed z-40 w-3 h-3 -ml-1.5 -mb-1.5 rounded-full bg-rose-500 shadow-[0_0_12px_#f43f5e] animate-ping pointer-events-none"
+        />
+      )}
+
+      {/* FREESTANDING SCREEN PET WITH GRAVITY & DRAG PHYSICS */}
       <div
         className="fixed bottom-2 z-40 select-none pointer-events-auto"
         style={{
-          transform: `translateX(${x}px)`,
-          transition: 'none' // Position driven purely by 60FPS physics loop
+          transform: `translate3d(${x}px, ${-y}px, 0)`,
+          transition: 'none',
+          cursor: isDragging ? 'grabbing' : 'grab'
         }}
+        onMouseDown={handleMouseDown}
+        onDoubleClick={handleDoubleClick}
       >
         <div className="relative flex flex-col items-center">
           {/* Floating Speech Bubble */}
@@ -484,7 +654,7 @@ export const PixelPet = () => {
             </motion.div>
           ))}
 
-          {/* Level Up Golden Burst Ceremony */}
+          {/* Level Up Celebration */}
           {isLevelingUp && (
             <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
@@ -498,9 +668,8 @@ export const PixelPet = () => {
 
           {/* THE FREESTANDING PET SPRITE WITH VISUAL EVOLUTIONS */}
           <div
-            onClick={handlePetClick}
-            className="relative cursor-pointer group p-1 flex items-center justify-center"
-            title={`Click to pet ${currentPet.name}! (${levelInfo.title} • Lv.${lvl})`}
+            className="relative p-1 flex items-center justify-center"
+            title={`Drag & toss me! Double-click for backflip trick! (${levelInfo.title} • Lv.${lvl})`}
           >
             {/* EVOLUTION 3: Cosmic / Super Saiyan Aura (Lv.5+) */}
             {hasCosmicAura && (
@@ -541,10 +710,9 @@ export const PixelPet = () => {
             {/* Raw Pixel Art Sprite Image (No bounding box!) */}
             <motion.div
               animate={{
-                y: isLevelingUp ? [-20, 0, -15, 0] : 0,
-                rotate: isLevelingUp ? [0, 360] : 0
+                rotate: isDragging ? [0, 10, -10, 0] : y > 20 ? [0, 360] : 0
               }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: y > 20 ? 0.6 : 0.2 }}
               style={{
                 transform: facing === 'left' ? 'scaleX(-1)' : 'scaleX(1)',
                 transition: 'transform 0.15s ease-out'
@@ -557,6 +725,7 @@ export const PixelPet = () => {
                   lvl >= 5 ? 'drop-shadow-[0_0_14px_rgba(6,182,212,0.8)]' : lvl >= 3 ? 'drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]'
                 }`}
                 style={{ imageRendering: 'pixelated' }}
+                draggable={false}
               />
             </motion.div>
 
@@ -576,7 +745,7 @@ export const PixelPet = () => {
           className="bg-slate-900/90 text-white backdrop-blur-md border border-cyan-500/30 shadow-2xl rounded-2xl p-2.5 flex items-center gap-2.5"
           data-pet-menu
         >
-          {/* Pet Active Icon & Quick Level */}
+          {/* Companion Selector & Quick Level */}
           <button
             onClick={() => setIsMenuOpen((v) => !v)}
             className="flex items-center gap-1.5 p-1 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
@@ -602,6 +771,28 @@ export const PixelPet = () => {
             />
           </div>
 
+          {/* PLAY FETCH TENNIS BALL BUTTON */}
+          <button
+            onClick={spawnTennisBall}
+            className="p-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 transition-colors flex items-center gap-1 text-[10px] font-mono font-semibold"
+            title="Play Fetch! Throws a tennis ball for pet to chase (+30 XP)"
+          >
+            <span>🎾</span>
+            <span className="hidden sm:inline">Fetch</span>
+          </button>
+
+          {/* LASER POINTER TOGGLE */}
+          <button
+            onClick={() => setLaserActive((l) => !l)}
+            className={`p-1 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-mono font-semibold ${
+              laserActive ? 'bg-rose-500/30 text-rose-300 shadow-[0_0_8px_#f43f5e]' : 'bg-slate-800 text-slate-400 hover:text-white'
+            }`}
+            title="Toggle Laser Pointer Mode (Pet chases red dot)"
+          >
+            <Crosshair size={12} className={laserActive ? 'text-rose-400 animate-spin' : ''} />
+            <span className="hidden sm:inline">Laser</span>
+          </button>
+
           {/* Quick Sound Toggle */}
           <button
             onClick={toggleSound}
@@ -609,19 +800,6 @@ export const PixelPet = () => {
             title={isMuted ? 'Unmute 8-bit Sound' : 'Mute Sound'}
           >
             {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} className="text-cyan-400" />}
-          </button>
-
-          {/* Whistle / Call Pet to here */}
-          <button
-            onClick={() => {
-              targetXRef.current = 140;
-              setFacing('left');
-              petAudio.playChirp();
-            }}
-            className="text-slate-400 hover:text-cyan-400 transition-colors p-1"
-            title="Call Pet back to corner dock"
-          >
-            <Compass size={13} />
           </button>
 
           {/* Toggle Menu */}
@@ -730,9 +908,10 @@ export const PixelPet = () => {
                   <span>{xp} Total XP</span>
                 </div>
                 <p className="text-slate-400">
-                  • Lv.3+: Unlocks Holographic Cyber Halo 💫<br />
-                  • Lv.4+: Unlocks Dual Orbiting Plasma Wisps 🔮<br />
-                  • Lv.5+: Unlocks Cosmic Super Saiyan Aura & High Speed 🔥
+                  • 🪂 <strong>Drag & Toss:</strong> Click and throw pet with real physics!<br />
+                  • 🎾 <strong>Play Fetch:</strong> Toss tennis ball for pet to chase!<br />
+                  • ⭐ <strong>Trick:</strong> Double-click pet for acrobatic backflip!<br />
+                  • Lv.3+ Cyber Halo • Lv.4+ Orbiting Wisps • Lv.5+ Saiyan Aura
                 </p>
               </div>
             </motion.div>
