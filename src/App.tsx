@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { CustomCursor } from "./components/CustomCursor";
 import { AIChatbot } from "./components/AIChatbot";
+import { PixelPet } from "./components/pet/PixelPet";
 
 const queryClient = new QueryClient();
 
@@ -14,6 +15,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <CustomCursor />
+      <PixelPet />
       <AIChatbot />
       <Toaster />
       <Sonner />
@@ -28,4 +30,3 @@ const App = () => (
 );
 
 export default App;
-

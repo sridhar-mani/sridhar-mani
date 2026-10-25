@@ -1,12 +1,14 @@
 [
-  { "name": "react", "version": "^18.2.0", "years": 2, "projects": 12 },
-  { "name": "typescript", "version": "^5.0.0", "years": 2, "projects": 10 },
-  { "name": "python", "version": "^3.11.0", "years": 3, "projects": 15 },
-  { "name": "fastapi", "version": "^0.109.0", "years": 2, "projects": 8 },
-  { "name": "three.js", "version": "^0.160.0", "years": 2, "projects": 6 },
-  { "name": "langchain", "version": "^0.1.0", "years": 1, "projects": 5 },
-  { "name": "chromadb", "version": "^0.4.0", "years": 1, "projects": 4 },
-  { "name": "docker", "version": "^24.0.0", "years": 2, "projects": 10 },
-  { "name": "postgresql", "version": "^15.0", "years": 2, "projects": 6 },
-  { "name": "vtk.js", "version": "^30.0.0", "years": 2, "projects": 4 }
+  { "name": "typescript", "version": "^5.5.0", "years": 3, "projects": 14 },
+  { "name": "python", "version": "^3.11.0", "years": 3, "projects": 16 },
+  { "name": "react", "version": "^18.3.0", "years": 3, "projects": 15 },
+  { "name": "three.js", "version": "^0.160.0", "years": 2, "projects": 8 },
+  { "name": "webgpu", "version": "WGSL / Offscreen", "years": 1, "projects": 4 },
+  { "name": "pytorch", "version": "^2.2.0", "years": 2, "projects": 5 },
+  { "name": "fastapi", "version": "^0.111.0", "years": 2, "projects": 10 },
+  { "name": "react-native", "version": "New Arch (TurboModule)", "years": 2, "projects": 4 },
+  { "name": "ollama / web-llm", "version": "Local RAG", "years": 2, "projects": 6 },
+  { "name": "vtk.js", "version": "^30.0.0", "years": 2, "projects": 4 },
+  { "name": "docker", "version": "^26.0.0", "years": 2, "projects": 11 },
+  { "name": "postgresql", "version": "^16.0", "years": 2, "projects": 7 }
 ]

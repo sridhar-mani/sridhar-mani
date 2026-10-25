@@ -17,18 +17,32 @@ interface Experience {
 
 const experiences: Experience[] = [
   {
-    id: 'novacast-current',
+    id: 'zenteiq-current',
+    hash: '#9a4c1f',
+    type: 'feat',
+    title: 'AI Engineer',
+    company: 'Zenteiq Aitech Innovations',
+    period: 'Mar 2026 - Present',
+    current: true,
+    changes: [
+      { type: 'add', text: 'Architecting stateful workflow orchestration and autonomous coding-agent systems' },
+      { type: 'add', text: 'Building high-performance FastAPI microservices and numerical pipelines for automation workloads' },
+      { type: 'add', text: 'Integrating agentic systems with domain simulation data and open-weight model pipelines' },
+    ],
+  },
+  {
+    id: 'novacast-prev',
     hash: '#24a1b0',
     type: 'feat',
     title: 'Associate Software Engineer',
-    company: 'Novacast India',
-    period: 'Jun 2024 - Present',
-    current: true,
+    company: 'NovaCast India',
+    period: 'Jun 2024 - Feb 2026',
+    current: false,
     changes: [
-      { type: 'add', text: 'Architected CFD visualization platform with FastAPI + React achieving 30% performance boost' },
-      { type: 'add', text: 'Reduced memory usage by 40-50% through optimized chunked parsing algorithms' },
-      { type: 'add', text: 'Built 3D visualization with VTK.js, Three.js, and WebAssembly' },
-      { type: 'remove', text: 'Migrated from batch processing to Socket.IO real-time streaming' },
+      { type: 'add', text: 'Architected browser CFD visualization product with FastAPI + React achieving 30% latency cut' },
+      { type: 'add', text: 'Reduced peak ingestion memory by 40-50% through optimized chunked binary streaming' },
+      { type: 'add', text: 'Built interactive 3D rendering pipeline using VTK.js, Three.js, and WebAssembly' },
+      { type: 'remove', text: 'Eliminated legacy batch processing latency and high server memory bottlenecks' },
     ],
   },
   {
@@ -40,22 +54,8 @@ const experiences: Experience[] = [
     period: '2023 - 2025',
     current: false,
     changes: [
-      { type: 'add', text: 'Completed coursework in Machine Learning and Deep Learning Fundamentals' },
+      { type: 'add', text: 'Completed coursework in Machine Learning, Statistical Analysis & Deep Learning' },
       { type: 'add', text: 'Statistical Methods and Data Analysis certification' },
-    ],
-  },
-  {
-    id: 'iit-madras-programming',
-    hash: '#4f7cff',
-    type: 'feat',
-    title: 'Diploma in Programming',
-    company: 'IIT Madras Online',
-    period: '2023 - 2025',
-    current: false,
-    changes: [
-      { type: 'add', text: 'Completed Programming in Java, Programming in Python, and Advanced SQL' },
-      { type: 'add', text: 'Built web applications and APIs with Database Design coursework' },
-      { type: 'add', text: 'Completed both IIT Madras diplomas' },
     ],
   },
   {
@@ -68,6 +68,7 @@ const experiences: Experience[] = [
     current: false,
     changes: [
       { type: 'add', text: 'Bachelor of Technology with 7.78 CGPA' },
+      { type: 'add', text: 'Completed IIT Madras Programming Diploma coursework (7.3 CGPA)' },
     ],
   },
 ];
@@ -81,6 +82,7 @@ const CommitCard = ({ experience, index }: { experience: Experience; index: numb
       viewport={{ once: true, margin: '-50px' }}
       className="git-commit group"
     >
+      {/* Commit dot with pulse animation on hover */}
       <motion.div 
         className="git-dot transition-all duration-300 group-hover:scale-125"
         style={{ 
@@ -95,6 +97,7 @@ const CommitCard = ({ experience, index }: { experience: Experience; index: numb
         }}
       />
 
+      {/* Commit card with glassmorphism */}
       <motion.div 
         className="relative bg-card/80 backdrop-blur-sm rounded-xl border border-border/50 p-5 sm:p-6 ml-4 overflow-hidden group-hover:border-syntax-cyan/30 transition-all duration-300"
         whileHover={{ 
@@ -103,28 +106,35 @@ const CommitCard = ({ experience, index }: { experience: Experience; index: numb
         }}
         transition={{ duration: 0.3 }}
       >
+        {/* Gradient overlay on hover */}
         <div className="absolute inset-0 bg-gradient-to-br from-syntax-cyan/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
+        {/* Header */}
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4 mb-4">
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
-              <span className="px-2 py-0.5 rounded-full bg-syntax-purple/10 font-mono text-xs text-syntax-purple border border-syntax-purple/20">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <span className={`font-mono text-xs px-2 py-0.5 rounded font-medium ${
+                experience.type === 'feat' ? 'bg-syntax-green/10 text-syntax-green' :
+                experience.type === 'fix' ? 'bg-syntax-orange/10 text-syntax-orange' :
+                'bg-syntax-purple/10 text-syntax-purple'
+              }`}>
                 {experience.type}
               </span>
-              <h3 className="font-mono font-bold text-base sm:text-lg text-foreground">{experience.title}</h3>
+              <span className="font-mono text-xs text-muted-foreground">{experience.period}</span>
+              {experience.current && (
+                <span className="inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full bg-syntax-cyan/10 text-syntax-cyan font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-syntax-cyan animate-pulse" />
+                  HEAD
+                </span>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-sm text-muted-foreground">@ {experience.company}</span>
-              <span className="text-border">•</span>
-              <span className={`font-mono text-xs ${experience.current ? 'text-syntax-green' : 'text-muted-foreground'}`}>
-                {experience.current && <span className="inline-block w-1.5 h-1.5 rounded-full bg-syntax-green mr-1.5 animate-pulse" />}
-                {experience.period}
-              </span>
-            </div>
+            <h3 className="font-mono font-semibold text-base sm:text-lg text-foreground">{experience.title}</h3>
+            <p className="font-mono text-xs sm:text-sm text-syntax-cyan font-medium">{experience.company}</p>
           </div>
           <span className="font-mono text-[10px] text-muted-foreground/60 bg-muted/50 px-2 py-1 rounded">{experience.hash}</span>
         </div>
 
+        {/* Changes (diff style) */}
         <div className="relative z-10 space-y-2 font-mono text-xs sm:text-sm border-l-2 border-border/50 pl-4 ml-1">
           {experience.changes.map((change, i) => (
             <motion.div
@@ -160,21 +170,23 @@ export const ExperienceSection = () => {
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' });
 
   return (
-    <section id="experience" ref={sectionRef} className="py-16 sm:py-24 lg:py-32 bg-gray-50">
+    <section id="experience" ref={sectionRef} className="py-16 sm:py-24 lg:py-32 bg-secondary/30">
       <div className="container mx-auto px-4 sm:px-6">
+        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
           className="mb-8 sm:mb-12"
         >
-          <span className="section-label text-xs sm:text-sm text-gray-500 font-mono tracking-widest">// 04 EXPERIENCE</span>
-          <h2 className="section-title mt-3 sm:mt-4 text-3xl sm:text-4xl md:text-5xl font-mono font-bold text-gray-900">git-history.log</h2>
+          <span className="section-label text-xs sm:text-sm text-muted-foreground font-mono tracking-widest">// 04 HISTORY</span>
+          <h2 className="section-title mt-3 sm:mt-4 text-3xl sm:text-4xl md:text-5xl font-mono font-bold text-foreground">git log</h2>
         </motion.div>
 
-        <div className="max-w-3xl mx-auto">
-          {experiences.map((exp, index) => (
-            <CommitCard key={exp.id} experience={exp} index={index} />
+        {/* Timeline */}
+        <div className="max-w-3xl ml-2 sm:ml-4">
+          {experiences.map((experience, index) => (
+            <CommitCard key={experience.id} experience={experience} index={index} />
           ))}
         </div>
       </div>

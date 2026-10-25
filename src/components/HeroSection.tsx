@@ -47,7 +47,7 @@ export const HeroSection = () => {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-syntax-green" />
             </span>
             <span className="font-mono text-xs text-gray-600">
-              Available for new opportunities
+              Available for new engineering opportunities
             </span>
           </motion.div>
 
@@ -78,8 +78,8 @@ export const HeroSection = () => {
           >
             <p className="font-mono text-sm md:text-base text-[#4A5568] tracking-widest flex flex-wrap items-center gap-2">
               FULL STACK ENGINEER
-              <span className="px-3 py-1 rounded-full bg-syntax-cyan text-white text-xs font-semibold shadow-sm">3D VIZ</span>
-              <span className="px-3 py-1 rounded-full bg-syntax-orange text-white text-xs font-semibold shadow-sm">AI/LLM</span>
+              <span className="px-3 py-1 rounded-full bg-syntax-cyan text-white text-xs font-semibold shadow-sm">AI AGENTS</span>
+              <span className="px-3 py-1 rounded-full bg-syntax-orange text-white text-xs font-semibold shadow-sm">3D & WEBGPU</span>
             </p>
           </motion.div>
 
@@ -90,10 +90,10 @@ export const HeroSection = () => {
             transition={{ duration: 0.6, delay: 1 }}
             className="text-lg md:text-xl text-[#4A5568] max-w-lg mb-12 leading-relaxed"
           >
-            Crafting{' '}
-            <span className="text-syntax-cyan font-semibold">CFD simulations</span>,{' '}
-            <span className="text-syntax-orange font-semibold">RAG systems</span>, and{' '}
-            <span className="text-syntax-purple font-semibold">interactive 3D</span> experiences.
+            Architecting{' '}
+            <span className="text-syntax-cyan font-semibold">autonomous coding agents</span>,{' '}
+            <span className="text-syntax-orange font-semibold">WebGPU pipelines</span>, and{' '}
+            <span className="text-syntax-purple font-semibold">interactive 3D simulations</span>.
           </motion.p>
 
           {/* Social links */}
@@ -104,62 +104,48 @@ export const HeroSection = () => {
             className="flex items-center gap-4"
           >
             {[
-              { icon: Github, href: 'https://github.com/sridhar-mani', label: 'GitHub', hoverBg: 'hover:bg-[#24292e]' },
-              { icon: Linkedin, href: 'https://www.linkedin.com/in/sridharmanimuthusamy', label: 'LinkedIn', hoverBg: 'hover:bg-[#0A66C2]' },
-              { icon: Mail, href: 'mailto:sridharmani510@gmail.com', label: 'Email', hoverBg: 'hover:bg-syntax-orange' },
+              { icon: Github, href: 'https://github.com/sridhar-mani', label: 'GitHub', hoverBg: 'group-hover:bg-[#24292e]' },
+              { icon: Linkedin, href: 'https://www.linkedin.com/in/sridharmanimuthusamy/', label: 'LinkedIn', hoverBg: 'group-hover:bg-[#0A66C2]' },
+              { icon: Mail, href: 'mailto:sridharmani510@gmail.com', label: 'Email', hoverBg: 'group-hover:bg-syntax-orange' },
             ].map(({ icon: Icon, href, label, hoverBg }) => (
               <motion.a
                 key={label}
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`group relative p-4 bg-gray-100 rounded-xl text-gray-600 transition-all duration-300 shadow-sm hover:shadow-md hover:text-white ${hoverBg}`}
-                whileHover={{ scale: 1.1, y: -4 }}
+                className="group relative flex items-center justify-center w-12 h-12 rounded-xl bg-white border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-md"
+                whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 aria-label={label}
               >
-                <Icon size={24} className="relative z-10 text-inherit transition-colors duration-300" />
+                <div className={`absolute inset-0 rounded-xl transition-all duration-300 opacity-0 group-hover:opacity-100 ${hoverBg}`} />
+                <Icon size={20} className="relative z-10 text-gray-700 group-hover:text-white transition-colors duration-300" />
               </motion.a>
             ))}
-          </motion.div>
 
-          {/* Identity Panel - Now part of flow, below socials */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.4 }}
-            className="mt-12"
-          >
-            <Suspense fallback={null}>
+            {/* Quick Holo Identity Card */}
+            <div className="relative z-[30] ml-2">
               <IdentityPanel />
-            </Suspense>
+            </div>
           </motion.div>
-
-
         </div>
       </div>
 
-
-      {/* Scroll indicator - positioned at bottom center */}
+      {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20"
+        transition={{ delay: 1.4, duration: 0.6 }}
+        className="absolute bottom-8 left-8 md:left-28 lg:left-36 z-[20] flex items-center gap-3 text-xs font-mono text-gray-600"
       >
-        <motion.a
-          href="#expertise"
-          onClick={(e) => {
-            e.preventDefault();
-            document.querySelector('#expertise')?.scrollIntoView({ behavior: 'smooth' });
-          }}
-          className="flex flex-col items-center gap-2 text-gray-400 hover:text-syntax-cyan transition-colors"
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        <span className="w-8 h-px bg-gray-300" />
+        <span>SCROLL TO EXPLORE</span>
+        <motion.div
+          animate={{ y: [0, 4, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
         >
-          <span className="font-mono text-xs tracking-[0.3em] uppercase">Scroll</span>
-          <ArrowDown size={16} />
-        </motion.a>
+          <ArrowDown size={14} className="text-syntax-cyan" />
+        </motion.div>
       </motion.div>
     </section>
   );

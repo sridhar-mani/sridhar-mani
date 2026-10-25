@@ -6,132 +6,161 @@ type CursorMode = 'default' | 'card' | 'link' | 'close' | 'drag' | 'text';
 export const CustomCursor = () => {
   const [cursorMode, setCursorMode] = useState<CursorMode>('default');
   const [isVisible, setIsVisible] = useState(false);
-  const cursorRef = useRef<HTMLDivElement>(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   
-  const cursorX = useMotionValue(0);
-  const cursorY = useMotionValue(0);
+  // Motion values for smooth cursor movement
+  const cursorX = useMotionValue(-100);
+  const cursorY = useMotionValue(-100);
   
+  // Spring animation for smoother movement
   const springConfig = { damping: 25, stiffness: 400, mass: 0.5 };
   const cursorXSpring = useSpring(cursorX, springConfig);
   const cursorYSpring = useSpring(cursorY, springConfig);
 
+  // Rotation value for dynamic effects
   const rotation = useMotionValue(0);
   const rotationSpring = useSpring(rotation, { damping: 15, stiffness: 150 });
 
   useEffect(() => {
+    // Detect touch / coarse pointer devices
+    const isCoarse = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+    if (isCoarse) {
+      setIsTouchDevice(true);
+      return;
+    }
+
+    let lastHoverCheck = 0;
+
     const handleMouseMove = (e: MouseEvent) => {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
       
-      const velocityX = e.movementX;
-      rotation.set(velocityX * 2); // Max ~20deg rotation
+      const velocityX = e.movementX || 0;
+      rotation.set(Math.max(-25, Math.min(25, velocityX * 2)));
       
       if (!isVisible) {
         setIsVisible(true);
+      }
+
+      // Throttle hover detection to ~60ms to avoid DOM traversal on every sub-pixel move
+      const now = performance.now();
+      if (now - lastHoverCheck > 60) {
+        lastHoverCheck = now;
+        const target = e.target as HTMLElement | null;
+        if (!target) return;
+
+        const isClose = target.closest('[data-cursor="close"]') ||
+                        target.closest('button[aria-label*="close"]') ||
+                        target.closest('.close-button');
+        
+        const isCard = target.closest('[data-cursor="card"]') || 
+                       target.closest('.project-card');
+        
+        const isLink = target.closest('a') || 
+                       target.closest('button') ||
+                       target.closest('[data-cursor="pointer"]') ||
+                       target.closest('[role="button"]');
+        
+        const isDrag = target.closest('[data-cursor="drag"]') ||
+                       target.closest('[draggable="true"]');
+        
+        const isText = target.closest('[data-cursor="text"]');
+
+        if (isClose) {
+          setCursorMode('close');
+        } else if (isDrag) {
+          setCursorMode('drag');
+        } else if (isCard && !isLink) {
+          setCursorMode('card');
+        } else if (isLink) {
+          setCursorMode('link');
+        } else if (isText) {
+          setCursorMode('text');
+        } else {
+          setCursorMode('default');
+        }
       }
     };
 
     const handleMouseEnter = () => setIsVisible(true);
     const handleMouseLeave = () => setIsVisible(false);
 
-    const handleElementHover = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      
-      const isClose = target.closest('[data-cursor="close"]') ||
-                      target.closest('button[aria-label*="close"]') ||
-                      target.closest('.close-button') ||
-                      (target.closest('button') && target.closest('button')?.querySelector('svg[class*="X"]'));
-      
-      const isCard = target.closest('[data-cursor="card"]') || 
-                     target.closest('.project-card') ||
-                     target.closest('[class*="card"]');
-      
-      const isLink = target.closest('a') || 
-                     target.closest('button') ||
-                     target.closest('[data-cursor="pointer"]') ||
-                     target.closest('[role="button"]');
-      
-      const isDrag = target.closest('[data-cursor="drag"]') ||
-                     target.closest('[draggable="true"]');
-      
-      const isText = target.closest('[data-cursor="text"]') ||
-                     target.matches('h1, h2, h3, h4, h5, h6, p, span, li') ||
-                     target.closest('h1, h2, h3, h4, h5, h6, p');
-      
-      if (isClose) {
-        setCursorMode('close');
-      } else if (isDrag) {
-        setCursorMode('drag');
-      } else if (isCard && !isLink) {
-        setCursorMode('card');
-      } else if (isLink) {
-        setCursorMode('link');
-      } else if (isText && !isCard && !isLink) {
-        setCursorMode('text');
-      } else {
-        setCursorMode('default');
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mousemove', handleElementHover);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     document.addEventListener('mouseenter', handleMouseEnter);
     document.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mousemove', handleElementHover);
       document.removeEventListener('mouseenter', handleMouseEnter);
       document.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, [cursorX, cursorY, isVisible, rotation]);
 
+  if (isTouchDevice) {
+    return null;
+  }
+
+  // Cursor size based on mode
   const getCursorSize = () => {
     switch (cursorMode) {
-      case 'card': return 70;
-      case 'link': return 45;
-      case 'close': return 50;
-      case 'drag': return 60;
-      case 'text': return 8;
-      default: return 24;
+      case 'card':
+        return 56;
+      case 'link':
+        return 44;
+      case 'close':
+        return 48;
+      case 'drag':
+        return 48;
+      case 'text':
+        return 28;
+      default:
+        return 20;
     }
   };
 
   const getCursorStyle = () => {
     switch (cursorMode) {
       case 'card':
-        return { mixBlendMode: 'difference' as const, backgroundColor: 'white' };
+        return {
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          border: '1px solid rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+        };
       case 'link':
-        return { mixBlendMode: 'difference' as const, backgroundColor: 'white' };
+        return {
+          backgroundColor: 'rgba(0, 217, 255, 0.15)',
+          border: '1.5px solid rgba(0, 217, 255, 0.8)',
+          boxShadow: '0 0 20px rgba(0, 217, 255, 0.4)',
+        };
       case 'close':
-        return { mixBlendMode: 'normal' as const, backgroundColor: 'rgba(239, 68, 68, 0.9)', border: 'none' };
+        return {
+          backgroundColor: 'rgba(239, 68, 68, 0.9)',
+          border: 'none',
+          boxShadow: '0 4px 20px rgba(239, 68, 68, 0.4)',
+        };
       case 'drag':
-        return { mixBlendMode: 'normal' as const, backgroundColor: 'rgba(34, 197, 94, 0.2)', border: '2px dashed rgba(34, 197, 94, 0.8)' };
+        return {
+          backgroundColor: 'rgba(16, 185, 129, 0.2)',
+          border: '2px dashed rgba(16, 185, 129, 0.8)',
+        };
       case 'text':
-        return { mixBlendMode: 'normal' as const, backgroundColor: 'hsl(188 80% 45%)', border: 'none', borderRadius: '2px', width: '2px', height: '24px' };
+        return {
+          backgroundColor: 'transparent',
+          border: '1px solid rgba(100, 116, 139, 0.6)',
+        };
       default:
-        return { mixBlendMode: 'normal' as const, backgroundColor: 'transparent', border: '2px solid hsl(188 80% 45%)' };
+        return {
+          backgroundColor: 'transparent',
+          border: '1.5px solid rgba(0, 217, 255, 0.6)',
+        };
     }
   };
 
-  if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) {
-    return null;
-  }
-
   return (
     <>
-      <style>{`
-        *:not(input):not(textarea):not([contenteditable="true"]) {
-          cursor: none !important;
-        }
-        input, textarea, [contenteditable="true"] {
-          cursor: text !important;
-        }
-      `}</style>
-      
+      {/* Outer cursor ring */}
       <motion.div
-        ref={cursorRef}
-        className="fixed top-0 left-0 pointer-events-none z-[9999] rounded-full flex items-center justify-center"
+        className="fixed top-0 left-0 pointer-events-none z-[9999] rounded-full flex items-center justify-center backdrop-blur-[1px]"
         style={{
           x: cursorXSpring,
           y: cursorYSpring,
@@ -201,6 +230,7 @@ export const CustomCursor = () => {
         </AnimatePresence>
       </motion.div>
 
+      {/* Center dot (only for default/link modes) */}
       <motion.div
         className="fixed top-0 left-0 pointer-events-none z-[9999] w-1.5 h-1.5 rounded-full bg-cyan-500"
         style={{
@@ -218,4 +248,3 @@ export const CustomCursor = () => {
     </>
   );
 };
-
