@@ -9,14 +9,16 @@ interface JobAnalyzerProps {
   isAIReady: boolean;
 }
 
-// Profile skills for local matching
+// Comprehensive Profile skills for local matching (synchronized with Sridhar's latest profile)
 const PROFILE_SKILLS = [
-  'react', 'typescript', 'javascript', 'python', 'vue', 'next.js',
-  'fastapi', 'flask', 'django', 'node', 'postgresql', 'mongodb',
-  'docker', 'git', 'tailwind', 'three.js', 'webgl', 'vtk.js',
-  'machine learning', 'ai', 'ml', 'langchain', 'chromadb', 'rag',
-  'react native', 'mobile', 'rest', 'api', 'graphql',
-  'cfd', 'simulation', 'openfoam'
+  'python', 'typescript', 'javascript', 'react', 'next.js', 'vue',
+  'fastapi', 'flask', 'django', 'node', 'langchain', 'langgraph',
+  'agents', 'agentic', 'agentic workflows', 'workflow orchestration',
+  'pytorch', 'deep learning', 'machine learning', 'ai', 'ml', 'llm', 'rag',
+  'three.js', 'webgpu', 'webgl', 'vtk.js', 'vtk', 'cfd', 'simulation', 'openfoam',
+  'docker', 'sql', 'postgresql', 'sqlite', 'redis', 'chromadb', 'tailwind',
+  'ollama', 'socket.io', 'rest', 'api', 'graphql', 'wasm', 'webassembly',
+  'react native', 'turbomodule', 'mobile', 'git', 'ci/cd'
 ];
 
 export const JobAnalyzer = ({ onBack, isAIReady }: JobAnalyzerProps) => {
@@ -78,7 +80,7 @@ export const JobAnalyzer = ({ onBack, isAIReady }: JobAnalyzerProps) => {
       const result = matchSkills(parsed.skills, PROFILE_SKILLS);
       setQuickResult(result);
       setMode('results');
-    }, 500);
+    }, 450);
   };
 
   const analyzeWithAI = async () => {
@@ -98,119 +100,110 @@ export const JobAnalyzer = ({ onBack, isAIReady }: JobAnalyzerProps) => {
     }
   };
 
-  const reset = () => {
-    setMode('input');
-    setJobText('');
-    setQuickResult(null);
-    setAiResult(null);
-  };
+  const currentResult = isUsingAI ? aiResult : quickResult;
+  const fitScore = isUsingAI ? aiResult?.fitScore : quickResult?.score;
+  const matched = isUsingAI ? aiResult?.matchedSkills : quickResult?.matched;
+  const missing = isUsingAI ? aiResult?.missingSkills : quickResult?.missing;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-gray-200">
-        <button
-          onClick={onBack}
-          className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft size={18} className="text-gray-600" />
-        </button>
-        <div>
-          <h3 className="font-semibold text-gray-900">Job Analyzer</h3>
-          <p className="text-xs text-gray-500">Check if I'm a good fit</p>
+      <div className="p-4 bg-white border-b border-gray-200 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onBack}
+            className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
+          >
+            <ArrowLeft size={18} />
+          </button>
+          <span className="font-semibold text-gray-800 text-sm">Job Fit Analyzer</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="file"
+            ref={resumeInputRef}
+            onChange={handleResumeUpload}
+            accept=".pdf"
+            className="hidden"
+          />
+          <button
+            onClick={() => resumeInputRef.current?.click()}
+            className="text-xs text-cyan-600 hover:text-cyan-700 flex items-center gap-1 font-medium bg-cyan-50 px-2 py-1 rounded"
+            title="Index custom resume document for deeper analysis"
+          >
+            <FileUp size={12} />
+            + Custom Resume
+          </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 p-4 overflow-y-auto">
         <AnimatePresence mode="wait">
           {mode === 'input' && (
             <motion.div
               key="input"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               className="space-y-4"
             >
-              {/* Job Description Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Job Description
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Paste Job Description or Requirements:
                 </label>
                 <textarea
                   value={jobText}
                   onChange={(e) => setJobText(e.target.value)}
-                  placeholder="Paste the job description here..."
-                  className="w-full h-40 p-3 border border-gray-200 rounded-xl text-sm resize-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none"
+                  placeholder="Paste job description (skills, requirements, role specs)..."
+                  className="w-full h-40 p-3 text-xs bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-cyan-500/50 outline-none resize-none leading-relaxed"
                 />
               </div>
 
-              {/* Upload JD PDF */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-                >
-                  <Upload size={16} />
-                  Upload JD PDF
-                </button>
+              {/* PDF upload alternative */}
+              <div className="flex items-center gap-2">
                 <input
+                  type="file"
                   ref={fileInputRef}
-                  type="file"
-                  accept=".pdf"
                   onChange={handleFileUpload}
-                  className="hidden"
-                />
-
-                <button
-                  onClick={() => resumeInputRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-cyan-200 rounded-xl text-sm text-cyan-600 hover:bg-cyan-50 transition-colors"
-                >
-                  <FileUp size={16} />
-                  Add Resume
-                </button>
-                <input
-                  ref={resumeInputRef}
-                  type="file"
                   accept=".pdf"
-                  onChange={handleResumeUpload}
                   className="hidden"
                 />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-1 py-2 px-3 border border-gray-300 border-dashed rounded-xl text-xs text-gray-600 hover:bg-gray-100 transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <Upload size={14} />
+                  Upload Job Spec PDF
+                </button>
               </div>
 
-              {/* Indexed Sources */}
-              {indexedSources.length > 0 && (
-                <div className="bg-cyan-50 p-3 rounded-xl">
-                  <p className="text-xs font-medium text-cyan-800 mb-1">Indexed Documents:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {indexedSources.map((source, i) => (
-                      <span key={i} className="text-xs bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded">
-                        {source}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Analyze Buttons */}
+              {/* Action buttons */}
               <div className="flex gap-2 pt-2">
                 <button
                   onClick={analyzeQuick}
                   disabled={!jobText.trim()}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium disabled:opacity-50 hover:bg-gray-200 transition-colors"
+                  className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
-                  <Search size={16} />
-                  Quick Scan
+                  <Search size={14} />
+                  Quick Match (Instant)
                 </button>
                 <button
                   onClick={analyzeWithAI}
                   disabled={!jobText.trim() || !isAIReady}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-xl text-sm font-medium disabled:opacity-50 hover:shadow-lg transition-all"
+                  className="flex-1 py-2.5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-xl text-xs font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
                 >
-                  <Sparkles size={16} />
-                  AI Analysis
+                  <Sparkles size={14} />
+                  AI RAG Match
                 </button>
               </div>
+
+              {!isAIReady && (
+                <p className="text-[10px] text-gray-400 text-center">
+                  * Initialize AI chat tab first to enable deep LLM analysis
+                </p>
+              )}
             </motion.div>
           )}
 
@@ -220,12 +213,13 @@ export const JobAnalyzer = ({ onBack, isAIReady }: JobAnalyzerProps) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center py-12"
+              className="h-full flex flex-col items-center justify-center py-12 space-y-3"
             >
-              <Loader2 size={40} className="text-cyan-500 animate-spin mb-4" />
-              <p className="text-sm text-gray-600">
-                {isUsingAI ? 'AI is analyzing the job fit...' : 'Scanning for skill matches...'}
+              <Loader2 size={32} className="text-cyan-500 animate-spin" />
+              <p className="text-sm font-medium text-gray-700">
+                {isUsingAI ? 'Vector RAG analyzing candidate fit...' : 'Parsing skills and calculating match...'}
               </p>
+              <p className="text-xs text-gray-500">Comparing profile against requirements</p>
             </motion.div>
           )}
 
@@ -234,72 +228,92 @@ export const JobAnalyzer = ({ onBack, isAIReady }: JobAnalyzerProps) => {
               key="results"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
               className="space-y-4"
             >
-              {/* Score */}
-              <div className="text-center py-4">
-                <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-cyan-100 to-purple-100 mb-3">
-                  <span className="text-3xl font-bold text-gray-900">
-                    {aiResult?.fitScore ?? quickResult?.score ?? 0}%
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600">Skill Match Score</p>
-              </div>
-
-              {/* Matched Skills */}
-              <div className="bg-green-50 p-4 rounded-xl">
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle2 size={16} className="text-green-600" />
-                  <span className="text-sm font-medium text-green-800">Matched Skills</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {(aiResult?.matchedSkills || quickResult?.matched || []).map((skill, i) => (
-                    <span key={i} className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full capitalize">
-                      {skill}
-                    </span>
-                  ))}
-                  {(aiResult?.matchedSkills || quickResult?.matched || []).length === 0 && (
-                    <span className="text-xs text-green-600">No specific matches found</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Missing Skills */}
-              <div className="bg-orange-50 p-4 rounded-xl">
-                <div className="flex items-center gap-2 mb-2">
-                  <XCircle size={16} className="text-orange-600" />
-                  <span className="text-sm font-medium text-orange-800">Skills to Highlight</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {(aiResult?.missingSkills || quickResult?.missing || []).map((skill, i) => (
-                    <span key={i} className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full capitalize">
-                      {skill}
-                    </span>
-                  ))}
-                  {(aiResult?.missingSkills || quickResult?.missing || []).length === 0 && (
-                    <span className="text-xs text-orange-600">All required skills covered!</span>
-                  )}
-                </div>
-              </div>
-
-              {/* AI Summary */}
-              {aiResult?.summary && (
-                <div className="bg-purple-50 p-4 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles size={16} className="text-purple-600" />
-                    <span className="text-sm font-medium text-purple-800">AI Assessment</span>
+              {/* Score circle */}
+              <div className="p-4 bg-white rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
+                <div>
+                  <span className="text-xs text-gray-500 font-mono">FIT COMPATIBILITY</span>
+                  <div className="text-2xl font-bold font-mono text-gray-900 mt-0.5">
+                    {fitScore}%
                   </div>
-                  <p className="text-sm text-purple-700">{aiResult.summary}</p>
+                  <p className="text-[11px] text-gray-600 mt-1">
+                    {isUsingAI ? (aiResult?.summary || 'Analysis complete') : quickResult ? `${quickResult.matched.length} matched skills` : ''}
+                  </p>
+                </div>
+                <div className="relative w-14 h-14">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="#E5E7EB"
+                      strokeWidth="3.5"
+                    />
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="url(#gradient)"
+                      strokeWidth="3.5"
+                      strokeDasharray={`${fitScore || 0}, 100`}
+                    />
+                    <defs>
+                      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#06B6D4" />
+                        <stop offset="100%" stopColor="#8B5CF6" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+              </div>
+
+              {/* Matched skills */}
+              <div className="p-3.5 bg-white rounded-xl border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 mb-2">
+                  <CheckCircle2 size={14} />
+                  <span>Strong Matching Skills ({matched?.length || 0})</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {matched && matched.length > 0 ? (
+                    matched.map((skill, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[11px] font-mono"
+                      >
+                        {skill}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-xs text-gray-400">None detected directly</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Missing skills */}
+              {missing && missing.length > 0 && (
+                <div className="p-3.5 bg-white rounded-xl border border-gray-100 shadow-sm">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 mb-2">
+                    <XCircle size={14} />
+                    <span>Unmatched / Secondary Requirements ({missing.length})</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {missing.map((skill, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[11px] font-mono"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {/* Reset Button */}
+              {/* Reset button */}
               <button
-                onClick={reset}
-                className="w-full py-3 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                onClick={() => setMode('input')}
+                className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-medium transition-colors"
               >
-                Analyze Another
+                Analyze Another Job
               </button>
             </motion.div>
           )}

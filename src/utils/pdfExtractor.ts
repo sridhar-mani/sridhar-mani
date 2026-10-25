@@ -48,29 +48,30 @@ export function parseJobDescription(text: string): {
   experience: string[];
 } {
   const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  
+
   const skillKeywords = [
     'react', 'vue', 'angular', 'typescript', 'javascript', 'python', 'node',
     'flask', 'django', 'fastapi', 'sql', 'postgresql', 'mongodb', 'redis',
     'docker', 'kubernetes', 'aws', 'gcp', 'azure', 'git', 'ci/cd',
     'machine learning', 'ai', 'ml', 'deep learning', 'nlp', 'llm',
-    'three.js', 'webgl', 'opengl', 'vtk', 'cfd', 'simulation',
+    'three.js', 'webgl', 'webgpu', 'opengl', 'vtk', 'vtk.js', 'cfd', 'simulation', 'openfoam',
     'rest', 'api', 'graphql', 'microservices', 'agile', 'scrum',
     'tailwind', 'css', 'html', 'figma', 'responsive', 'mobile',
-    'react native', 'expo', 'ios', 'android', 'flutter',
-    'langchain', 'chromadb', 'vector', 'rag', 'embeddings',
-    'next.js', 'vite', 'webpack', 'testing', 'jest', 'pytest'
+    'react native', 'turbomodule', 'expo', 'ios', 'android', 'kotlin',
+    'langchain', 'langgraph', 'agents', 'agentic', 'workflow orchestration',
+    'chromadb', 'vector', 'rag', 'embeddings', 'pytorch', 'ollama', 'socket.io',
+    'next.js', 'vite', 'webpack', 'wasm', 'webassembly', 'testing', 'jest', 'pytest'
   ];
 
   const textLower = text.toLowerCase();
-  
+
   const foundSkills = skillKeywords.filter(skill => 
     textLower.includes(skill.toLowerCase())
   );
 
   // Extract experience requirements (years)
   const experienceMatches = text.match(/(\d+\+?\s*(?:years?|yrs?))/gi) || [];
-  
+
   // Extract bullet points as requirements
   const requirements = lines
     .filter(line => /^[-•*]\s/.test(line) || /^\d+\.\s/.test(line))
@@ -96,13 +97,13 @@ export function matchSkills(
   score: number;
 } {
   const profileLower = profileSkills.map(s => s.toLowerCase());
-  
+
   const matched = jobSkills.filter(skill => 
-    profileLower.some(ps => ps.includes(skill.toLowerCase()) || skill.toLowerCase().includes(ps))
+    profileLower.includes(skill.toLowerCase())
   );
-  
+
   const missing = jobSkills.filter(skill => 
-    !profileLower.some(ps => ps.includes(skill.toLowerCase()) || skill.toLowerCase().includes(ps))
+    !profileLower.includes(skill.toLowerCase())
   );
 
   const score = jobSkills.length > 0 

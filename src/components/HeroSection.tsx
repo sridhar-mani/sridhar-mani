@@ -47,7 +47,7 @@ export const HeroSection = () => {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-syntax-green" />
             </span>
             <span className="font-mono text-xs text-gray-600">
-              Available for new engineering opportunities
+              AI Engineer @ Zenteiq • Available for select collaborations
             </span>
           </motion.div>
 
@@ -77,7 +77,7 @@ export const HeroSection = () => {
             className="mb-8"
           >
             <p className="font-mono text-sm md:text-base text-[#4A5568] tracking-widest flex flex-wrap items-center gap-2">
-              FULL STACK ENGINEER
+              SOFTWARE ENGINEER | AI ENGINEER
               <span className="px-3 py-1 rounded-full bg-syntax-cyan text-white text-xs font-semibold shadow-sm">AI AGENTS</span>
               <span className="px-3 py-1 rounded-full bg-syntax-orange text-white text-xs font-semibold shadow-sm">3D & WEBGPU</span>
             </p>

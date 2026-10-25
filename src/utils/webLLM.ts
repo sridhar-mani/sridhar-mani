@@ -6,27 +6,29 @@ import { env, FeatureExtractionPipeline, pipeline } from "@xenova/transformers";
 import { profileSridhar } from "../data/profileData";
 import { simpleHash } from "./simpleHash";
 
-// Use stable Qwen2.5-1.5B-Instruct for conversational AI (DeepSeek-R1 is for reasoning, not chat)
-const selectedModel = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC";
+// Use stable Qwen2.5-1.5B-Instruct for conversational AI (with fallback to Llama-3.2-1B)
+const primaryModel = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC";
+const fallbackModel = "Llama-3.2-1B-Instruct-q4f16_1-MLC";
 
-// Use prebuilt config - Qwen2.5-1.5B-Instruct is included in web-llm v0.2.80
+let activeModel = primaryModel;
 let customAppConfig: any = null;
 
-// Initialize with prebuilt config, fallback to custom if needed
+// Initialize with prebuilt config, auto-detect model availability
 async function getAppConfig() {
   if (customAppConfig) return customAppConfig;
-  
-  // Check if model exists in prebuilt config
+
   const prebuilt = prebuiltAppConfig;
-  const modelExists = prebuilt.model_list?.some((m: any) => m.model_id === selectedModel);
-  
-  if (modelExists) {
+  const qwenExists = prebuilt.model_list?.some((m: any) => m.model_id === primaryModel);
+
+  if (qwenExists) {
+    activeModel = primaryModel;
     prebuilt.useIndexedDBCache = true;
     return prebuilt;
   }
-  
-  // Fallback: try Llama-3.2-1B if Qwen not available
-  console.log("Qwen2.5 not found in prebuilt, using Llama-3.2-1B fallback");
+
+  // Fallback to Llama-3.2-1B
+  console.log("Qwen2.5 not found in prebuilt catalog, switching to Llama-3.2-1B fallback");
+  activeModel = fallbackModel;
   prebuilt.useIndexedDBCache = true;
   return prebuilt;
 }
@@ -36,15 +38,15 @@ let mydetailsIndex: EmbeddingIndex | null = null;
 let embeddingPipeline: FeatureExtractionPipeline | null = null;
 let initProgress = 0;
 
-const initProgressCallback = Comlink.proxy(({ progress }: { progress: number }) => {
+const initProgressCallback = Comlink.proxy(({ progress, text }: { progress: number; text?: string }) => {
   initProgress = progress;
-  console.log(`Initialization Progress: ${(progress * 100).toFixed(1)}%`);
+  console.log(`Initialization Progress: ${(progress * 100).toFixed(1)}% ${text ? `- ${text}` : ''}`);
 });
 
 const messages: Array<{ role: string; content: string }> = [
   {
     role: "system",
-    content: `You are Sridhar Mani, a Full Stack Engineer. When users ask about your background, skills, projects, or experience, answer naturally as yourself. Be friendly, professional, and concise. If you don't know something specific, say so honestly.`,
+    content: `You are Sridhar Mani, an AI Engineer at Zenteiq Aitech Innovations (previously Associate Software Engineer at NovaCast India). You specialize in stateful workflow orchestration (LangGraph), autonomous coding agents, WebGPU/Three.js 3D pipelines, and high-performance full-stack engineering. When users ask about your background, skills, or projects, answer naturally, professionally, and concisely as yourself.`,
   },
   { role: "user", content: "Hello!" },
 ];
@@ -79,7 +81,7 @@ async function initEmbeddingModel() {
   try {
     env.allowLocalModels = false;
     env.useBrowserCache = true;
-    
+
     embeddingPipeline = await pipeline(
       "feature-extraction",
       "Xenova/e5-small-v2",
@@ -102,7 +104,6 @@ async function embedProfile(profileText: string) {
     .map((s) => s.replace(/^##\s*/, ""))
     .filter((s) => s.length > 0);
 
-  // Load existing data from IndexedDB
   let existingDb: any[] = [];
   try {
     existingDb = (await mydetailsIndex.getAllObjectsFromIndexedDB(
@@ -117,9 +118,7 @@ async function embedProfile(profileText: string) {
     const para = filteredParagraphs[i].trim();
     const uniqueId = `profile_${simpleHash(para)}`;
 
-    // Check if this paragraph is already embedded
     if (existingDb && existingDb.some((item: any) => item.id === uniqueId)) {
-      console.log(`Paragraph already embedded: ${para.slice(0, 40)}...`);
       continue;
     }
 
@@ -145,16 +144,15 @@ async function embedProfile(profileText: string) {
 
 async function initEngine() {
   try {
-    console.log(`Initializing LLM engine with ${selectedModel}...`);
-    
+    console.log(`Initializing LLM engine...`);
     const appConfig = await getAppConfig();
 
-    engine = await CreateMLCEngine(selectedModel, {
+    engine = await CreateMLCEngine(activeModel, {
       initProgressCallback: initProgressCallback,
       appConfig: appConfig,
     });
 
-    console.log("LLM engine initialized");
+    console.log(`LLM engine initialized with ${activeModel}`);
 
     await initEmbeddingModel();
 
@@ -172,13 +170,9 @@ async function initEngine() {
         existingDb = [];
       }
 
-      const profileExists = existingDb && existingDb.length > 0;
-
-      if (!profileExists) {
+      if (!existingDb || existingDb.length === 0) {
         console.log("Embedding profile for the first time...");
         await embedProfile(profileSridhar);
-      } else {
-        console.log("Profile already embedded, skipping...");
       }
     }
 
@@ -210,8 +204,6 @@ async function reply() {
         },
       });
 
-      console.log("Search results:", searchResults);
-
       retrievedContext = searchResults
         .map((result: any) => result.object.text)
         .join("\n\n");
@@ -220,10 +212,10 @@ async function reply() {
     console.error("RAG search failed:", error);
   }
 
-  // Construct focused prompt
+  // Construct focused prompt reflecting current role and work
   const systemPrompt = retrievedContext 
-    ? `You are Sridhar Mani. Use this info to answer:\n${retrievedContext.slice(0, 600)}\n\nAnswer in 1-2 sentences. Be specific.`
-    : `You are Sridhar Mani, a Full Stack Engineer skilled in React, Python, AI/ML, and 3D visualization. Answer in 1-2 sentences.`;
+    ? `You are Sridhar Mani, an AI Engineer at Zenteiq Aitech Innovations. Use this information to answer:\n${retrievedContext.slice(0, 700)}\n\nAnswer concisely in 1-3 sentences. Be specific.`
+    : `You are Sridhar Mani, an AI Engineer at Zenteiq specializing in agentic workflows, LangGraph, Python, WebGPU/Three.js, and full-stack systems. Answer concisely in 1-2 sentences.`;
 
   const enhancedMessages = [
     { role: "system", content: systemPrompt },
@@ -234,7 +226,7 @@ async function reply() {
     messages: enhancedMessages as any,
     temperature: 0.5,
     top_p: 0.9,
-    max_tokens: 80,
+    max_tokens: 100,
     stop: ["\n\n", "---", "User:", "Assistant:"],
   });
 
@@ -255,8 +247,7 @@ async function indexDocument(text: string, source: string) {
 
   for (const chunk of chunks) {
     const uniqueId = `doc_${source}_${simpleHash(chunk)}`;
-    
-    // Check if already indexed
+
     let existingDb: any[] = [];
     try {
       existingDb = (await mydetailsIndex!.getAllObjectsFromIndexedDB(
@@ -291,8 +282,8 @@ async function analyzeJobFit(jobDescription: string) {
     await initEngine();
   }
 
-  // Extract key skills from job description using NLP patterns
-  const skillPatterns = /\b(react|vue|angular|typescript|javascript|python|node|flask|django|fastapi|sql|postgresql|mongodb|redis|docker|kubernetes|aws|gcp|azure|git|ci\/cd|machine learning|ai|ml|deep learning|nlp|llm|three\.js|webgl|opengl|vtk|cfd|simulation|rest|api|graphql|microservices|tailwind|css|html|langchain|chromadb|rag|next\.js|vite|testing|agile)\b/gi;
+  // Comprehensive NLP skill keyword pattern including latest agentic, WebGPU, and deep learning skills
+  const skillPatterns = /\b(react|vue|angular|typescript|javascript|python|node|flask|django|fastapi|sql|postgresql|mongodb|redis|docker|kubernetes|aws|gcp|azure|git|ci\/cd|machine learning|ai|ml|deep learning|nlp|llm|three\.js|webgl|webgpu|opengl|vtk|cfd|simulation|rest|api|graphql|microservices|tailwind|css|html|langchain|langgraph|agent|agents|agentic|chromadb|rag|next\.js|vite|testing|agile|pytorch|ollama|socket\.io|wasm|turbomodule)\b/gi;
   const jdSkills = [...new Set((jobDescription.toLowerCase().match(skillPatterns) || []))];
 
   // Get relevant context from indexed profile
@@ -318,63 +309,60 @@ async function analyzeJobFit(jobDescription: string) {
   // Step 1: Try LLM-based analysis first
   try {
     console.log("Attempting LLM-based job analysis...");
-    
-    const analysisPrompt = `JD Skills: ${jdSkills.slice(0, 15).join(', ')}
-Profile: ${relevantContext.slice(0, 800)}
 
-Match skills to profile. Return ONLY valid JSON:
-{"matched":["skill"],"missing":["skill"],"score":75,"note":"one sentence"}`;
+    const analysisPrompt = `JD Skills: ${jdSkills.slice(0, 16).join(', ')}
+Candidate Profile: ${relevantContext.slice(0, 800)}
+
+Match candidate profile against JD skills. Return ONLY valid JSON:
+{"matched":["skill"],"missing":["skill"],"score":85,"note":"one sentence summary"}`;
 
     const response = await engine!.chat.completions.create({
       messages: [
-        { role: "system", content: "You are a skill matcher. Output valid JSON only. No explanations." },
+        { role: "system", content: "You are a senior tech recruiter and skill matcher. Output strictly valid JSON only." },
         { role: "user", content: analysisPrompt }
       ],
       temperature: 0.3,
-      max_tokens: 150,
+      max_tokens: 160,
       stop: ["\n\n"],
     });
 
     const content = response.choices[0].message.content || "";
-    console.log("LLM response:", content);
-    
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
       const result = {
         matchedSkills: parsed.matched || parsed.matchedSkills || [],
         missingSkills: parsed.missing || parsed.missingSkills || [],
-        fitScore: typeof parsed.score === 'number' ? parsed.score : (parsed.fitScore || 50),
-        summary: parsed.note || parsed.summary || "LLM analysis complete"
+        fitScore: typeof parsed.score === 'number' ? parsed.score : (parsed.fitScore || 60),
+        summary: parsed.note || parsed.summary || "LLM match analysis complete"
       };
-      
-      // Validate result has reasonable data
+
       if (result.matchedSkills.length > 0 || result.missingSkills.length > 0) {
-        console.log("LLM analysis successful:", result);
         return result;
       }
     }
-    console.log("LLM returned invalid format, falling back to regex...");
   } catch (error) {
-    console.error("LLM analysis failed, using regex fallback:", error);
+    console.warn("LLM analysis failed, using local NLP fallback:", error);
   }
 
-  // Step 2: Fallback - Local NLP/regex matching
-  console.log("Using regex-based skill matching...");
+  // Step 2: Fallback - Comprehensive local NLP matching with all latest skills
   const profileSkills = [
-    'react', 'typescript', 'javascript', 'python', 'vue', 'next.js',
-    'fastapi', 'flask', 'django', 'three.js', 'langchain', 'chromadb',
-    'docker', 'postgresql', 'webgl', 'vtk', 'ai', 'ml', 'rag', 'tailwind'
+    'python', 'typescript', 'javascript', 'react', 'next.js', 'vue',
+    'fastapi', 'flask', 'django', 'node', 'langchain', 'langgraph',
+    'agents', 'agentic', 'pytorch', 'deep learning', 'three.js',
+    'webgpu', 'webgl', 'vtk', 'cfd', 'simulation', 'docker', 'sql',
+    'postgresql', 'sqlite', 'redis', 'chromadb', 'rag', 'tailwind',
+    'ollama', 'socket.io', 'rest', 'api', 'wasm', 'turbomodule'
   ];
-  
+
   const matched = jdSkills.filter(s => profileSkills.includes(s.toLowerCase()));
   const missing = jdSkills.filter(s => !profileSkills.includes(s.toLowerCase()));
-  
+
   return {
     matchedSkills: matched,
     missingSkills: missing,
     fitScore: jdSkills.length > 0 ? Math.round((matched.length / jdSkills.length) * 100) : 0,
-   summary: `Matched ${matched.length}/${jdSkills.length} required skills`
+    summary: `Matched ${matched.length}/${jdSkills.length} required skills based on Sridhar's profile`
   };
 }
 

@@ -165,24 +165,50 @@ export const ORB_PALETTES: OrbPalette[] = [
   },
 ];
 
-// Awwwards-tier Accretion Disk / Cosmic Ring of Stardust Particles
+// Generates a soft glowing circular particle texture in-memory to eliminate square artifacts
+function createGlowingDotTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+
+  if (ctx) {
+    const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0.85)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.3)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(32, 32, 32, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
+
+// Awwwards-tier Accretion Disk / Cosmic Ring of Glowing Circular Stardust Particles
 const AccretionRing = ({ color }: { color: string }) => {
   const pointsRef = useRef<THREE.Points>(null);
+  const dotTexture = useMemo(() => createGlowingDotTexture(), []);
 
   const [positions, scales] = useMemo(() => {
-    const count = 280;
+    const count = 320;
     const pos = new Float32Array(count * 3);
     const scl = new Float32Array(count);
 
     for (let i = 0; i < count; i++) {
-      const radius = 2.4 + Math.random() * 0.9;
+      const radius = 2.3 + Math.random() * 1.1;
       const angle = Math.random() * Math.PI * 2;
-      const yOffset = (Math.random() - 0.5) * 0.35;
+      const yOffset = (Math.random() - 0.5) * 0.4;
 
       pos[i * 3] = Math.cos(angle) * radius;
       pos[i * 3 + 1] = yOffset;
       pos[i * 3 + 2] = Math.sin(angle) * radius;
-      scl[i] = Math.random() * 0.04 + 0.015;
+      scl[i] = Math.random() * 0.05 + 0.02;
     }
     return [pos, scl];
   }, []);
@@ -190,8 +216,8 @@ const AccretionRing = ({ color }: { color: string }) => {
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
     if (pointsRef.current) {
-      pointsRef.current.rotation.y = time * 0.18;
-      pointsRef.current.rotation.x = Math.sin(time * 0.1) * 0.15 + 0.25;
+      pointsRef.current.rotation.y = time * 0.16;
+      pointsRef.current.rotation.x = Math.sin(time * 0.1) * 0.14 + 0.25;
       pointsRef.current.rotation.z = Math.cos(time * 0.08) * 0.1;
     }
   });
@@ -205,12 +231,14 @@ const AccretionRing = ({ color }: { color: string }) => {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.06}
+        size={0.16}
+        map={dotTexture}
         color={color}
-        transparent
-        opacity={0.7}
+        transparent={true}
+        opacity={0.85}
         blending={THREE.AdditiveBlending}
         depthWrite={false}
+        sizeAttenuation={true}
       />
     </points>
   );
@@ -316,7 +344,7 @@ const LiquidOrbMesh = ({ mouseStateRef, palette, pulseTrigger, onRandomize }: Li
 
   return (
     <group onClick={(e) => { e.stopPropagation(); onRandomize(); }}>
-      {/* Awwwards-tier Stardust Accretion Ring */}
+      {/* Soft circular glowing stardust ring */}
       <AccretionRing color={palette.primary} />
 
       {/* Main liquid glass orb with high refraction */}
