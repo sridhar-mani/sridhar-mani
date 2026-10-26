@@ -210,6 +210,7 @@ export const PixelPet = () => {
   const baseDepthYRef = useRef<number>(12); // Ground depth baseline (ranges between 8 and 65)
   const velXRef = useRef<number>(0);
   const velYRef = useRef<number>(0);
+  const angularVelocityRef = useRef<number>(0);
   const directionRef = useRef<1 | -1>(1);
   const pauseUntilRef = useRef<number>(0);
   const nextLeapTimeRef = useRef<number>(performance.now() + 5000);
@@ -320,6 +321,9 @@ export const PixelPet = () => {
 
       const minX = 20;
       const maxX = Math.max(minX + 120, screenWidthRef.current - 80);
+      // Y is measured as distance from the viewport bottom; keep the full pet inside the screen.
+      const maxY = Math.max(8, window.innerHeight - 72);
+      baseDepthYRef.current = Math.min(baseDepthYRef.current, maxY);
 
       // 1. TENNIS BALL PHYSICS (X & Y)
       if (tennisBall && tennisBall.active) {
@@ -415,6 +419,9 @@ export const PixelPet = () => {
               newVelY = -newVelY * 0.42; // Restitution bounce
             } else {
               newVelY = 0;
+              velXRef.current = 0;
+              angularVelocityRef.current = 0;
+              setRotation(0);
               setScaleY(1.0);
               setScaleX(1.0);
             }
@@ -433,10 +440,12 @@ export const PixelPet = () => {
             setX(newX);
           }
 
-          // Gentle mid-air spin
-          if (velYRef.current !== 0) {
-            setRotation((prev) => (directionRef.current === 1 ? prev + 4 : prev - 4));
-          } else {
+          // Apply a finite, damped spin from the toss instead of adding a fixed angle every frame.
+          if (velYRef.current !== 0 && Math.abs(angularVelocityRef.current) > 2) {
+            setRotation((prev) => prev + angularVelocityRef.current * dt);
+            angularVelocityRef.current *= Math.exp(-4 * dt);
+          } else if (velYRef.current === 0) {
+            angularVelocityRef.current = 0;
             setRotation(0);
           }
         } else {
@@ -460,8 +469,8 @@ export const PixelPet = () => {
               velYRef.current = Math.random() * 120 + 220; // Hop into air!
               petAudio.playBoing();
 
-              // Also randomly shift depth baseline (8px to 55px)
-              baseDepthYRef.current = Math.floor(Math.random() * 45) + 10;
+              // Randomly choose a new depth anywhere within the visible viewport.
+              baseDepthYRef.current = 8 + Math.random() * Math.max(1, maxY - 8);
             }
 
             const baseSpeed = 75 + (levelInfo.level - 1) * 12;
@@ -533,6 +542,7 @@ export const PixelPet = () => {
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
 
     setIsDragging(true);
+    angularVelocityRef.current = 0;
     setState('happy');
     petAudio.playBoing();
 
@@ -569,7 +579,8 @@ export const PixelPet = () => {
       const minX = 20;
       const maxX = Math.max(minX + 100, screenWidthRef.current - 80);
       const newX = Math.max(minX, Math.min(maxX, dragStartRef.current.startX + dx));
-      const newY = Math.max(8, dragStartRef.current.startY + dy);
+      const maxY = Math.max(8, window.innerHeight - 72);
+      const newY = Math.max(8, Math.min(maxY, dragStartRef.current.startY + dy));
 
       currentXRef.current = newX;
       currentYRef.current = newY;
@@ -593,14 +604,25 @@ export const PixelPet = () => {
       }
     };
 
-    const handlePointerUp = () => {
+    const handlePointerUp = (event?: PointerEvent) => {
       const dist = dragStartRef.current?.totalDist || 0;
+      const wasCancelled = event?.type === 'pointercancel';
       setIsDragging(false);
       dragStartRef.current = null;
       lastMousePosRef.current = null;
 
+      if (wasCancelled) {
+        // Cancellation is not a throw: discard stale pointer momentum.
+        velXRef.current = 0;
+        velYRef.current = 0;
+        angularVelocityRef.current = 0;
+        setRotation(0);
+      }
+
       // Clean distinction: Click (< 8px total movement) vs Drag (> 8px)
-      if (dist < 8) {
+      if (wasCancelled) {
+        setState('walk');
+      } else if (dist < 8) {
         // Was a gentle tap/click!
         petAudio.playChirp();
         setIsMenuOpen(true);
@@ -611,17 +633,20 @@ export const PixelPet = () => {
           setHearts((prev) => prev.filter((h) => h.id !== newHeart.id));
         }, 1200);
       } else {
-        // Was tossed into the air!
+        // Was tossed into the air. Derive a short spin from throw speed; physics damps it out.
+        angularVelocityRef.current = Math.max(-240, Math.min(240, velXRef.current * 0.18));
         setState('happy');
         setDialogue("WHEEE! Airtime! 🪂");
       }
 
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
     };
 
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
   };
 
   // Laser Pointer follower
@@ -632,7 +657,7 @@ export const PixelPet = () => {
     }
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (e.clientY > window.innerHeight * 0.4) {
+      if (e.clientY > 40) {
         const altitude = window.innerHeight - e.clientY;
         setLaserPos({ x: e.clientX, y: altitude });
         targetXOverrideRef.current = Math.max(20, Math.min(screenWidthRef.current - 80, e.clientX - 25));
@@ -653,10 +678,11 @@ export const PixelPet = () => {
         return;
       }
 
-      if (e.clientY > window.innerHeight * 0.5) {
+      if (e.clientY > 40) {
         const targetX = Math.max(20, Math.min(e.clientX - 25, screenWidthRef.current - 80));
         targetXOverrideRef.current = targetX;
-        baseDepthYRef.current = Math.max(8, Math.min(60, window.innerHeight - e.clientY - 20));
+        const maxY = Math.max(8, window.innerHeight - 72);
+        baseDepthYRef.current = Math.max(8, Math.min(maxY, window.innerHeight - e.clientY - 32));
         setFacing(targetX > currentXRef.current ? 'right' : 'left');
         directionRef.current = targetX > currentXRef.current ? 1 : -1;
         petAudio.playChirp();
