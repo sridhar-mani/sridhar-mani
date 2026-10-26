@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints, stepVerticalPhysics, getPatrolDepthTarget } from '../src/components/pet/petPhysics.js';
+import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints, getRandomPatrolTarget, stepVerticalPhysics, getPatrolDepthTarget } from '../src/components/pet/petPhysics.js';
 
 test('clamp handles values outside and inside the range', () => {
   assert.equal(clamp(-5, 0, 10), 0);
@@ -74,4 +74,15 @@ test('random depth stops cover most of the safe viewport without leaving bounds'
   assert.equal(getPatrolDepthTarget(8, 708, 0.5), 358);
   assert.ok(getPatrolDepthTarget(8, 708, 0.5) > 134);
   assert.equal(getPatrolDepthTarget(0, 0, 1), 0);
+});
+
+
+test('random patrol targets stay in bounds and travel a meaningful distance', () => {
+  const left = getRandomPatrolTarget(8, 1208, 600, 0);
+  const right = getRandomPatrolTarget(8, 1208, 600, 0.999);
+  assert.equal(left, 8);
+  assert.ok(right <= 1208 && right >= 740);
+  assert.ok(Math.abs(left - 600) >= 140);
+  assert.ok(Math.abs(right - 600) >= 140);
+  assert.equal(getRandomPatrolTarget(10, 10, 5, 0.5), 10);
 });
