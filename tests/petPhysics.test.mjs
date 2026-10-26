@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints, stepVerticalPhysics } from '../src/components/pet/petPhysics.js';
+import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints, stepVerticalPhysics, getPatrolDepthTarget } from '../src/components/pet/petPhysics.js';
 
 test('clamp handles values outside and inside the range', () => {
   assert.equal(clamp(-5, 0, 10), 0);
@@ -66,4 +66,11 @@ test('vertical integration stops upward motion at the ceiling', () => {
   assert.equal(step.position, 720);
   assert.equal(step.velocity, 0);
   assert.equal(step.hitCeiling, true);
+});
+
+test('random depth stops stay in the lower 18% of the safe movement range', () => {
+  assert.equal(getPatrolDepthTarget(8, 708, 0), 8);
+  assert.equal(getPatrolDepthTarget(8, 708, 1), 134);
+  assert.ok(getPatrolDepthTarget(8, 708, 0.5) <= 134);
+  assert.equal(getPatrolDepthTarget(0, 0, 1), 0);
 });
