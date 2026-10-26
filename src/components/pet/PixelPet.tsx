@@ -457,11 +457,13 @@ export const PixelPet = () => {
             if (state !== 'happy' && state !== 'sleep' && !isLevelingUp) {
               setState('idle');
             }
+            currentYRef.current = baseDepthYRef.current;
             setY(baseDepthYRef.current);
           } else {
             // Natural walking hop in Y axis: $|\sin(t \times 10)| \times 6\text{px}$
             const walkHop = Math.abs(Math.sin(time * 0.012)) * 6;
-            setY(baseDepthYRef.current + walkHop);
+            currentYRef.current = baseDepthYRef.current + walkHop;
+            setY(currentYRef.current);
 
             // Autonomous random playful leap in Y axis
             if (time > nextLeapTimeRef.current && !targetXOverrideRef.current) {
