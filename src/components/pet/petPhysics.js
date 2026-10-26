@@ -87,3 +87,25 @@ export function getPatrolDepthTarget(minY, maxY, randomValue = Math.random()) {
   const coverage = 0.08 + safeRandom * 0.84;
   return low + (high - low) * coverage;
 }
+
+
+/** Choose a random patrol destination far enough away to make visible progress. */
+export function getRandomPatrolTarget(minX, maxX, currentX, randomValue = Math.random(), minimumTravel = 140) {
+  const low = Math.min(minX, maxX);
+  const high = Math.max(minX, maxX);
+  const span = high - low;
+  if (span <= 0) return low;
+
+  const current = clamp(currentX, low, high);
+  const safeRandom = clamp(randomValue, 0, 1 - Number.EPSILON);
+  const minTravel = Math.min(Math.max(0, minimumTravel), span * 0.35);
+  const leftEnd = Math.max(low, current - minTravel);
+  const rightStart = Math.min(high, current + minTravel);
+  const leftLength = leftEnd - low;
+  const rightLength = high - rightStart;
+  const available = leftLength + rightLength;
+
+  if (available <= 0) return low + span * safeRandom;
+  const pick = safeRandom * available;
+  return pick < leftLength ? low + pick : rightStart + (pick - leftLength);
+}
