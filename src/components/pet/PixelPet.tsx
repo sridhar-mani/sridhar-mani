@@ -478,7 +478,6 @@ export const PixelPet = () => {
           }
         } else {
           // 3. CONTINUOUS PATROL IN BOTH X AND Y (Depth wandering & Natural Steps)
-          setRotation(0);
           const isPaused = time < pauseUntilRef.current;
 
           if (isPaused || state === 'sleep' || isLevelingUp) {
@@ -487,6 +486,7 @@ export const PixelPet = () => {
             }
             currentYRef.current = baseDepthYRef.current;
             setY(baseDepthYRef.current);
+            setRotation((previous) => moveTowards(previous, 0, 24 * dt));
           } else {
             // Smoothly walk toward a clicked depth instead of moving the floor instantly.
             if (targetDepthYRef.current !== null) {
@@ -496,12 +496,14 @@ export const PixelPet = () => {
                 targetDepthYRef.current = null;
               }
             }
-            // Natural walking hop in Y axis: $|\sin(t \times 10)| \times 6\text{px}$
-            const walkHop = Math.abs(Math.sin(time * 0.012)) * 6;
+            // Small footfall bob and a restrained directional lean make walking feel alive
+            // without scaling the sprite or turning every step into a squash animation.
+            const walkHop = Math.abs(Math.sin(time * 0.012)) * 3;
             currentYRef.current = baseDepthYRef.current + walkHop;
             setY(currentYRef.current);
+            setRotation(directionRef.current * (2 + Math.sin(time * 0.018) * 2.5));
 
-            const baseSpeed = 75 + (levelInfo.level - 1) * 12;
+            const baseSpeed = 92 + (levelInfo.level - 1) * 10;
             const speed = tennisBallRef.current ? baseSpeed * 2.3 : laserActive ? baseSpeed * 1.8 : baseSpeed;
 
             let curX = currentXRef.current;
