@@ -471,8 +471,8 @@ export const PixelPet = () => {
               velYRef.current = Math.random() * 120 + 220; // Hop into air!
               petAudio.playBoing();
 
-              // Randomly choose a new depth anywhere within the visible viewport.
-              baseDepthYRef.current = 8 + Math.random() * Math.max(1, maxY - 8);
+              // Keep the current ground baseline while airborne. Changing it at takeoff
+              // makes the floor move under the pet and causes visible teleporting.
             }
 
             const baseSpeed = 75 + (levelInfo.level - 1) * 12;
@@ -635,7 +635,12 @@ export const PixelPet = () => {
           setHearts((prev) => prev.filter((h) => h.id !== newHeart.id));
         }, 1200);
       } else {
-        // Was tossed into the air. Derive a short spin from throw speed; physics damps it out.
+        // Anchor the landing baseline to the release position so a toss never snaps
+        // toward a stale floor position from before the drag.
+        const maxY = Math.max(8, window.innerHeight - 72);
+        baseDepthYRef.current = Math.max(8, Math.min(maxY, currentYRef.current));
+        currentYRef.current = baseDepthYRef.current;
+        // Derive a short spin from throw speed; physics damps it out.
         angularVelocityRef.current = Math.max(-240, Math.min(240, velXRef.current * 0.18));
         setState('happy');
         setDialogue("WHEEE! Airtime! 🪂");
@@ -663,7 +668,8 @@ export const PixelPet = () => {
         const altitude = window.innerHeight - e.clientY;
         setLaserPos({ x: e.clientX, y: altitude });
         targetXOverrideRef.current = Math.max(20, Math.min(screenWidthRef.current - 80, e.clientX - 25));
-        baseDepthYRef.current = Math.max(8, Math.min(60, altitude - 10));
+        // Keep the pet's ground baseline stable while the laser moves; updating it
+        // on every mousemove makes the pet jump vertically from frame to frame.
         setFacing(e.clientX > currentXRef.current ? 'right' : 'left');
       }
     };
@@ -676,7 +682,7 @@ export const PixelPet = () => {
   useEffect(() => {
     const handleScreenClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.closest('button') || target.closest('a') || target.closest('input') || target.closest('[data-pet-menu]') || isDragging) {
+      if (target.closest('button') || target.closest('a') || target.closest('input') || target.closest('[data-pet-menu]') || target.closest('[data-pet-root]') || isDragging) {
         return;
       }
 
@@ -790,6 +796,7 @@ export const PixelPet = () => {
 
       {/* FREESTANDING SCREEN PET (FULL 2D X & Y PHYSICS) */}
       <div
+        data-pet-root
         className="fixed z-40 select-none pointer-events-auto touch-none"
         style={{
           left: `${x}px`,
