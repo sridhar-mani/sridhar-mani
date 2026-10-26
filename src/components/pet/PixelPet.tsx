@@ -205,6 +205,9 @@ export const PixelPet = () => {
   } | null>(null);
 
   const prevLevelRef = useRef<number>(getLevelInfo(xp).level);
+  // Keep the animated ball in a ref so each physics frame doesn't restart the RAF loop.
+  const tennisBallRef = useRef(tennisBall);
+  tennisBallRef.current = tennisBall;
   const currentXRef = useRef<number>(80);
   const currentYRef = useRef<number>(10);
   const baseDepthYRef = useRef<number>(12); // Ground depth baseline (ranges between 8 and 65)
@@ -326,11 +329,12 @@ export const PixelPet = () => {
       baseDepthYRef.current = Math.min(baseDepthYRef.current, maxY);
 
       // 1. TENNIS BALL PHYSICS (X & Y)
-      if (tennisBall && tennisBall.active) {
-        let bx = tennisBall.x + tennisBall.vx * dt;
-        let by = tennisBall.y + tennisBall.vy * dt;
-        let bvy = tennisBall.vy - 980 * dt;
-        let bvx = tennisBall.vx * (1 - 0.4 * dt);
+      const activeBall = tennisBallRef.current;
+      if (activeBall && activeBall.active) {
+        let bx = activeBall.x + activeBall.vx * dt;
+        let by = activeBall.y + activeBall.vy * dt;
+        let bvy = activeBall.vy - 980 * dt;
+        let bvx = activeBall.vx * (1 - 0.4 * dt);
 
         if (by <= 8) {
           by = 8;
@@ -346,19 +350,16 @@ export const PixelPet = () => {
           bvx = -bvx * 0.7;
         }
 
-        setTennisBall({
-          x: bx,
-          y: by,
-          vx: bvx,
-          vy: bvy,
-          active: true
-        });
+        const nextBall = { x: bx, y: by, vx: bvx, vy: bvy, active: true };
+        tennisBallRef.current = nextBall;
+        setTennisBall(nextBall);
 
         // Pet sprints and leaps to intercept the ball
         targetXOverrideRef.current = bx;
 
         if (Math.abs(currentXRef.current - bx) < 28 && by <= 25) {
           petAudio.playMunch();
+          tennisBallRef.current = null;
           setTennisBall(null);
           targetXOverrideRef.current = null;
           setState('happy');
@@ -476,7 +477,7 @@ export const PixelPet = () => {
             }
 
             const baseSpeed = 75 + (levelInfo.level - 1) * 12;
-            const speed = tennisBall ? baseSpeed * 2.3 : laserActive ? baseSpeed * 1.8 : baseSpeed;
+            const speed = tennisBallRef.current ? baseSpeed * 2.3 : laserActive ? baseSpeed * 1.8 : baseSpeed;
 
             let curX = currentXRef.current;
 
@@ -536,7 +537,7 @@ export const PixelPet = () => {
 
     animFrameRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [tennisBall, isDragging, state, levelInfo.level, isLevelingUp, laserActive, currentPet]);
+  }, [isDragging, state, levelInfo.level, isLevelingUp, laserActive, currentPet]);
 
   // REALISTIC LIVING PET DRAG & REACT HANDLERS
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -544,6 +545,9 @@ export const PixelPet = () => {
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
 
     setIsDragging(true);
+    // A fresh grab must not inherit momentum from a previous toss or click.
+    velXRef.current = 0;
+    velYRef.current = 0;
     angularVelocityRef.current = 0;
     setState('happy');
     petAudio.playBoing();
@@ -625,7 +629,11 @@ export const PixelPet = () => {
       if (wasCancelled) {
         setState('walk');
       } else if (dist < 8) {
-        // Was a gentle tap/click!
+        // A tap is not a throw: discard pointer jitter so it cannot launch the pet.
+        velXRef.current = 0;
+        velYRef.current = 0;
+        angularVelocityRef.current = 0;
+        setRotation(0);
         petAudio.playChirp();
         setIsMenuOpen(true);
         setXp((p) => p + 6);
