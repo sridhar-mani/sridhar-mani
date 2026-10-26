@@ -211,7 +211,7 @@ export const PixelPet = () => {
   tennisBallRef.current = tennisBall;
   const currentXRef = useRef<number>(80);
   const currentYRef = useRef<number>(10);
-  const baseDepthYRef = useRef<number>(12); // Ground depth baseline (ranges between 8 and 65)
+  const baseDepthYRef = useRef<number>(12); // Ground depth baseline, clamped to the current viewport
   const velXRef = useRef<number>(0);
   const velYRef = useRef<number>(0);
   const angularVelocityRef = useRef<number>(0);
@@ -1149,7 +1149,7 @@ export const PixelPet = () => {
                 </p>
                 <p className="text-slate-400 leading-relaxed">
                   • 🪂 <strong>Drag & Toss:</strong> Grab your pet, fling it into the air, and watch it bounce with a pop!<br />
-                  • 🐾 <strong>2D Patrol:</strong> Hops and wanders naturally in X & Y depth.<br />
+                  • 🐾 <strong>2D Patrol:</strong> Wanders between random waypoints, pauses to look around, and explores depth.<br />
                   • ⭐ <strong>Double-Click:</strong> Acrobatic 360° backflip pop trick!<br />
                   • 🎾 <strong>Play Fetch:</strong> Toss tennis ball for pet to chase!
                 </p>
