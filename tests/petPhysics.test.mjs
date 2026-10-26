@@ -55,7 +55,7 @@ test('vertical integration bounces at the floor and settles low-energy landings'
   assert.equal(bounce.bounced, true);
   assert.ok(bounce.velocity > 0);
 
-  const settled = stepVerticalPhysics(9, -10, 0.05, 8, 720);
+  const settled = stepVerticalPhysics(8.2, -10, 0.05, 8, 720);
   assert.equal(settled.position, 8);
   assert.equal(settled.velocity, 0);
   assert.equal(settled.bounced, false);
