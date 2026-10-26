@@ -242,6 +242,7 @@ export const PixelPet = () => {
       baseDepthYRef.current = clamp(baseDepthYRef.current, minY, maxY);
       if (targetXOverrideRef.current !== null) targetXOverrideRef.current = clamp(targetXOverrideRef.current, minX, maxX);
       if (targetDepthYRef.current !== null) targetDepthYRef.current = clamp(targetDepthYRef.current, minY, maxY);
+      if (patrolTargetXRef.current !== null) patrolTargetXRef.current = clamp(patrolTargetXRef.current, minX, maxX);
       setX(currentXRef.current);
       setY(currentYRef.current);
     };
@@ -302,6 +303,9 @@ export const PixelPet = () => {
   // Spawn Tennis Ball for Fetch
   const spawnTennisBall = useCallback(() => {
     petAudio.playBoing();
+    targetXOverrideRef.current = null;
+    targetDepthYRef.current = null;
+    patrolTargetXRef.current = null;
     const { minX, maxX } = getHorizontalBounds(screenWidthRef.current);
     const { maxY: ballMaxY } = getVerticalBounds(window.innerHeight, 24);
     const curX = clamp(currentXRef.current, minX, maxX);
@@ -567,6 +571,7 @@ export const PixelPet = () => {
               }
             }
 
+            curX = clamp(curX, minX, maxX);
             currentXRef.current = curX;
             setX(curX);
           }
