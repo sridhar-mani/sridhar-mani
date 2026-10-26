@@ -887,15 +887,17 @@ export const PixelPet = () => {
           {/* Floating Speech Bubble */}
           <AnimatePresence>
             {showDialogue && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.85 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8, y: 5 }}
-                className="mb-2 bg-slate-900/95 text-white border border-cyan-400/60 backdrop-blur-md rounded-2xl px-3 py-1.5 text-xs font-mono shadow-[0_8px_24px_rgba(0,0,0,0.4)] max-w-[240px] text-center pointer-events-none"
-              >
-                <p className="leading-snug">{dialogue}</p>
-                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-r border-b border-cyan-400/60 rotate-45" />
-              </motion.div>
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none">
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.85 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8, y: 5 }}
+                  className="relative bg-slate-900/95 text-white border border-cyan-400/60 backdrop-blur-md rounded-2xl px-3 py-1.5 text-xs font-mono shadow-[0_8px_24px_rgba(0,0,0,0.4)] max-w-[240px] text-center"
+                >
+                  <p className="leading-snug">{dialogue}</p>
+                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-r border-b border-cyan-400/60 rotate-45" />
+                </motion.div>
+              </div>
             )}
           </AnimatePresence>
 
