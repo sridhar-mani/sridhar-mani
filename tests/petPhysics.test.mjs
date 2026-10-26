@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints } from '../src/components/pet/petPhysics.js';
+import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints, stepVerticalPhysics } from '../src/components/pet/petPhysics.js';
 
 test('clamp handles values outside and inside the range', () => {
   assert.equal(clamp(-5, 0, 10), 0);
@@ -39,4 +39,31 @@ test('patrol waypoints are ordered and remain within bounds', () => {
   assert.deepEqual([...points].sort((a, b) => a - b), points);
   assert.ok(points.every((point) => point >= 8 && point <= 1208));
   assert.ok(new Set(points).size === points.length);
+});
+
+test('vertical integration applies gravity without exceeding the time-step cap', () => {
+  const step = stepVerticalPhysics(100, 100, 1, 8, 720);
+  assert.equal(step.position, 105);
+  assert.equal(step.velocity, 30);
+  assert.equal(step.landed, false);
+});
+
+test('vertical integration bounces at the floor and settles low-energy landings', () => {
+  const bounce = stepVerticalPhysics(10, -200, 0.05, 8, 720);
+  assert.equal(bounce.position, 8);
+  assert.equal(bounce.landed, true);
+  assert.equal(bounce.bounced, true);
+  assert.ok(bounce.velocity > 0);
+
+  const settled = stepVerticalPhysics(9, -10, 0.05, 8, 720);
+  assert.equal(settled.position, 8);
+  assert.equal(settled.velocity, 0);
+  assert.equal(settled.bounced, false);
+});
+
+test('vertical integration stops upward motion at the ceiling', () => {
+  const step = stepVerticalPhysics(718, 500, 0.05, 8, 720);
+  assert.equal(step.position, 720);
+  assert.equal(step.velocity, 0);
+  assert.equal(step.hitCeiling, true);
 });
