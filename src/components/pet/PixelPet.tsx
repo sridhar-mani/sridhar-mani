@@ -220,7 +220,6 @@ export const PixelPet = () => {
   const targetXOverrideRef = useRef<number | null>(null);
   const targetDepthYRef = useRef<number | null>(null);
   const patrolTargetXRef = useRef<number | null>(null);
-  const lastPatrolIndexRef = useRef<number>(-1);
   const nextPatrolTimeRef = useRef<number>(performance.now() + 1600);
   const animFrameRef = useRef<number>(0);
   const dragStartRef = useRef<{ mouseX: number; mouseY: number; startX: number; startY: number; totalDist: number } | null>(null);
@@ -428,15 +427,10 @@ export const PixelPet = () => {
           const newY = verticalStep.position;
           const newVelY = verticalStep.velocity;
 
-          // Aerial stretch responds to the bounded velocity result.
-          if (newVelY > 100) {
-          } else if (newVelY < -100) {
-          }
-
           if (verticalStep.landed && verticalStep.bounced) {
             petAudio.playPop();
             triggerDustPuff(currentXRef.current, floorY);
-                      } else if (verticalStep.landed) {
+          } else if (verticalStep.landed) {
             velXRef.current = 0;
             angularVelocityRef.current = 0;
             setRotation(0);
