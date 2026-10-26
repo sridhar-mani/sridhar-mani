@@ -70,8 +70,8 @@ test('vertical integration stops upward motion at the ceiling', () => {
 
 test('random depth stops cover most of the safe viewport without leaving bounds', () => {
   assert.equal(getPatrolDepthTarget(8, 708, 0), 64);
-  assert.equal(getPatrolDepthTarget(8, 708, 1), 624);
-  assert.equal(getPatrolDepthTarget(8, 708, 0.5), 344);
+  assert.equal(getPatrolDepthTarget(8, 708, 1), 652);
+  assert.equal(getPatrolDepthTarget(8, 708, 0.5), 358);
   assert.ok(getPatrolDepthTarget(8, 708, 0.5) > 134);
   assert.equal(getPatrolDepthTarget(0, 0, 1), 0);
 });
