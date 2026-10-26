@@ -501,16 +501,6 @@ export const PixelPet = () => {
             currentYRef.current = baseDepthYRef.current + walkHop;
             setY(currentYRef.current);
 
-            // Autonomous random playful leap in Y axis
-            if (time > nextLeapTimeRef.current && !targetXOverrideRef.current) {
-              nextLeapTimeRef.current = time + Math.random() * 5000 + 4000;
-              velYRef.current = Math.random() * 120 + 220; // Hop into air!
-              petAudio.playBoing();
-
-              // Keep the current ground baseline while airborne. Changing it at takeoff
-              // makes the floor move under the pet and causes visible teleporting.
-            }
-
             const baseSpeed = 75 + (levelInfo.level - 1) * 12;
             const speed = tennisBallRef.current ? baseSpeed * 2.3 : laserActive ? baseSpeed * 1.8 : baseSpeed;
 
@@ -520,7 +510,8 @@ export const PixelPet = () => {
             if (targetXOverrideRef.current !== null) {
               const diff = targetXOverrideRef.current - curX;
               if (Math.abs(diff) > 4) {
-                const step = Math.sign(diff) * Math.min(Math.abs(diff), speed * dt);
+                const easing = clamp(Math.abs(diff) / 110, 0.24, 1);
+                const step = Math.sign(diff) * Math.min(Math.abs(diff), speed * easing * dt);
                 curX += step;
                 const newFacing = diff > 0 ? 'right' : 'left';
                 directionRef.current = diff > 0 ? 1 : -1;
@@ -548,7 +539,8 @@ export const PixelPet = () => {
               if (patrolTargetXRef.current !== null) {
                 const diff = patrolTargetXRef.current - curX;
                 if (Math.abs(diff) > 4) {
-                  curX += Math.sign(diff) * Math.min(Math.abs(diff), speed * dt);
+                  const easing = clamp(Math.abs(diff) / 110, 0.24, 1);
+                  curX += Math.sign(diff) * Math.min(Math.abs(diff), speed * easing * dt);
                   directionRef.current = diff > 0 ? 1 : -1;
                   setFacing(diff > 0 ? 'right' : 'left');
                   if (state !== 'walk' && state !== 'happy') setState('walk');
@@ -556,8 +548,8 @@ export const PixelPet = () => {
                   curX = patrolTargetXRef.current;
                   patrolTargetXRef.current = null;
                   targetDepthYRef.current = getPatrolDepthTarget(minY, maxY);
-                  pauseUntilRef.current = time + 900 + Math.random() * 1200;
-                  nextPatrolTimeRef.current = time + 1500 + Math.random() * 1000;
+                  pauseUntilRef.current = time + 550 + Math.random() * 650;
+                  nextPatrolTimeRef.current = time + 450 + Math.random() * 650;
                   setState('idle');
 
                   if (Math.random() < 0.28) {
@@ -866,9 +858,8 @@ export const PixelPet = () => {
           left: `${x}px`,
           bottom: `${y}px`,
           cursor: isDragging ? 'grabbing' : 'grab',
-          transform: `rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`,
-          transformOrigin: 'bottom center',
-          transition: isDragging ? 'none' : 'transform 0.12s ease-out'
+          transform: `rotate(${rotation}deg)`,
+          transformOrigin: 'bottom center'
         }}
         onPointerDown={handlePointerDown}
         onDoubleClick={handleDoubleClick}
