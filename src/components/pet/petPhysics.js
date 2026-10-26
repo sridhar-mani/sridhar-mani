@@ -78,3 +78,11 @@ export function stepVerticalPhysics(position, velocity, dt, floorY, ceilingY, gr
 
   return { position: nextPosition, velocity: nextVelocity, landed, bounced, hitCeiling };
 }
+
+/** Pick a small random depth variation near the bottom, away from central page content. */
+export function getPatrolDepthTarget(minY, maxY, randomValue = Math.random()) {
+  const low = Math.min(minY, maxY);
+  const high = Math.max(minY, maxY);
+  const safeRandom = clamp(randomValue, 0, 1);
+  return low + (high - low) * 0.18 * safeRandom;
+}
