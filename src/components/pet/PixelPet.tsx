@@ -236,7 +236,7 @@ export const PixelPet = () => {
     const handleResize = () => {
       screenWidthRef.current = window.innerWidth;
       const { minX, maxX } = getHorizontalBounds(window.innerWidth);
-      const { minY, maxY } = getVerticalBounds(window.innerHeight);
+      const { minY, maxY } = getVerticalBounds(window.innerHeight, 78);
       currentXRef.current = clamp(currentXRef.current, minX, maxX);
       currentYRef.current = clamp(currentYRef.current, minY, maxY);
       baseDepthYRef.current = clamp(baseDepthYRef.current, minY, maxY);
@@ -348,7 +348,7 @@ export const PixelPet = () => {
 
       const { minX, maxX } = getHorizontalBounds(screenWidthRef.current);
       // Y is measured from the viewport bottom; leave room for the whole sprite.
-      const { minY, maxY } = getVerticalBounds(window.innerHeight);
+      const { minY, maxY } = getVerticalBounds(window.innerHeight, 78);
       baseDepthYRef.current = clamp(baseDepthYRef.current, minY, maxY);
       currentXRef.current = clamp(currentXRef.current, minX, maxX);
       currentYRef.current = clamp(currentYRef.current, minY, maxY);
@@ -632,7 +632,7 @@ export const PixelPet = () => {
       dragStartRef.current.totalDist += Math.abs(dx) + Math.abs(dy);
 
       const { minX, maxX } = getHorizontalBounds(screenWidthRef.current);
-      const { minY, maxY } = getVerticalBounds(window.innerHeight);
+      const { minY, maxY } = getVerticalBounds(window.innerHeight, 78);
       const newX = clamp(dragStartRef.current.startX + dx, minX, maxX);
       const newY = clamp(dragStartRef.current.startY + dy, minY, maxY);
 
@@ -693,7 +693,7 @@ export const PixelPet = () => {
       } else {
         // Anchor the landing baseline to the release position so a toss never snaps
         // toward a stale floor position from before the drag.
-        const { minY, maxY } = getVerticalBounds(window.innerHeight);
+        const { minY, maxY } = getVerticalBounds(window.innerHeight, 78);
         baseDepthYRef.current = clamp(currentYRef.current, minY, maxY);
         currentYRef.current = baseDepthYRef.current;
         targetDepthYRef.current = null;
@@ -749,7 +749,7 @@ export const PixelPet = () => {
 
       if (e.clientY > 40) {
         const { minX, maxX } = getHorizontalBounds(screenWidthRef.current);
-        const { minY, maxY } = getVerticalBounds(window.innerHeight);
+        const { minY, maxY } = getVerticalBounds(window.innerHeight, 78);
         const targetX = clamp(e.clientX - 25, minX, maxX);
         targetXOverrideRef.current = targetX;
         targetDepthYRef.current = clamp(window.innerHeight - e.clientY - 32, minY, maxY);
