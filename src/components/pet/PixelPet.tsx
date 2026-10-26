@@ -629,7 +629,6 @@ export const PixelPet = () => {
 
     const handlePointerUp = (event?: PointerEvent) => {
       const gesture = dragStartRef.current;
-      const dist = gesture?.totalDist || 0;
       const wasCancelled = event?.type === 'pointercancel';
       setIsDragging(false);
       dragStartRef.current = null;
