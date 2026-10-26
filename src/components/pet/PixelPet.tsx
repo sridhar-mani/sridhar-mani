@@ -652,6 +652,14 @@ export const PixelPet = () => {
         velYRef.current = 0;
         angularVelocityRef.current = 0;
         setRotation(0);
+        // Restore the exact press position so sub-threshold pointer jitter cannot
+        // nudge the pet when the user meant only to tap it.
+        if (gesture) {
+          currentXRef.current = gesture.startX;
+          currentYRef.current = gesture.startY;
+          setX(gesture.startX);
+          setY(gesture.startY);
+        }
         setState(gesture?.startState ?? 'walk');
         petAudio.playChirp();
         // Tapping pets the companion; settings are opened only by its gear button.
