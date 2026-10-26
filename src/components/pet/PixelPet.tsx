@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, X, Crosshair, Sparkles } from 'lucide-react';
 import { petAudio } from './PixelPetAudio';
-import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints, getPatrolDepthTarget, stepVerticalPhysics } from './petPhysics';
+import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getRandomPatrolTarget, getPatrolDepthTarget, stepVerticalPhysics } from './petPhysics';
 
 export type PetId = 'shiba' | 'fox' | 'crab' | 'duck' | 'clippy' | 'totoro' | 'zappy';
 export type PetState = 'idle' | 'walk' | 'happy' | 'sleep';
@@ -179,10 +179,10 @@ export const PixelPet = () => {
   });
 
   const [state, setState] = useState<PetState>('walk');
+  const stateRef = useRef<PetState>(state);
+  stateRef.current = state;
   const [x, setX] = useState<number>(80);
   const [y, setY] = useState<number>(10); // Vertical altitude/depth from bottom
-  const [scaleX, setScaleX] = useState<number>(1);
-  const [scaleY, setScaleY] = useState<number>(1);
   const [rotation, setRotation] = useState<number>(0);
   const [facing, setFacing] = useState<'left' | 'right'>('right');
   const [isMuted, setIsMuted] = useState(true);
@@ -217,7 +217,6 @@ export const PixelPet = () => {
   const angularVelocityRef = useRef<number>(0);
   const directionRef = useRef<1 | -1>(1);
   const pauseUntilRef = useRef<number>(0);
-  const nextLeapTimeRef = useRef<number>(performance.now() + 5000);
   const targetXOverrideRef = useRef<number | null>(null);
   const targetDepthYRef = useRef<number | null>(null);
   const patrolTargetXRef = useRef<number | null>(null);
@@ -229,6 +228,8 @@ export const PixelPet = () => {
   const screenWidthRef = useRef<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
   const currentPet = PET_CATALOG.find((p) => p.id === petId) || PET_CATALOG[0];
+  const currentPetRef = useRef(currentPet);
+  currentPetRef.current = currentPet;
   const levelInfo = getLevelInfo(xp);
 
   // Screen resize tracking
@@ -398,8 +399,6 @@ export const PixelPet = () => {
 
           // Victory pop leap
           velYRef.current = 240;
-          setScaleY(1.3);
-          setScaleX(0.85);
 
           const newHeart = { id: Date.now(), x: 0, y: -30 };
           setHearts((h) => [...h, newHeart]);
@@ -431,28 +430,16 @@ export const PixelPet = () => {
 
           // Aerial stretch responds to the bounded velocity result.
           if (newVelY > 100) {
-            setScaleY(1.2);
-            setScaleX(0.85);
           } else if (newVelY < -100) {
-            setScaleY(1.15);
-            setScaleX(0.9);
           }
 
           if (verticalStep.landed && verticalStep.bounced) {
             petAudio.playPop();
             triggerDustPuff(currentXRef.current, floorY);
-            setScaleY(0.65);
-            setScaleX(1.35);
-            setTimeout(() => {
-              setScaleY(1.0);
-              setScaleX(1.0);
-            }, 180);
-          } else if (verticalStep.landed) {
+                      } else if (verticalStep.landed) {
             velXRef.current = 0;
             angularVelocityRef.current = 0;
             setRotation(0);
-            setScaleY(1.0);
-            setScaleX(1.0);
           }
 
           currentYRef.current = newY;
@@ -480,8 +467,8 @@ export const PixelPet = () => {
           // 3. CONTINUOUS PATROL IN BOTH X AND Y (Depth wandering & Natural Steps)
           const isPaused = time < pauseUntilRef.current;
 
-          if (isPaused || state === 'sleep' || isLevelingUp) {
-            if (state !== 'happy' && state !== 'sleep' && !isLevelingUp) {
+          if (isPaused || stateRef.current === 'sleep' || isLevelingUp) {
+            if (stateRef.current !== 'happy' && stateRef.current !== 'sleep' && !isLevelingUp) {
               setState('idle');
             }
             currentYRef.current = baseDepthYRef.current;
@@ -526,16 +513,7 @@ export const PixelPet = () => {
               }
             } else {
               if (patrolTargetXRef.current === null && time >= nextPatrolTimeRef.current) {
-                const waypoints = getPatrolWaypoints(minX, maxX);
-                const candidates = waypoints
-                  .map((point, index) => ({ point, index }))
-                  .filter(({ point, index }) => index !== lastPatrolIndexRef.current && Math.abs(point - curX) > 48);
-                const choices = candidates.length > 0
-                  ? candidates
-                  : waypoints.map((point, index) => ({ point, index }));
-                const chosen = choices[Math.floor(Math.random() * choices.length)];
-                patrolTargetXRef.current = chosen.point;
-                lastPatrolIndexRef.current = chosen.index;
+                patrolTargetXRef.current = getRandomPatrolTarget(minX, maxX, curX);
               }
 
               if (patrolTargetXRef.current !== null) {
@@ -545,7 +523,7 @@ export const PixelPet = () => {
                   curX += Math.sign(diff) * Math.min(Math.abs(diff), speed * easing * dt);
                   directionRef.current = diff > 0 ? 1 : -1;
                   setFacing(diff > 0 ? 'right' : 'left');
-                  if (state !== 'walk' && state !== 'happy') setState('walk');
+                  if (stateRef.current !== 'walk' && stateRef.current !== 'happy') setState('walk');
                 } else {
                   curX = patrolTargetXRef.current;
                   patrolTargetXRef.current = null;
@@ -555,13 +533,13 @@ export const PixelPet = () => {
                   setState('idle');
 
                   if (Math.random() < 0.28) {
-                    const remark = currentPet.dialogues[Math.floor(Math.random() * currentPet.dialogues.length)];
+                    const remark = currentPetRef.current.dialogues[Math.floor(Math.random() * currentPetRef.current.dialogues.length)];
                     setDialogue(remark);
                     setShowDialogue(true);
                     setTimeout(() => setShowDialogue(false), 4000);
                   }
                 }
-              } else if (state !== 'happy' && state !== 'sleep') {
+              } else if (stateRef.current !== 'happy' && stateRef.current !== 'sleep') {
                 setState('idle');
               }
             }
@@ -578,7 +556,7 @@ export const PixelPet = () => {
 
     animFrameRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [isDragging, state, levelInfo.level, isLevelingUp, laserActive, currentPet]);
+  }, [isDragging, levelInfo.level, isLevelingUp, laserActive]);
 
   // REALISTIC LIVING PET DRAG & REACT HANDLERS
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -595,10 +573,6 @@ export const PixelPet = () => {
     angularVelocityRef.current = 0;
     setState('happy');
     petAudio.playBoing();
-
-    // Wiggle and stretch when grabbed
-    setScaleY(1.25);
-    setScaleX(0.85);
 
     // Living pet reaction dialogue
     const grabPhrases = [
