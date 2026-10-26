@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, X, Crosshair, Sparkles } from 'lucide-react';
 import { petAudio } from './PixelPetAudio';
+import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints } from './petPhysics';
 
 export type PetId = 'shiba' | 'fox' | 'crab' | 'duck' | 'clippy' | 'totoro' | 'zappy';
 export type PetState = 'idle' | 'walk' | 'happy' | 'sleep';
@@ -218,6 +219,10 @@ export const PixelPet = () => {
   const pauseUntilRef = useRef<number>(0);
   const nextLeapTimeRef = useRef<number>(performance.now() + 5000);
   const targetXOverrideRef = useRef<number | null>(null);
+  const targetDepthYRef = useRef<number | null>(null);
+  const patrolTargetXRef = useRef<number | null>(null);
+  const lastPatrolIndexRef = useRef<number>(-1);
+  const nextPatrolTimeRef = useRef<number>(performance.now() + 1600);
   const animFrameRef = useRef<number>(0);
   const dragStartRef = useRef<{ mouseX: number; mouseY: number; startX: number; startY: number; totalDist: number } | null>(null);
   const lastMousePosRef = useRef<{ x: number; y: number; time: number } | null>(null);
@@ -230,7 +235,17 @@ export const PixelPet = () => {
   useEffect(() => {
     const handleResize = () => {
       screenWidthRef.current = window.innerWidth;
+      const { minX, maxX } = getHorizontalBounds(window.innerWidth);
+      const { minY, maxY } = getVerticalBounds(window.innerHeight);
+      currentXRef.current = clamp(currentXRef.current, minX, maxX);
+      currentYRef.current = clamp(currentYRef.current, minY, maxY);
+      baseDepthYRef.current = clamp(baseDepthYRef.current, minY, maxY);
+      if (targetXOverrideRef.current !== null) targetXOverrideRef.current = clamp(targetXOverrideRef.current, minX, maxX);
+      if (targetDepthYRef.current !== null) targetDepthYRef.current = clamp(targetDepthYRef.current, minY, maxY);
+      setX(currentXRef.current);
+      setY(currentYRef.current);
     };
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -287,19 +302,23 @@ export const PixelPet = () => {
   // Spawn Tennis Ball for Fetch
   const spawnTennisBall = useCallback(() => {
     petAudio.playBoing();
-    const curX = currentXRef.current;
+    const { minX, maxX } = getHorizontalBounds(screenWidthRef.current);
+    const { maxY: ballMaxY } = getVerticalBounds(window.innerHeight, 24);
+    const curX = clamp(currentXRef.current, minX, maxX);
     const facingRight = directionRef.current === 1;
     const targetThrowX = facingRight ? curX + 280 : curX - 280;
-    const clampedThrowX = Math.max(50, Math.min(screenWidthRef.current - 90, targetThrowX));
+    const clampedThrowX = clamp(targetThrowX, minX, maxX);
     const dist = clampedThrowX - curX;
 
-    setTennisBall({
-      x: curX + (facingRight ? 40 : -40),
-      y: 120,
+    const newBall = {
+      x: clamp(curX + (facingRight ? 40 : -40), minX, maxX),
+      y: clamp(120, 8, Math.max(8, ballMaxY)),
       vx: dist * 1.6,
       vy: 280,
       active: true
-    });
+    };
+    tennisBallRef.current = newBall;
+    setTennisBall(newBall);
 
     setDialogue(`Fetch the ball! 🎾`);
     setShowDialogue(true);
@@ -319,14 +338,16 @@ export const PixelPet = () => {
     let lastTime = performance.now();
 
     const loop = (time: number) => {
-      const dt = Math.min((time - lastTime) / 1000, 0.1);
+      // Cap elapsed time after tab throttling so physics never jumps several frames at once.
+      const dt = clamp((time - lastTime) / 1000, 0, 0.05);
       lastTime = time;
 
-      const minX = 20;
-      const maxX = Math.max(minX + 120, screenWidthRef.current - 80);
-      // Y is measured as distance from the viewport bottom; keep the full pet inside the screen.
-      const maxY = Math.max(8, window.innerHeight - 72);
-      baseDepthYRef.current = Math.min(baseDepthYRef.current, maxY);
+      const { minX, maxX } = getHorizontalBounds(screenWidthRef.current);
+      // Y is measured from the viewport bottom; leave room for the whole sprite.
+      const { minY, maxY } = getVerticalBounds(window.innerHeight);
+      baseDepthYRef.current = clamp(baseDepthYRef.current, minY, maxY);
+      currentXRef.current = clamp(currentXRef.current, minX, maxX);
+      currentYRef.current = clamp(currentYRef.current, minY, maxY);
 
       // 1. TENNIS BALL PHYSICS (X & Y)
       const activeBall = tennisBallRef.current;
@@ -334,12 +355,16 @@ export const PixelPet = () => {
         let bx = activeBall.x + activeBall.vx * dt;
         let by = activeBall.y + activeBall.vy * dt;
         let bvy = activeBall.vy - 980 * dt;
-        let bvx = activeBall.vx * (1 - 0.4 * dt);
+        let bvx = activeBall.vx * Math.exp(-0.4 * dt);
+        const ballMaxY = Math.max(8, window.innerHeight - 32);
 
         if (by <= 8) {
           by = 8;
           bvy = -bvy * 0.65;
           if (Math.abs(bvy) < 40) bvy = 0;
+        } else if (by > ballMaxY) {
+          by = ballMaxY;
+          bvy = -Math.abs(bvy) * 0.7;
         }
 
         if (bx < minX) {
@@ -437,7 +462,7 @@ export const PixelPet = () => {
           // Horizontal drift while in air
           if (velXRef.current !== 0) {
             let newX = currentXRef.current + velXRef.current * dt;
-            velXRef.current *= 1 - 1.2 * dt;
+            velXRef.current *= Math.exp(-1.2 * dt);
             newX = Math.max(minX, Math.min(maxX, newX));
             currentXRef.current = newX;
             setX(newX);
@@ -463,6 +488,14 @@ export const PixelPet = () => {
             currentYRef.current = baseDepthYRef.current;
             setY(baseDepthYRef.current);
           } else {
+            // Smoothly walk toward a clicked depth instead of moving the floor instantly.
+            if (targetDepthYRef.current !== null) {
+              baseDepthYRef.current = moveTowards(baseDepthYRef.current, targetDepthYRef.current, 95 * dt);
+              if (Math.abs(targetDepthYRef.current - baseDepthYRef.current) < 1) {
+                baseDepthYRef.current = targetDepthYRef.current;
+                targetDepthYRef.current = null;
+              }
+            }
             // Natural walking hop in Y axis: $|\sin(t \times 10)| \times 6\text{px}$
             const walkHop = Math.abs(Math.sin(time * 0.012)) * 6;
             currentYRef.current = baseDepthYRef.current + walkHop;
@@ -499,32 +532,42 @@ export const PixelPet = () => {
                 setState('idle');
               }
             } else {
-              // Edge-to-edge patrol
-              curX += directionRef.current * speed * dt;
+              if (patrolTargetXRef.current === null && time >= nextPatrolTimeRef.current) {
+                const waypoints = getPatrolWaypoints(minX, maxX);
+                const candidates = waypoints
+                  .map((point, index) => ({ point, index }))
+                  .filter(({ point, index }) => index !== lastPatrolIndexRef.current && Math.abs(point - curX) > 48);
+                const choices = candidates.length > 0
+                  ? candidates
+                  : waypoints.map((point, index) => ({ point, index }));
+                const chosen = choices[Math.floor(Math.random() * choices.length)];
+                patrolTargetXRef.current = chosen.point;
+                lastPatrolIndexRef.current = chosen.index;
+              }
 
-              if (curX >= maxX) {
-                curX = maxX;
-                directionRef.current = -1;
-                setFacing('left');
-                pauseUntilRef.current = time + 1300;
-                setState('idle');
+              if (patrolTargetXRef.current !== null) {
+                const diff = patrolTargetXRef.current - curX;
+                if (Math.abs(diff) > 4) {
+                  curX += Math.sign(diff) * Math.min(Math.abs(diff), speed * dt);
+                  directionRef.current = diff > 0 ? 1 : -1;
+                  setFacing(diff > 0 ? 'right' : 'left');
+                  if (state !== 'walk' && state !== 'happy') setState('walk');
+                } else {
+                  curX = patrolTargetXRef.current;
+                  patrolTargetXRef.current = null;
+                  pauseUntilRef.current = time + 900 + Math.random() * 1200;
+                  nextPatrolTimeRef.current = time + 1500 + Math.random() * 1000;
+                  setState('idle');
 
-                if (Math.random() < 0.3) {
-                  const remark = currentPet.dialogues[Math.floor(Math.random() * currentPet.dialogues.length)];
-                  setDialogue(remark);
-                  setShowDialogue(true);
-                  setTimeout(() => setShowDialogue(false), 5000);
+                  if (Math.random() < 0.28) {
+                    const remark = currentPet.dialogues[Math.floor(Math.random() * currentPet.dialogues.length)];
+                    setDialogue(remark);
+                    setShowDialogue(true);
+                    setTimeout(() => setShowDialogue(false), 4000);
+                  }
                 }
-              } else if (curX <= minX) {
-                curX = minX;
-                directionRef.current = 1;
-                setFacing('right');
-                pauseUntilRef.current = time + 1300;
+              } else if (state !== 'happy' && state !== 'sleep') {
                 setState('idle');
-              } else {
-                if (state !== 'walk' && state !== 'happy') {
-                  setState('walk');
-                }
               }
             }
 
@@ -584,11 +627,10 @@ export const PixelPet = () => {
 
       dragStartRef.current.totalDist += Math.abs(dx) + Math.abs(dy);
 
-      const minX = 20;
-      const maxX = Math.max(minX + 100, screenWidthRef.current - 80);
-      const newX = Math.max(minX, Math.min(maxX, dragStartRef.current.startX + dx));
-      const maxY = Math.max(8, window.innerHeight - 72);
-      const newY = Math.max(8, Math.min(maxY, dragStartRef.current.startY + dy));
+      const { minX, maxX } = getHorizontalBounds(screenWidthRef.current);
+      const { minY, maxY } = getVerticalBounds(window.innerHeight);
+      const newX = clamp(dragStartRef.current.startX + dx, minX, maxX);
+      const newY = clamp(dragStartRef.current.startY + dy, minY, maxY);
 
       currentXRef.current = newX;
       currentYRef.current = newY;
@@ -602,8 +644,8 @@ export const PixelPet = () => {
         if (dt > 0.015) {
           const vx = (moveEvent.clientX - lastMousePosRef.current.x) / dt;
           const vy = (lastMousePosRef.current.y - moveEvent.clientY) / dt;
-          velXRef.current = vx;
-          velYRef.current = vy;
+          velXRef.current = clamp(vx, -900, 900);
+          velYRef.current = clamp(vy, -1000, 1000);
 
           // Cute dangle rotation based on drag horizontal speed
           setRotation(Math.max(-25, Math.min(25, vx * 0.04)));
@@ -647,9 +689,12 @@ export const PixelPet = () => {
       } else {
         // Anchor the landing baseline to the release position so a toss never snaps
         // toward a stale floor position from before the drag.
-        const maxY = Math.max(8, window.innerHeight - 72);
-        baseDepthYRef.current = Math.max(8, Math.min(maxY, currentYRef.current));
+        const { minY, maxY } = getVerticalBounds(window.innerHeight);
+        baseDepthYRef.current = clamp(currentYRef.current, minY, maxY);
         currentYRef.current = baseDepthYRef.current;
+        targetDepthYRef.current = null;
+        patrolTargetXRef.current = null;
+        nextPatrolTimeRef.current = performance.now() + 1800;
         // Derive a short spin from throw speed; physics damps it out.
         angularVelocityRef.current = Math.max(-240, Math.min(240, velXRef.current * 0.18));
         setState('happy');
@@ -692,15 +737,17 @@ export const PixelPet = () => {
   useEffect(() => {
     const handleScreenClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.closest('button') || target.closest('a') || target.closest('input') || target.closest('[data-pet-menu]') || target.closest('[data-pet-root]') || isDragging) {
+      if (target.closest('button') || target.closest('a') || target.closest('input') || target.closest('[data-pet-menu]') || target.closest('[data-pet-root]') || isDragging || isMenuOpen) {
         return;
       }
 
       if (e.clientY > 40) {
-        const targetX = Math.max(20, Math.min(e.clientX - 25, screenWidthRef.current - 80));
+        const { minX, maxX } = getHorizontalBounds(screenWidthRef.current);
+        const { minY, maxY } = getVerticalBounds(window.innerHeight);
+        const targetX = clamp(e.clientX - 25, minX, maxX);
         targetXOverrideRef.current = targetX;
-        const maxY = Math.max(8, window.innerHeight - 72);
-        baseDepthYRef.current = Math.max(8, Math.min(maxY, window.innerHeight - e.clientY - 32));
+        targetDepthYRef.current = clamp(window.innerHeight - e.clientY - 32, minY, maxY);
+        patrolTargetXRef.current = null;
         setFacing(targetX > currentXRef.current ? 'right' : 'left');
         directionRef.current = targetX > currentXRef.current ? 1 : -1;
         petAudio.playChirp();
@@ -709,7 +756,7 @@ export const PixelPet = () => {
 
     window.addEventListener('click', handleScreenClick);
     return () => window.removeEventListener('click', handleScreenClick);
-  }, [isDragging]);
+  }, [isDragging, isMenuOpen]);
 
   // Double click pet for backflip trick
   const handleDoubleClick = (e: React.MouseEvent) => {
