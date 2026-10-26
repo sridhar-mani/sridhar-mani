@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, X, Crosshair, Sparkles } from 'lucide-react';
 import { petAudio } from './PixelPetAudio';
-import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints } from './petPhysics';
+import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints, stepVerticalPhysics } from './petPhysics';
 
 export type PetId = 'shiba' | 'fox' | 'crab' | 'duck' | 'clippy' | 'totoro' | 'zappy';
 export type PetState = 'idle' | 'walk' | 'happy' | 'sleep';
@@ -415,10 +415,17 @@ export const PixelPet = () => {
         // The idle walk animation lifts the sprite by at most 6px; don't mistake
         // that decorative bob for an airborne toss, or taps trigger a landing pop.
         if (currentYRef.current > floorY + 8 || velYRef.current !== 0) {
-          let newY = currentYRef.current + velYRef.current * dt;
-          let newVelY = velYRef.current - 1400 * dt; // Gravity
+          const verticalStep = stepVerticalPhysics(
+            currentYRef.current,
+            velYRef.current,
+            dt,
+            floorY,
+            maxY
+          );
+          const newY = verticalStep.position;
+          const newVelY = verticalStep.velocity;
 
-          // Aerial stretch
+          // Aerial stretch responds to the bounded velocity result.
           if (newVelY > 100) {
             setScaleY(1.2);
             setScaleX(0.85);
@@ -427,32 +434,21 @@ export const PixelPet = () => {
             setScaleX(0.9);
           }
 
-          // Floor Impact (Bounce & Squash Pop!)
-          if (newY <= floorY) {
-            newY = floorY;
-
-            // Trigger POP audio and dust particles
-            if (Math.abs(newVelY) > 80) {
-              petAudio.playPop();
-              triggerDustPuff(currentXRef.current, floorY);
-
-              // Dramatic landing squash
-              setScaleY(0.65);
-              setScaleX(1.35);
-              setTimeout(() => {
-                setScaleY(1.0);
-                setScaleX(1.0);
-              }, 180);
-
-              newVelY = -newVelY * 0.42; // Restitution bounce
-            } else {
-              newVelY = 0;
-              velXRef.current = 0;
-              angularVelocityRef.current = 0;
-              setRotation(0);
+          if (verticalStep.landed && verticalStep.bounced) {
+            petAudio.playPop();
+            triggerDustPuff(currentXRef.current, floorY);
+            setScaleY(0.65);
+            setScaleX(1.35);
+            setTimeout(() => {
               setScaleY(1.0);
               setScaleX(1.0);
-            }
+            }, 180);
+          } else if (verticalStep.landed) {
+            velXRef.current = 0;
+            angularVelocityRef.current = 0;
+            setRotation(0);
+            setScaleY(1.0);
+            setScaleX(1.0);
           }
 
           currentYRef.current = newY;
