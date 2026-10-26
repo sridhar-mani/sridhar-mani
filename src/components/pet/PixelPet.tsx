@@ -387,7 +387,9 @@ export const PixelPet = () => {
       if (!isDragging) {
         const floorY = baseDepthYRef.current;
 
-        if (currentYRef.current > floorY || velYRef.current !== 0) {
+        // The idle walk animation lifts the sprite by at most 6px; don't mistake
+        // that decorative bob for an airborne toss, or taps trigger a landing pop.
+        if (currentYRef.current > floorY + 8 || velYRef.current !== 0) {
           let newY = currentYRef.current + velYRef.current * dt;
           let newVelY = velYRef.current - 1400 * dt; // Gravity
 
@@ -542,7 +544,7 @@ export const PixelPet = () => {
   // REALISTIC LIVING PET DRAG & REACT HANDLERS
   const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault();
-    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
 
     setIsDragging(true);
     // A fresh grab must not inherit momentum from a previous toss or click.
