@@ -28,6 +28,11 @@ export function getVerticalBounds(viewportHeight, petHeight = 72, gutter = 8) {
   return { minY, maxY };
 }
 
+/** Treat movement below the drag threshold as a tap. */
+export function isTapGesture(distance, threshold = 8) {
+  return Number.isFinite(distance) && distance < Math.max(0, threshold);
+}
+
 /** Move toward a target by at most maxDelta without overshooting. */
 export function moveTowards(current, target, maxDelta) {
   if (!Number.isFinite(current)) return Number.isFinite(target) ? target : 0;

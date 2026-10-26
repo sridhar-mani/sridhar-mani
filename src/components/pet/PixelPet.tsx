@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, X, Crosshair, Sparkles } from 'lucide-react';
+import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, X, Crosshair, Sparkles, Settings } from 'lucide-react';
 import { petAudio } from './PixelPetAudio';
-import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getRandomPatrolTarget, getPatrolDepthTarget, stepVerticalPhysics } from './petPhysics';
+import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getRandomPatrolTarget, getPatrolDepthTarget, stepVerticalPhysics, isTapGesture } from './petPhysics';
 
 export type PetId = 'shiba' | 'fox' | 'crab' | 'duck' | 'clippy' | 'totoro' | 'zappy';
 export type PetState = 'idle' | 'walk' | 'happy' | 'sleep';
@@ -29,7 +29,7 @@ export const PET_CATALOG: PetMeta[] = [
       "Woof! Sridhar is building high-impact AI agents at Zenteiq! ⚡",
       "I love clean TypeScript, WebGPU shaders, and zero bugs! 🐾",
       "Pick me up and toss me! I can fly! 🪂",
-      "Click on me to open treats and settings! 🎾",
+      "Tap me for a hello; use my gear for treats and settings! 🎾",
       "Type 'agent' in the terminal to watch autonomous coding agents! 🤖"
     ]
   },
@@ -222,7 +222,7 @@ export const PixelPet = () => {
   const patrolTargetXRef = useRef<number | null>(null);
   const nextPatrolTimeRef = useRef<number>(performance.now() + 1600);
   const animFrameRef = useRef<number>(0);
-  const dragStartRef = useRef<{ mouseX: number; mouseY: number; startX: number; startY: number; totalDist: number } | null>(null);
+  const dragStartRef = useRef<{ mouseX: number; mouseY: number; startX: number; startY: number; totalDist: number; startState: PetState; hasDragged: boolean } | null>(null);
   const lastMousePosRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const screenWidthRef = useRef<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
@@ -479,10 +479,10 @@ export const PixelPet = () => {
             }
             // Small footfall bob and a restrained directional lean make walking feel alive
             // without scaling the sprite or turning every step into a squash animation.
-            const walkHop = Math.abs(Math.sin(time * 0.012)) * 3;
+            const walkHop = Math.abs(Math.sin(time * 0.006)) * 1.75;
             currentYRef.current = baseDepthYRef.current + walkHop;
             setY(currentYRef.current);
-            setRotation(directionRef.current * (2 + Math.sin(time * 0.018) * 2.5));
+            setRotation(directionRef.current * (1 + Math.sin(time * 0.006) * 1.5));
 
             const baseSpeed = 92 + (levelInfo.level - 1) * 10;
             const speed = tennisBallRef.current ? baseSpeed * 2.3 : laserActive ? baseSpeed * 1.8 : baseSpeed;
@@ -522,8 +522,8 @@ export const PixelPet = () => {
                   curX = patrolTargetXRef.current;
                   patrolTargetXRef.current = null;
                   targetDepthYRef.current = getPatrolDepthTarget(minY, maxY);
-                  pauseUntilRef.current = time + 550 + Math.random() * 650;
-                  nextPatrolTimeRef.current = time + 450 + Math.random() * 650;
+                  pauseUntilRef.current = time + 450 + Math.random() * 450;
+                  nextPatrolTimeRef.current = time + 800 + Math.random() * 700;
                   setState('idle');
 
                   if (Math.random() < 0.28) {
@@ -565,25 +565,16 @@ export const PixelPet = () => {
     velXRef.current = 0;
     velYRef.current = 0;
     angularVelocityRef.current = 0;
-    setState('happy');
-    petAudio.playBoing();
-
-    // Living pet reaction dialogue
-    const grabPhrases = [
-      "Whoa! Put me down! 🐾",
-      "Wheeee! Flying familiar! 🪂",
-      "Look at me, zero gravity! ✨",
-      "Hold on tight! 🚀"
-    ];
-    setDialogue(grabPhrases[Math.floor(Math.random() * grabPhrases.length)]);
-    setShowDialogue(true);
-
+    // A press alone is a tap, not a drag: wait for real pointer travel before
+    // changing the sprite, playing the grab sound, or showing drag dialogue.
     dragStartRef.current = {
       mouseX: e.clientX,
       mouseY: e.clientY,
       startX: currentXRef.current,
       startY: currentYRef.current,
-      totalDist: 0
+      totalDist: 0,
+      startState: stateRef.current,
+      hasDragged: false
     };
     lastMousePosRef.current = { x: e.clientX, y: e.clientY, time: performance.now() };
 
@@ -592,7 +583,22 @@ export const PixelPet = () => {
       const dx = moveEvent.clientX - dragStartRef.current.mouseX;
       const dy = dragStartRef.current.mouseY - moveEvent.clientY; // Invert Y for altitude
 
-      dragStartRef.current.totalDist += Math.abs(dx) + Math.abs(dy);
+      // Measure displacement from the initial press, not accumulated pointer
+      // jitter; otherwise a stationary tap can accidentally become a toss.
+      dragStartRef.current.totalDist = Math.hypot(dx, dy);
+      if (!dragStartRef.current.hasDragged && !isTapGesture(dragStartRef.current.totalDist)) {
+        dragStartRef.current.hasDragged = true;
+        setState('happy');
+        petAudio.playBoing();
+        const grabPhrases = [
+          "Whoa! Put me down! 🐾",
+          "Wheeee! Flying familiar! 🪂",
+          "Look at me, zero gravity! ✨",
+          "Hold on tight! 🚀"
+        ];
+        setDialogue(grabPhrases[Math.floor(Math.random() * grabPhrases.length)]);
+        setShowDialogue(true);
+      }
 
       const { minX, maxX } = getHorizontalBounds(screenWidthRef.current);
       const { minY, maxY } = getVerticalBounds(window.innerHeight, 78);
@@ -622,7 +628,7 @@ export const PixelPet = () => {
     };
 
     const handlePointerUp = (event?: PointerEvent) => {
-      const dist = dragStartRef.current?.totalDist || 0;
+      const gesture = dragStartRef.current;
       const wasCancelled = event?.type === 'pointercancel';
       setIsDragging(false);
       dragStartRef.current = null;
@@ -636,17 +642,26 @@ export const PixelPet = () => {
         setRotation(0);
       }
 
-      // Clean distinction: Click (< 8px total movement) vs Drag (> 8px)
+      // Once the drag threshold is crossed, moving back to the start does not turn it into a tap.
       if (wasCancelled) {
         setState('walk');
-      } else if (dist < 8) {
+      } else if (!gesture?.hasDragged) {
         // A tap is not a throw: discard pointer jitter so it cannot launch the pet.
         velXRef.current = 0;
         velYRef.current = 0;
         angularVelocityRef.current = 0;
         setRotation(0);
+        // Restore the exact press position so sub-threshold pointer jitter cannot
+        // nudge the pet when the user meant only to tap it.
+        if (gesture) {
+          currentXRef.current = gesture.startX;
+          currentYRef.current = gesture.startY;
+          setX(gesture.startX);
+          setY(gesture.startY);
+        }
+        setState(gesture?.startState ?? 'walk');
         petAudio.playChirp();
-        setIsMenuOpen(true);
+        // Tapping pets the companion; settings are opened only by its gear button.
         setXp((p) => p + 6);
         const newHeart = { id: Date.now(), x: 0, y: -25 };
         setHearts((prev) => [...prev, newHeart]);
@@ -825,16 +840,34 @@ export const PixelPet = () => {
         data-pet-root
         className="fixed z-40 select-none pointer-events-auto touch-none"
         style={{
-          left: `${x}px`,
-          bottom: `${y}px`,
+          // Keep the fixed pet on a compositor-friendly transform path instead of
+          // forcing layout recalculation for every animation frame.
+          left: 0,
+          bottom: 0,
           cursor: isDragging ? 'grabbing' : 'grab',
-          transform: `rotate(${rotation}deg)`,
-          transformOrigin: 'bottom center'
+          transform: `translate3d(${x}px, ${-y}px, 0) rotate(${rotation}deg)`,
+          transformOrigin: 'bottom center',
+          willChange: 'transform'
         }}
         onPointerDown={handlePointerDown}
         onDoubleClick={handleDoubleClick}
       >
         <div className="relative flex flex-col items-center">
+          <button
+            type="button"
+            aria-label="Open pet menu"
+            title="Pet settings"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+              setIsMenuOpen(true);
+            }}
+            onDoubleClick={(event) => event.stopPropagation()}
+            className="absolute -right-3 top-1 z-10 grid h-6 w-6 place-items-center rounded-full border border-cyan-400/60 bg-slate-900/95 text-cyan-300 shadow-md transition-colors hover:bg-cyan-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+          >
+            <Settings size={12} />
+          </button>
+
           {/* Living reaction exclamation badge when dragged */}
           {isDragging && (
             <motion.div
@@ -891,7 +924,7 @@ export const PixelPet = () => {
           {/* THE FREESTANDING PET SPRITE WITH VISUAL EVOLUTIONS */}
           <div
             className="relative p-1 flex items-center justify-center group"
-            title={`Drag me to toss in the air! Click for menu! (${levelInfo.title} • Lv.${lvl})`}
+            title={`Drag me to toss in the air! Use the gear for settings. (${levelInfo.title} • Lv.${lvl})`}
           >
             {/* EVOLUTION 3: Cosmic / Super Saiyan Aura (Lv.5+) */}
             {hasCosmicAura && (
@@ -956,7 +989,7 @@ export const PixelPet = () => {
         </div>
       </div>
 
-      {/* ON-DEMAND SETTINGS & COMPANION POPOVER (Only opens when tapping pet) */}
+      {/* ON-DEMAND SETTINGS & COMPANION POPOVER (Opened by the gear button) */}
       <AnimatePresence>
         {isMenuOpen && (
           <div
