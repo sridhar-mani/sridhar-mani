@@ -840,11 +840,14 @@ export const PixelPet = () => {
         data-pet-root
         className="fixed z-40 select-none pointer-events-auto touch-none"
         style={{
-          left: `${x}px`,
-          bottom: `${y}px`,
+          // Keep the fixed pet on a compositor-friendly transform path instead of
+          // forcing layout recalculation for every animation frame.
+          left: 0,
+          bottom: 0,
           cursor: isDragging ? 'grabbing' : 'grab',
-          transform: `rotate(${rotation}deg)`,
-          transformOrigin: 'bottom center'
+          transform: `translate3d(${x}px, ${-y}px, 0) rotate(${rotation}deg)`,
+          transformOrigin: 'bottom center',
+          willChange: 'transform'
         }}
         onPointerDown={handlePointerDown}
         onDoubleClick={handleDoubleClick}
