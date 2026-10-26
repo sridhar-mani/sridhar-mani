@@ -43,3 +43,38 @@ export function getPatrolWaypoints(minX, maxX) {
   const span = high - low;
   return [0.15, 0.38, 0.62, 0.85].map((ratio) => low + span * ratio);
 }
+
+/** Integrate one bounded vertical-physics step in viewport bottom-offset coordinates. */
+export function stepVerticalPhysics(position, velocity, dt, floorY, ceilingY, gravity = 1400, restitution = 0.42, bounceThreshold = 80) {
+  const safeFloor = Number.isFinite(floorY) ? floorY : 0;
+  const safeCeiling = Math.max(safeFloor, Number.isFinite(ceilingY) ? ceilingY : safeFloor);
+  const safePosition = Number.isFinite(position) ? position : safeFloor;
+  const safeVelocity = Number.isFinite(velocity) ? velocity : 0;
+  const safeDt = clamp(dt, 0, 0.05);
+  const safeGravity = Number.isFinite(gravity) ? Math.max(0, gravity) : 1400;
+  const safeRestitution = clamp(restitution, 0, 1);
+  let nextPosition = safePosition + safeVelocity * safeDt;
+  let nextVelocity = safeVelocity - safeGravity * safeDt;
+  let landed = false;
+  let bounced = false;
+  let hitCeiling = false;
+
+  if (nextPosition > safeCeiling) {
+    nextPosition = safeCeiling;
+    if (nextVelocity > 0) nextVelocity = 0;
+    hitCeiling = true;
+  }
+
+  if (nextPosition <= safeFloor) {
+    nextPosition = safeFloor;
+    landed = true;
+    if (Math.abs(nextVelocity) > bounceThreshold) {
+      nextVelocity = -nextVelocity * safeRestitution;
+      bounced = true;
+    } else {
+      nextVelocity = 0;
+    }
+  }
+
+  return { position: nextPosition, velocity: nextVelocity, landed, bounced, hitCeiling };
+}
