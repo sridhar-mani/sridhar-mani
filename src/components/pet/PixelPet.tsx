@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, X, Crosshair, Sparkles, Settings } from 'lucide-react';
 import { petAudio } from './PixelPetAudio';
-import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getRandomPatrolTarget, getPatrolDepthTarget, stepVerticalPhysics } from './petPhysics';
+import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getRandomPatrolTarget, getPatrolDepthTarget, stepVerticalPhysics, isTapGesture } from './petPhysics';
 
 export type PetId = 'shiba' | 'fox' | 'crab' | 'duck' | 'clippy' | 'totoro' | 'zappy';
 export type PetState = 'idle' | 'walk' | 'happy' | 'sleep';
@@ -586,7 +586,7 @@ export const PixelPet = () => {
       // Measure displacement from the initial press, not accumulated pointer
       // jitter; otherwise a stationary tap can accidentally become a toss.
       dragStartRef.current.totalDist = Math.hypot(dx, dy);
-      if (!dragStartRef.current.hasDragged && dragStartRef.current.totalDist >= 8) {
+      if (!dragStartRef.current.hasDragged && !isTapGesture(dragStartRef.current.totalDist)) {
         dragStartRef.current.hasDragged = true;
         setState('happy');
         petAudio.playBoing();
@@ -643,10 +643,10 @@ export const PixelPet = () => {
         setRotation(0);
       }
 
-      // Clean distinction: Click (< 8px total movement) vs Drag (> 8px)
+      // Once the drag threshold is crossed, moving back to the start does not turn it into a tap.
       if (wasCancelled) {
         setState('walk');
-      } else if (dist < 8) {
+      } else if (!gesture?.hasDragged) {
         // A tap is not a throw: discard pointer jitter so it cannot launch the pet.
         velXRef.current = 0;
         velYRef.current = 0;
