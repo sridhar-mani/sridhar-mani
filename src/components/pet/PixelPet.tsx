@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, X, Crosshair, Sparkles } from 'lucide-react';
 import { petAudio } from './PixelPetAudio';
-import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints, stepVerticalPhysics } from './petPhysics';
+import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints, getPatrolDepthTarget, stepVerticalPhysics } from './petPhysics';
 
 export type PetId = 'shiba' | 'fox' | 'crab' | 'duck' | 'clippy' | 'totoro' | 'zappy';
 export type PetState = 'idle' | 'walk' | 'happy' | 'sleep';
@@ -555,6 +555,7 @@ export const PixelPet = () => {
                 } else {
                   curX = patrolTargetXRef.current;
                   patrolTargetXRef.current = null;
+                  targetDepthYRef.current = getPatrolDepthTarget(minY, maxY);
                   pauseUntilRef.current = time + 900 + Math.random() * 1200;
                   nextPatrolTimeRef.current = time + 1500 + Math.random() * 1000;
                   setState('idle');
