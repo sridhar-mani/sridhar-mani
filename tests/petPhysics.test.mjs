@@ -1,6 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints, getRandomPatrolTarget, stepVerticalPhysics, getPatrolDepthTarget } from '../src/components/pet/petPhysics.js';
+import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getPatrolWaypoints, getRandomPatrolTarget, stepVerticalPhysics, getPatrolDepthTarget, isTapGesture } from '../src/components/pet/petPhysics.js';
+
+
+test('tap threshold ignores small jitter and treats threshold-sized movement as a drag', () => {
+  assert.equal(isTapGesture(0), true);
+  assert.equal(isTapGesture(7.99), true);
+  assert.equal(isTapGesture(8), false);
+  assert.equal(isTapGesture(18), false);
+  assert.equal(isTapGesture(Number.NaN), false);
+  assert.equal(isTapGesture(4, 5), true);
+  assert.equal(isTapGesture(5, 5), false);
+});
 
 test('clamp handles values outside and inside the range', () => {
   assert.equal(clamp(-5, 0, 10), 0);
