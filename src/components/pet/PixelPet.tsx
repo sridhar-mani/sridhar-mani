@@ -885,9 +885,9 @@ export const PixelPet = () => {
           )}
 
           {/* Floating Speech Bubble */}
-          <AnimatePresence>
-            {showDialogue && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none">
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none">
+            <AnimatePresence>
+              {showDialogue && (
                 <motion.div
                   initial={{ opacity: 0, y: 10, scale: 0.85 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -897,9 +897,9 @@ export const PixelPet = () => {
                   <p className="leading-snug">{dialogue}</p>
                   <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-r border-b border-cyan-400/60 rotate-45" />
                 </motion.div>
-              </div>
-            )}
-          </AnimatePresence>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Floating Hearts */}
           {hearts.map((h) => (
