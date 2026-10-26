@@ -586,6 +586,9 @@ export const PixelPet = () => {
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
 
     setIsDragging(true);
+    targetXOverrideRef.current = null;
+    targetDepthYRef.current = null;
+    patrolTargetXRef.current = null;
     // A fresh grab must not inherit momentum from a previous toss or click.
     velXRef.current = 0;
     velYRef.current = 0;
@@ -718,7 +721,9 @@ export const PixelPet = () => {
       if (e.clientY > 40) {
         const altitude = window.innerHeight - e.clientY;
         setLaserPos({ x: e.clientX, y: altitude });
-        targetXOverrideRef.current = Math.max(20, Math.min(screenWidthRef.current - 80, e.clientX - 25));
+        const { minX, maxX } = getHorizontalBounds(screenWidthRef.current);
+        targetXOverrideRef.current = clamp(e.clientX - 25, minX, maxX);
+        patrolTargetXRef.current = null;
         // Keep the pet's ground baseline stable while the laser moves; updating it
         // on every mousemove makes the pet jump vertically from frame to frame.
         setFacing(e.clientX > currentXRef.current ? 'right' : 'left');
