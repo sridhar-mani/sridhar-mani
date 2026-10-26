@@ -4,3 +4,4 @@ export function getVerticalBounds(viewportHeight: number, petHeight?: number, gu
 export function moveTowards(current: number, target: number, maxDelta: number): number;
 export function getPatrolWaypoints(minX: number, maxX: number): number[];
 export function stepVerticalPhysics(position: number, velocity: number, dt: number, floorY: number, ceilingY: number, gravity?: number, restitution?: number, bounceThreshold?: number): { position: number; velocity: number; landed: boolean; bounced: boolean; hitCeiling: boolean };
+export function getPatrolDepthTarget(minY: number, maxY: number, randomValue?: number): number;
