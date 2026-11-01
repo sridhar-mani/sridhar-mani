@@ -93,27 +93,6 @@ Tech: VTK.js, JavaScript, WebAssembly
 GitHub: github.com/sridhar-mani/cfd-toolkit
 NPM: cfd-toolkit
 
-### PDF Editor (freepdf.rest)
-Client-side PDF editor running WebAssembly and Web Workers locally in the browser for privacy-first PDF manipulation with zero server upload.
-Tech: React, Tailwind CSS, Web Workers, WASM
-Live: freepdf.rest
-
-### SpendFlow
-Smart personal spending tracker with automated categorization and geographic spending mapping built on React Native New Architecture.
-Tech: React Native, TypeScript, Android/iOS
-GitHub: github.com/sridhar-mani/SpendFlow
-
-### ChromaDB-UI
-Visual web manager and embedding inspector for ChromaDB vector collections.
-Tech: React.js, Tailwind CSS, ChromaDB
-GitHub: github.com/sridhar-mani/chromadb-ui
-NPM: @sridhar-mani/chromadb-ui
-
-### InfluencerHub
-Full-stack campaign platform built with Vue 3 and Flask, featuring user authentication and analytics.
-Tech: Vue 3, SQLite, Tailwind CSS, Flask
-GitHub: github.com/sridhar-mani/InfluencerHub
-
 ## Contact Information
 - Email: sridharmani510@gmail.com
 - GitHub: github.com/sridhar-mani

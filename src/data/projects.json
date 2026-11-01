@@ -43,7 +43,7 @@
     "iconBg": "bg-gradient-to-br from-amber-500 to-rose-600",
     "tech": "Next.js + Drizzle ORM + PWA",
     "category": "Full-Stack",
-    "stars": 4,
+    "stars": 5,
     "verified": true,
     "repoUrl": "https://github.com/sridhar-mani/dining-management"
   },
@@ -67,7 +67,7 @@
     "iconBg": "bg-gradient-to-br from-purple-600 to-blue-500",
     "tech": "Electron + React + RAG",
     "category": "AI & Agents",
-    "stars": 3,
+    "stars": 4,
     "verified": true,
     "repoUrl": "https://github.com/sridhar-mani/AiDocs"
   },
@@ -79,7 +79,7 @@
     "iconBg": "bg-gradient-to-br from-violet-500 to-rose-500",
     "tech": "Python + PyTorch",
     "category": "AI & Agents",
-    "stars": 3,
+    "stars": 4,
     "verified": true,
     "repoUrl": "https://github.com/sridhar-mani/code-dcr"
   },
@@ -97,18 +97,6 @@
     "liveUrl": "https://www.npmjs.com/package/cfd-toolkit"
   },
   {
-    "id": "doc-migration",
-    "title": "Doc Migration Analyser",
-    "description": "Working automation app assessing document migration readiness using local Ollama models (Qwen 3.5), complete privacy, and zero external egress.",
-    "iconName": "doc_migration",
-    "iconBg": "bg-gradient-to-br from-amber-500 to-orange-600",
-    "tech": "Python + Ollama",
-    "category": "AI & Agents",
-    "stars": 2,
-    "verified": true,
-    "repoUrl": "https://github.com/sridhar-mani/Doc-Migration-Analyser-Base"
-  },
-  {
     "id": "rn-sms-fetch",
     "title": "RN SMS Fetch",
     "description": "High-performance native module for React Native Android New Architecture (TurboModule) published on NPM for background SMS analysis.",
@@ -116,58 +104,9 @@
     "iconBg": "bg-gradient-to-br from-emerald-500 to-teal-600",
     "tech": "React Native + Kotlin",
     "category": "Mobile",
-    "stars": 3,
+    "stars": 4,
     "verified": true,
     "repoUrl": "https://github.com/sridhar-mani/rn-sms-fetch",
     "liveUrl": "https://www.npmjs.com/package/rn-sms-fetch"
-  },
-  {
-    "id": "pdf-editor",
-    "title": "PDF Editor",
-    "description": "Modern and responsive fully frontend PDF editor with Web Workers and WebAssembly, processing docs locally with zero server upload.",
-    "iconName": "pdf_editor",
-    "iconBg": "bg-gradient-to-br from-syntax-orange to-syntax-yellow",
-    "tech": "React + WASM",
-    "category": "Full-Stack",
-    "stars": 5,
-    "verified": true,
-    "liveUrl": "https://freepdf.rest/"
-  },
-  {
-    "id": "spend-flow",
-    "title": "SpendFlow",
-    "description": "Smart spending tracker with advanced data visualization and geo-mapping, built with React Native New Architecture.",
-    "iconName": "spend_flow",
-    "iconBg": "bg-gradient-to-br from-syntax-green to-syntax-yellow",
-    "tech": "React Native + TS",
-    "category": "Mobile",
-    "stars": 4,
-    "verified": true,
-    "repoUrl": "https://github.com/sridhar-mani/SpendFlow"
-  },
-  {
-    "id": "chromadb-ui",
-    "title": "ChromaDB-UI",
-    "description": "Web-based DB manager and interactive visual inspector for ChromaDB vector database collections.",
-    "iconName": "chromadb_ui",
-    "iconBg": "bg-gradient-to-br from-syntax-purple to-syntax-cyan",
-    "tech": "React + ChromaDB",
-    "category": "AI & Agents",
-    "stars": 3,
-    "verified": true,
-    "repoUrl": "https://github.com/sridhar-mani/chromadb-ui",
-    "liveUrl": "https://www.npmjs.com/package/@sridhar-mani/chromadb-ui"
-  },
-  {
-    "id": "influencer-hub",
-    "title": "InfluencerHub",
-    "description": "Full-stack campaign platform built with Vue 3 and Flask, featuring user authentication, analytics reporting, and CRUD operations.",
-    "iconName": "influencer_hub",
-    "iconBg": "bg-gradient-to-br from-syntax-purple to-syntax-pink",
-    "tech": "Vue3 + Flask",
-    "category": "Full-Stack",
-    "stars": 4,
-    "verified": true,
-    "repoUrl": "https://github.com/sridhar-mani/InfluencerHub"
   }
 ]
