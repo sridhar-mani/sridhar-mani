@@ -196,6 +196,8 @@ export const SkillsSection = () => {
                     {'  '}<span className="syntax-key">"projects"</span>
                     <span className="text-editor-comment">:</span>
                     {' '}<span className="syntax-bracket">{'['}</span>
+                  </span>
+                </CodeLine>
                 {projectsData.slice(0, 6).map((proj, idx) => {
                   const isLast = idx === 5;
                   const lineBase = 5 + idx * 5;
@@ -256,13 +258,13 @@ export const SkillsSection = () => {
                     </motion.div>
                   );
                 })}
-                <CodeLine lineNumber={20}>
+                <CodeLine lineNumber={35}>
                   <span className="text-editor-text">
                     {'  '}<span className="syntax-bracket">{']'}</span>
                     <span className="text-editor-comment">,</span>
                   </span>
                 </CodeLine>
-                <CodeLine lineNumber={21}>
+                <CodeLine lineNumber={36}>
                   <span className="text-editor-text">
                     {'  '}<span className="syntax-key">"openSource"</span>
                     <span className="text-editor-comment">:</span>
@@ -270,14 +272,14 @@ export const SkillsSection = () => {
                     <span className="text-editor-comment">,</span>
                   </span>
                 </CodeLine>
-                <CodeLine lineNumber={22}>
+                <CodeLine lineNumber={37}>
                   <span className="text-editor-text">
                     {'  '}<span className="syntax-key">"hireable"</span>
                     <span className="text-editor-comment">:</span>
                     {' '}<span className="syntax-number">true</span>
                   </span>
                 </CodeLine>
-                <CodeLine lineNumber={23}>
+                <CodeLine lineNumber={38}>
                   <span className="syntax-bracket">{'}'}</span>
                 </CodeLine>
               </>
