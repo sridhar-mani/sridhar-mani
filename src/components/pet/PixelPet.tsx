@@ -28,7 +28,7 @@ export const PET_CATALOG: PetMeta[] = [
       "Woof! Sridhar is building high-impact AI agents at Zenteiq! ⚡",
       "I love clean TypeScript, WebGPU shaders, and zero bugs! 🐾",
       "Pick me up and toss me! I can fly! 🪂",
-      "Click on me to open treats and settings! 🎾",
+      "Pet me with a click! 🐾 Click my badge ⚙️ for treats and settings!",
       "Type 'agent' in the terminal to watch autonomous coding agents! 🤖"
     ]
   },
@@ -532,23 +532,7 @@ export const PixelPet = () => {
     e.preventDefault();
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
 
-    setIsDragging(true);
-    setState('happy');
-    petAudio.playBoing();
-
-    // Wiggle and stretch when grabbed
-    setScaleY(1.25);
-    setScaleX(0.85);
-
-    // Living pet reaction dialogue
-    const grabPhrases = [
-      "Whoa! Put me down! 🐾",
-      "Wheeee! Flying familiar! 🪂",
-      "Look at me, zero gravity! ✨",
-      "Hold on tight! 🚀"
-    ];
-    setDialogue(grabPhrases[Math.floor(Math.random() * grabPhrases.length)]);
-    setShowDialogue(true);
+    let hasStartedDrag = false;
 
     dragStartRef.current = {
       mouseX: e.clientX,
@@ -565,6 +549,29 @@ export const PixelPet = () => {
       const dy = dragStartRef.current.mouseY - moveEvent.clientY; // Invert Y for altitude
 
       dragStartRef.current.totalDist += Math.abs(dx) + Math.abs(dy);
+
+      // Only enter drag/flying state if pointer actually moved beyond threshold
+      if (dragStartRef.current.totalDist >= 8 && !hasStartedDrag) {
+        hasStartedDrag = true;
+        setIsDragging(true);
+        setState('happy');
+        petAudio.playBoing();
+
+        // Wiggle and stretch when grabbed
+        setScaleY(1.25);
+        setScaleX(0.85);
+
+        const grabPhrases = [
+          "Whoa! Flying familiar! 🪂",
+          "Wheeee! Look at me fly! 🚀",
+          "Zero gravity mode activated! ✨",
+          "Hold on tight! 🐾"
+        ];
+        setDialogue(grabPhrases[Math.floor(Math.random() * grabPhrases.length)]);
+        setShowDialogue(true);
+      }
+
+      if (!hasStartedDrag) return;
 
       const minX = 20;
       const maxX = Math.max(minX + 100, screenWidthRef.current - 80);
@@ -599,17 +606,43 @@ export const PixelPet = () => {
       dragStartRef.current = null;
       lastMousePosRef.current = null;
 
-      // Clean distinction: Click (< 8px total movement) vs Drag (> 8px)
+      // Clean distinction: Click (< 8px total movement) = PET THE PET vs Drag (> 8px) = Toss
       if (dist < 8) {
-        // Was a gentle tap/click!
+        // GENTLE PETTING ACTION!
         petAudio.playChirp();
-        setIsMenuOpen(true);
-        setXp((p) => p + 6);
-        const newHeart = { id: Date.now(), x: 0, y: -25 };
+        setState('happy');
+        setXp((p) => p + 8);
+
+        // Cute squish & bounce animation (head pat reaction)
+        setScaleY(0.78);
+        setScaleX(1.22);
+        setTimeout(() => {
+          setScaleY(1.15);
+          setScaleX(0.92);
+          setTimeout(() => {
+            setScaleY(1.0);
+            setScaleX(1.0);
+          }, 140);
+        }, 120);
+
+        // Burst of floating hearts
+        const newHeart = { id: Date.now(), x: (Math.random() - 0.5) * 30, y: -25 };
         setHearts((prev) => [...prev, newHeart]);
         setTimeout(() => {
           setHearts((prev) => prev.filter((h) => h.id !== newHeart.id));
         }, 1200);
+
+        const pettingPhrases = [
+          "Purrrr... That's the spot! ❤️",
+          "Hehe, head pats feel so nice! 🥰",
+          "*happy wiggles* 🐾",
+          "Aww, thank you! Sridhar writes clean code just like this! ✨",
+          "My happiness meter is 100%! 💖",
+          "More head pats please! 🐾",
+          "Best human companion ever! ✨"
+        ];
+        setDialogue(pettingPhrases[Math.floor(Math.random() * pettingPhrases.length)]);
+        setShowDialogue(true);
       } else {
         // Was tossed into the air!
         setState('happy');
@@ -773,6 +806,12 @@ export const PixelPet = () => {
         }}
         onPointerDown={handlePointerDown}
         onDoubleClick={handleDoubleClick}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          petAudio.playPop();
+          setIsMenuOpen(true);
+        }}
       >
         <div className="relative flex flex-col items-center">
           {/* Living reaction exclamation badge when dragged */}
@@ -829,7 +868,7 @@ export const PixelPet = () => {
           {/* THE FREESTANDING PET SPRITE WITH VISUAL EVOLUTIONS */}
           <div
             className="relative p-1 flex items-center justify-center group"
-            title={`Drag me to toss in the air! Click for menu! (${levelInfo.title} • Lv.${lvl})`}
+            title={`Click to pet me! Drag to toss! Click badge ⚙️ to change pet! (${levelInfo.title} • Lv.${lvl})`}
           >
             {/* EVOLUTION 3: Cosmic / Super Saiyan Aura (Lv.5+) */}
             {hasCosmicAura && (
@@ -885,11 +924,23 @@ export const PixelPet = () => {
               />
             </div>
 
-            {/* Mini subtle level tag */}
-            <div className="absolute -bottom-2 bg-slate-900/90 text-cyan-400 border border-cyan-500/40 shadow-md rounded-full px-1.5 py-0.2 text-[9px] font-mono font-bold flex items-center gap-0.5 pointer-events-none">
+            {/* Mini subtle level & settings button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                petAudio.playPop();
+                setIsMenuOpen(true);
+              }}
+              className="absolute -bottom-2.5 bg-slate-900/90 hover:bg-slate-800 text-cyan-400 hover:text-cyan-300 border border-cyan-500/50 hover:border-cyan-400 shadow-md rounded-full px-2 py-0.5 text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer pointer-events-auto transition-all hover:scale-105 z-20"
+              title="Click to customize pet, feed treats, or change companion (⚙️)"
+              aria-label="Pet Settings and Companion Catalog"
+            >
               <span>Lv.{lvl}</span>
-              <span className="text-white/70 text-[8px]">{currentPet.name}</span>
-            </div>
+              <span className="text-white/80 text-[8px]">{currentPet.name}</span>
+              <span className="text-cyan-400 text-[10px]">⚙️</span>
+            </button>
           </div>
         </div>
       </div>
