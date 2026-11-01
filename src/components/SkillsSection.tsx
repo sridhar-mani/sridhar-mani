@@ -98,7 +98,7 @@ export const SkillsSection = () => {
   const [activeTab, setActiveTab] = useState<'package.json' | 'projects.json'>('package.json');
 
   return (
-    <section id="expertise" ref={sectionRef} className="py-20 sm:py-28 bg-white relative">
+    <section id="architecture" ref={sectionRef} className="py-20 sm:py-28 bg-white relative">
       <div className="container mx-auto px-4 sm:px-6">
         {/* Section header */}
         <motion.div
