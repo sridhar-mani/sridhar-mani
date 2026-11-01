@@ -29,15 +29,27 @@ const Portal = ({ children }: { children: React.ReactNode }) => {
   return createPortal(children, document.body);
 };
 
-// Project Icon Component with clean fallback
+const KNOWN_ICONS = new Set([
+  'ai_analyzer',
+  'cfd_toolkit',
+  'chromadb_ui',
+  'feascript_core',
+  'influencer_hub',
+  'pdf_editor',
+  'project_forum',
+  'spend_flow'
+]);
+
+// Project Icon Component with clean fallback (avoids 404 network requests)
 const ProjectIcon = ({ project, size = 'sm' }: { project: Project; size?: 'sm' | 'lg' }) => {
   const [imageError, setImageError] = useState(false);
   const dimClass = size === 'lg' ? 'w-20 h-20 rounded-2xl' : 'w-12 h-12 sm:w-14 sm:h-14 rounded-lg';
   const imgDim = size === 'lg' ? 'w-14 h-14' : 'w-9 h-9 sm:w-10 sm:h-10';
+  const hasKnownAsset = KNOWN_ICONS.has(project.iconName);
 
   return (
     <div className={`project-icon shrink-0 ${dimClass} ${project.iconBg} p-1 shadow-sm flex items-center justify-center overflow-hidden`}>
-      {!imageError ? (
+      {hasKnownAsset && !imageError ? (
         <img
           src={`${import.meta.env.BASE_URL}icons/${project.iconName}.png`}
           alt={project.title}

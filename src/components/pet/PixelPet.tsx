@@ -159,6 +159,15 @@ export const getLevelInfo = (xp: number): LevelInfo => {
 };
 
 export const PixelPet = () => {
+  // Auto-hide initial greeting after 5s so it doesn't persistently obscure hero elements
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowDialogue(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
+
   const [petId, setPetId] = useState<PetId>(() => {
     try {
       const saved = localStorage.getItem('portfolio_pet_id');
@@ -178,7 +187,7 @@ export const PixelPet = () => {
   });
 
   const [state, setState] = useState<PetState>('walk');
-  const [x, setX] = useState<number>(80);
+  const [x, setX] = useState<number>(() => typeof window !== 'undefined' ? Math.max(80, window.innerWidth - 200) : 180);
   const [y, setY] = useState<number>(10); // Vertical altitude/depth from bottom
   const [scaleX, setScaleX] = useState<number>(1);
   const [scaleY, setScaleY] = useState<number>(1);
@@ -832,7 +841,7 @@ export const PixelPet = () => {
                 initial={{ opacity: 0, y: 10, scale: 0.85 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8, y: 5 }}
-                className="mb-2 bg-slate-900/95 text-white border border-cyan-400/60 backdrop-blur-md rounded-2xl px-3 py-1.5 text-xs font-mono shadow-[0_8px_24px_rgba(0,0,0,0.4)] max-w-[240px] text-center pointer-events-none"
+                className="mb-2 bg-slate-900/95 text-white border border-cyan-400/60 backdrop-blur-md rounded-2xl px-4 py-2 text-xs font-mono shadow-[0_8px_24px_rgba(0,0,0,0.4)] min-w-[180px] max-w-[280px] w-max text-center pointer-events-none whitespace-normal leading-relaxed z-30"
               >
                 <p className="leading-snug">{dialogue}</p>
                 <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-r border-b border-cyan-400/60 rotate-45" />
