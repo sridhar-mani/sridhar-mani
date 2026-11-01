@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, useInView, AnimatePresence, useSpring, useMotionValue, useTransform } from 'framer-motion';
-import { Check, Star, X, ExternalLink, Github, Code2, Sparkles, Layers, Info } from 'lucide-react';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { ExternalLink, Github, Sparkles, Layers, Info, X, Lock } from 'lucide-react';
 import projectsData from '@/data/projects.json';
 
 interface Project {
@@ -40,15 +40,15 @@ const KNOWN_ICONS = new Set([
   'spend_flow'
 ]);
 
-// Project Icon Component with clean fallback (avoids 404 network requests)
+// Project Icon Component with clean fallback
 const ProjectIcon = ({ project, size = 'sm' }: { project: Project; size?: 'sm' | 'lg' }) => {
   const [imageError, setImageError] = useState(false);
-  const dimClass = size === 'lg' ? 'w-20 h-20 rounded-2xl' : 'w-12 h-12 sm:w-14 sm:h-14 rounded-lg';
-  const imgDim = size === 'lg' ? 'w-14 h-14' : 'w-9 h-9 sm:w-10 sm:h-10';
+  const dimClass = size === 'lg' ? 'w-16 h-16 rounded-2xl' : 'w-11 h-11 rounded-xl';
+  const imgDim = size === 'lg' ? 'w-11 h-11' : 'w-7 h-7';
   const hasKnownAsset = KNOWN_ICONS.has(project.iconName);
 
   return (
-    <div className={`project-icon shrink-0 ${dimClass} ${project.iconBg} p-1 shadow-sm flex items-center justify-center overflow-hidden`}>
+    <div className={`shrink-0 ${dimClass} ${project.iconBg} p-1 shadow-sm flex items-center justify-center overflow-hidden border border-black/5`}>
       {hasKnownAsset && !imageError ? (
         <img
           src={`${import.meta.env.BASE_URL}icons/${project.iconName}.png`}
@@ -57,7 +57,7 @@ const ProjectIcon = ({ project, size = 'sm' }: { project: Project; size?: 'sm' |
           onError={() => setImageError(true)}
         />
       ) : (
-        <span className="font-mono font-bold text-white text-base sm:text-lg tracking-wider">
+        <span className="font-mono font-bold text-white text-sm tracking-wider">
           {project.title.slice(0, 2).toUpperCase()}
         </span>
       )}
@@ -84,82 +84,83 @@ const ProjectModal = ({ project, isOpen, onClose }: { project: Project; isOpen: 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-md z-[9990] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9990] flex items-center justify-center p-4"
             onClick={onClose}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 0, y: 16 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: "spring", stiffness: 350, damping: 30 }}
-              className="bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl rounded-3xl overflow-hidden relative w-full max-w-[440px]"
+              exit={{ scale: 0.95, opacity: 0, y: 16 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white border border-slate-200 shadow-2xl rounded-2xl overflow-hidden relative w-full max-w-lg p-6 sm:p-8"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition-colors z-10"
+                className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors z-10"
                 aria-label="Close modal"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
 
-              <div className="p-8 flex flex-col items-center text-center">
-                <div className="mb-4">
-                  <ProjectIcon project={project} size="lg" />
+              <div className="flex items-start gap-4 mb-5">
+                <ProjectIcon project={project} size="lg" />
+                <div>
+                  <div className="inline-block px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-mono font-semibold border border-blue-200/60 mb-1.5">
+                    {project.category || 'Engineering'}
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{project.title}</h2>
                 </div>
+              </div>
 
-                {/* Title & Verified Badge */}
-                <div className="flex items-center gap-2 mb-2">
-                  <h2 className="text-2xl font-bold text-gray-900 font-mono">{project.title}</h2>
-                  {project.verified && (
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-syntax-green text-white">
-                      <Check size={12} />
-                    </span>
-                  )}
-                </div>
-
-                {/* Tech & Stars */}
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="px-3 py-1 bg-gray-100 rounded-full text-xs font-mono text-gray-600">
-                    {project.tech}
+              {/* Tech stack tags */}
+              <div className="flex flex-wrap gap-1.5 mb-6">
+                {project.tech.split(',').map((t, i) => (
+                  <span key={i} className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-mono font-medium border border-slate-200/80">
+                    {t.trim()}
                   </span>
-                  <span className="flex items-center gap-1 text-xs text-gray-500">
-                    <Star size={12} className="text-yellow-500" />
-                    {project.stars}
-                  </span>
-                </div>
+                ))}
+              </div>
 
-                {/* Description */}
-                <p className="text-sm text-gray-600 leading-relaxed mb-6 max-w-[95%]">
+              {/* Description */}
+              <div className="mb-8">
+                <h3 className="text-xs font-mono uppercase tracking-wider text-slate-600 mb-2 font-medium">Architecture & Implementation</h3>
+                <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200/60">
                   {project.description}
                 </p>
+              </div>
 
-                {/* Action Buttons */}
-                <div className="flex items-center gap-3 w-full">
-                  {project.repoUrl && (
-                    <a
-                      href={project.repoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-xl font-mono text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
-                    >
-                      <Github size={16} />
-                      Source Code
-                    </a>
-                  )}
-                  {project.liveUrl && (
-                    <a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-syntax-cyan text-white rounded-xl font-mono text-sm font-medium hover:bg-cyan-500 transition-colors shadow-sm"
-                    >
-                      <ExternalLink size={16} />
-                      Live Demo
-                    </a>
-                  )}
-                </div>
+              {/* Actions */}
+              <div className="flex items-center gap-3">
+                {project.repoUrl ? (
+                  <a
+                    href={project.repoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
+                  >
+                    <Github size={16} />
+                    <span>View GitHub Repo</span>
+                  </a>
+                ) : (
+                  <div className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 bg-slate-100 text-slate-500 rounded-xl text-sm font-medium border border-slate-200">
+                    <Lock size={15} />
+                    <span>Proprietary / Enterprise System</span>
+                  </div>
+                )}
+
+                {project.liveUrl && (
+                  <a
+                    href={project.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
+                  >
+                    <ExternalLink size={16} />
+                    <span>Live Demo</span>
+                  </a>
+                )}
               </div>
             </motion.div>
           </motion.div>
@@ -169,184 +170,108 @@ const ProjectModal = ({ project, isOpen, onClose }: { project: Project; isOpen: 
   );
 };
 
-// Project Card Component
+// Bento Project Card Component
 const ProjectCard = ({ project, index }: { project: Project; index: number }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [isInstalling, setIsInstalling] = useState(false);
-  const [progress, setProgress] = useState(0);
-
-  const cardRef = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const mouseX = useSpring(x, { stiffness: 400, damping: 30 });
-  const mouseY = useSpring(y, { stiffness: 400, damping: 30 });
-  const rotateX = useTransform(mouseY, [-0.5, 0.5], [6, -6]);
-  const rotateY = useTransform(mouseX, [-0.5, 0.5], [-6, 6]);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const normalizedX = (e.clientX - rect.left) / rect.width - 0.5;
-    const normalizedY = (e.clientY - rect.top) / heightOr1(rect.height) - 0.5;
-    x.set(normalizedX);
-    y.set(normalizedY);
-  };
-
-  const heightOr1 = (h: number) => (h > 0 ? h : 1);
-
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
-
-  const handleInstall = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isInstalled || isInstalling) return;
-
-    setIsInstalling(true);
-    setProgress(0);
-
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsInstalling(false);
-          setIsInstalled(true);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 120);
-  };
 
   return (
     <>
-      <div style={{ perspective: 1000 }}>
-        <motion.div
-          ref={cardRef}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: index * 0.05 }}
-          viewport={{ once: true }}
-          onClick={() => setIsModalOpen(true)}
-          className="group relative p-6 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
-          style={{
-            rotateX,
-            rotateY,
-            transformStyle: 'preserve-3d',
-          }}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          whileHover={{ scale: 1.02 }}
-        >
-          {/* Holographic sheen effect */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-0 group-hover:opacity-40 transition-opacity duration-500 rounded-xl"
-            style={{
-              background: 'linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.8) 45%, rgba(255, 255, 255, 0.5) 50%, transparent 54%)',
-            }}
-          />
-
-          {/* Details hint badge */}
-          <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <span className="text-[10px] text-gray-500 font-mono bg-gray-100/90 px-2 py-0.5 rounded backdrop-blur-sm flex items-center gap-1">
-              <Info size={10} /> details
-            </span>
-          </div>
-
-          {/* Header */}
-          <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4" style={{ transform: 'translateZ(20px)' }}>
-            <ProjectIcon project={project} size="sm" />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-mono font-semibold text-base sm:text-lg text-gray-900">{project.title}</h3>
-                {project.verified && (
-                  <span className="shrink-0 flex items-center justify-center w-4 h-4 rounded-full bg-syntax-green text-white">
-                    <Check size={10} />
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-3 sm:gap-4 mt-1 text-xs sm:text-sm text-gray-500 font-mono">
-                <span className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded">
-                  {project.tech}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Star size={12} className="sm:w-3.5 sm:h-3.5 text-yellow-500" />
-                  {project.stars}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: index * 0.04 }}
+        viewport={{ once: true }}
+        onClick={() => setIsModalOpen(true)}
+        className="group relative bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-slate-300 transition-all duration-200 cursor-pointer flex flex-col justify-between"
+      >
+        <div>
+          {/* Header row */}
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              <ProjectIcon project={project} size="sm" />
+              <div>
+                <h3 className="font-bold text-base sm:text-lg text-slate-900 group-hover:text-blue-600 transition-colors tracking-tight">
+                  {project.title}
+                </h3>
+                <span className="text-xs font-mono text-slate-600 font-medium">
+                  {project.category || 'Systems'}
                 </span>
               </div>
             </div>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsModalOpen(true);
+              }}
+              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              aria-label="View project details"
+            >
+              <Info size={16} />
+            </button>
           </div>
 
           {/* Description */}
-          <p className="font-mono text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 leading-relaxed line-clamp-3" style={{ transform: 'translateZ(10px)' }}>
+          <p className="text-xs sm:text-sm text-slate-600 mb-5 leading-relaxed line-clamp-3">
             {project.description}
           </p>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2 sm:gap-3" style={{ transform: 'translateZ(15px)' }}>
-            <motion.button
-              onClick={handleInstall}
-              disabled={isInstalled}
-              className={`flex-1 text-xs sm:text-sm py-2 sm:py-2.5 relative rounded-lg font-mono font-medium transition-colors ${
-                isInstalled
-                  ? 'bg-gray-100 text-syntax-green'
-                  : 'bg-syntax-cyan text-white hover:bg-cyan-500 shadow-sm hover:shadow'
-              }`}
-              whileHover={{ scale: isInstalled ? 1 : 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {isInstalling ? (
-                <div className="relative w-full h-full flex items-center justify-center">
-                  <motion.div
-                    className="absolute inset-0 bg-white/20 rounded-lg"
-                    initial={{ width: '0%' }}
-                    animate={{ width: `${progress}%` }}
-                  />
-                  <span className="relative z-10">{progress}%</span>
-                </div>
-              ) : isInstalled ? (
-                <span className="flex items-center justify-center gap-1">
-                  <Check size={14} /> Installed
-                </span>
-              ) : (
-                'Install'
-              )}
-            </motion.button>
+          {/* Tech pills */}
+          <div className="flex flex-wrap gap-1.5 mb-5">
+            {project.tech.split(',').slice(0, 3).map((t, i) => (
+              <span key={i} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[11px] font-mono font-medium border border-slate-200/60">
+                {t.trim()}
+              </span>
+            ))}
+            {project.tech.split(',').length > 3 && (
+              <span className="px-1.5 py-0.5 text-slate-600 text-[11px] font-mono font-medium">
+                +{project.tech.split(',').length - 3} more
+              </span>
+            )}
+          </div>
+        </div>
 
-            {project.repoUrl && (
-              <motion.a
+        {/* Action Row */}
+        <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-2">
+            {project.repoUrl ? (
+              <a
                 href={project.repoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="p-2 sm:p-2.5 rounded-lg border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors bg-white shadow-sm"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                aria-label={`View ${project.title} on GitHub`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200 transition-colors"
               >
-                <Code2 size={16} />
-              </motion.a>
+                <Github size={13} />
+                <span>Code</span>
+              </a>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-600">
+                <Lock size={12} />
+                <span>Proprietary</span>
+              </span>
             )}
 
             {project.liveUrl && (
-              <motion.a
+              <a
                 href={project.liveUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="p-2 sm:p-2.5 rounded-lg border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-colors bg-white shadow-sm"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                aria-label={`View live demo of ${project.title}`}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-medium border border-blue-200/60 transition-colors"
               >
-                <ExternalLink size={16} />
-              </motion.a>
+                <ExternalLink size={12} />
+                <span>Demo</span>
+              </a>
             )}
           </div>
-        </motion.div>
-      </div>
+
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="text-xs font-medium text-slate-600 hover:text-slate-800 transition-colors"
+          >
+            Details →
+          </button>
+        </div>
+      </motion.div>
 
       <ProjectModal
         project={project}
@@ -367,32 +292,35 @@ export const ProjectsSection = () => {
     : projects.filter((p) => p.category === selectedCategory);
 
   return (
-    <section id="work" ref={sectionRef} className="py-16 sm:py-24 lg:py-32 bg-white relative">
+    <section id="work" ref={sectionRef} className="py-20 sm:py-28 bg-slate-50/70 border-y border-slate-200/60 relative">
       <div className="container mx-auto px-4 sm:px-6">
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 sm:mb-12"
+          transition={{ duration: 0.5 }}
+          className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10"
         >
           <div>
-            <span className="section-label text-xs sm:text-sm text-gray-500 font-mono tracking-widest">// 03 SELECTED WORK</span>
-            <h2 className="section-title mt-3 sm:mt-4 text-3xl sm:text-4xl md:text-5xl font-mono font-bold text-gray-900">
-              projects.marketplace
+            <span className="text-xs font-mono font-semibold text-blue-600 uppercase tracking-widest">// 02 FLAGSHIP WORK</span>
+            <h2 className="mt-2 text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+              Featured Engineering Systems
             </h2>
+            <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-xl">
+              Autonomous coding agents, GPU compute shaders, enterprise backends, and geometric modeling engines.
+            </p>
           </div>
 
           {/* Category Filter Pills */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-full font-mono text-xs transition-all ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
                   selectedCategory === cat
-                    ? 'bg-syntax-cyan text-white shadow-sm font-semibold'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-slate-900 text-white shadow-sm font-semibold'
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
                 }`}
               >
                 {cat}
@@ -402,7 +330,7 @@ export const ProjectsSection = () => {
         </motion.div>
 
         {/* Projects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredProjects.map((project, index) => (
             <ProjectCard key={project.id} project={project} index={index} />
           ))}

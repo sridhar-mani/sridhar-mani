@@ -6,7 +6,6 @@ import { ProjectsSection } from '@/components/ProjectsSection';
 import { ExperienceSection } from '@/components/ExperienceSection';
 import { ContactSection } from '@/components/ContactSection';
 import { Footer } from '@/components/Footer';
-import { GlobalOrb } from '@/components/GlobalOrb';
 import { useSmoothScroll } from '@/hooks/useSmoothScroll';
 
 const Index = () => {
@@ -17,14 +16,12 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background relative">
-      <GlobalOrb />
-      
+    <div className="min-h-screen bg-white text-slate-900 selection:bg-blue-100 selection:text-blue-900 relative">
       <Navigation />
       <main>
         <HeroSection />
-        <SkillsSection />
         <ProjectsSection />
+        <SkillsSection />
         <ExperienceSection />
         <ContactSection />
       </main>
@@ -34,4 +31,3 @@ const Index = () => {
 };
 
 export default Index;
-

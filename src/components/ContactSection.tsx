@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
+import { Mail, Check, Copy, ExternalLink, Github, Linkedin, FileText, Send, Terminal as TerminalIcon, MessageSquare } from 'lucide-react';
 
 interface TerminalLine {
   type: 'command' | 'output' | 'input' | 'prompt' | 'link';
@@ -13,24 +14,38 @@ export const ContactSection = () => {
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' });
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<'form' | 'terminal'>('form');
+
+  // Form states
+  const [formName, setFormName] = useState('');
+  const [formEmail, setFormEmail] = useState('');
+  const [formSubject, setFormSubject] = useState('');
+  const [formMessage, setFormMessage] = useState('');
+
+  // Terminal states
   const [command, setCommand] = useState('');
-  const [currentField, setCurrentField] = useState<'command' | 'email' | 'message' | 'done'>('command');
   const [terminalLines] = useState<TerminalLine[]>([
     { type: 'command', content: 'cat README.md', path: '~/contact' },
     { type: 'output', content: "# Let's build high-performance systems together" },
     { type: 'output', content: 'Available for AI/ML, 3D WebGPU, and Full-Stack Engineering roles.' },
-    { type: 'output', content: 'Type "help" to see all commands or "email" to reach out directly.' },
+    { type: 'output', content: 'Type "help" to see all available commands.' },
     { type: 'output', content: '' },
   ]);
   const [submittedLines, setSubmittedLines] = useState<TerminalLine[]>([]);
 
-  useEffect(() => {
-    if (inputRef.current && currentField !== 'done') {
-      inputRef.current.focus();
-    }
-  }, [currentField, submittedLines]);
+  const copyEmail = () => {
+    navigator.clipboard.writeText('sridharmani510@gmail.com');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const subject = formSubject ? `[Portfolio Contact] ${formSubject}` : `Portfolio Inquiry from ${formName || 'Recruiter'}`;
+    const body = `Name: ${formName}\nEmail: ${formEmail}\n\nMessage:\n${formMessage}`;
+    window.location.href = `mailto:sridharmani510@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
 
   const handleCommandSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && command) {
@@ -64,16 +79,15 @@ export const ContactSection = () => {
           outputLines = [
             { type: 'output', content: 'Available terminal commands:' },
             { type: 'output', content: '  resume    - View and download latest resume (PDF)' },
-            { type: 'output', content: '  email     - Send Sridhar a direct email message' },
+            { type: 'output', content: '  email     - Open email client' },
             { type: 'output', content: '  agent     - Simulate autonomous coding agent runtime (LangGraph + Zenteiq)' },
-            { type: 'output', content: '  fetch     - Throw tennis ball for your screen pet to chase 🎾' },
+            { type: 'output', content: '  fetch     - Throw tennis ball for screen pet to chase 🎾' },
             { type: 'output', content: '  pet <id>  - Switch companion (shiba, fox, crab, duck, clippy, totoro, zappy)' },
-            { type: 'output', content: '  matrix    - Display Matrix digital rain sequence' },
             { type: 'output', content: '  projects  - List active highlighted repositories' },
             { type: 'output', content: '  skills    - Print key technical proficiencies' },
             { type: 'output', content: '  socials   - Display LinkedIn, GitHub, and email' },
             { type: 'output', content: '  whoami    - Display current user context' },
-            { type: 'output', content: '  clear     - Clear terminal buffer' },
+            { type: 'output', content: '  clear     - Clear terminal history' },
           ];
           setSubmittedLines([...newLines, ...outputLines]);
           break;
@@ -100,22 +114,6 @@ export const ContactSection = () => {
           setSubmittedLines([...newLines, ...outputLines]);
           break;
 
-        case 'matrix':
-          outputLines = [
-            { type: 'output', content: '01010011 01010010 01001001 01000100 01001000 01000001 01010010' },
-            { type: 'output', content: 'Wake up, Neo... The Matrix has you.' },
-            { type: 'output', content: 'Follow the White Shiba Inu. 🐾' },
-          ];
-          setSubmittedLines([...newLines, ...outputLines]);
-          break;
-
-        case 'sudo':
-          outputLines = [
-            { type: 'output', content: 'user is not in the sudoers file. This incident will be reported to Byte 🐾.' }
-          ];
-          setSubmittedLines([...newLines, ...outputLines]);
-          break;
-
         case 'projects':
           outputLines = [
             { type: 'output', content: 'Featured Flagship Repositories:' },
@@ -137,7 +135,7 @@ export const ContactSection = () => {
           }
           outputLines = [
             { type: 'output', content: '> Sridhar M - Software Engineer & AI Engineer (Oct 2026 Master Resume)' },
-            { type: 'output', content: '> Direct download link: /Sridhar_M_Resume.pdf (4.8 KB)' },
+            { type: 'output', content: '> Direct download link: /Sridhar_M_Resume.pdf' },
             { type: 'output', content: '> Opened resume in a new browser tab! 📄' },
           ];
           setSubmittedLines([...newLines, ...outputLines]);
@@ -147,33 +145,29 @@ export const ContactSection = () => {
           outputLines = [
             { type: 'output', content: 'Technical Proficiencies:' },
             { type: 'output', content: '  Frontend:  TypeScript, React, Next.js, Three.js, WebGPU, WASM' },
-            { type: 'output', content: '  Backend:   Python, PyTorch, LangGraph, FastAPI, Ollama, Node.js, Docker' },
-            { type: 'output', content: '  Mobile:    React Native New Architecture, Android (Kotlin)' },
+            { type: 'output', content: '  Backend:   Python, PyTorch, LangGraph, FastAPI, Node.js, Docker' },
+            { type: 'output', content: '  Geometry:  OpenCascade, Computational CAD, CFD Post-Processing' },
           ];
           setSubmittedLines([...newLines, ...outputLines]);
           break;
 
         case 'whoami':
-          outputLines = [{ type: 'output', content: 'sridhar-mani@portfolio - Software Engineer & AI Engineer @ Zenteiq' }];
+          outputLines = [{ type: 'output', content: 'sridhar-mani@portfolio - AI Engineer @ Zenteiq' }];
           setSubmittedLines([...newLines, ...outputLines]);
           break;
 
         case 'socials':
+        case 'email':
           outputLines = [
+            { type: 'output', content: 'Email:    sridharmani510@gmail.com' },
             { type: 'output', content: 'GitHub:   https://github.com/sridhar-mani' },
             { type: 'output', content: 'LinkedIn: https://linkedin.com/in/sridharmanimuthusamy' },
-            { type: 'output', content: 'Email:    sridharmani510@gmail.com' },
           ];
           setSubmittedLines([...newLines, ...outputLines]);
           break;
 
         case 'clear':
           setSubmittedLines([]);
-          break;
-
-        case 'email':
-          setSubmittedLines([...newLines, { type: 'output', content: 'Please enter your email address:' }]);
-          setCurrentField('email');
           break;
 
         default:
@@ -184,158 +178,266 @@ export const ContactSection = () => {
     }
   };
 
-  const handleEmailSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && email) {
-      setSubmittedLines((prev) => [
-        ...prev,
-        { type: 'input', content: email },
-        { type: 'output', content: 'Now enter your message:' },
-      ]);
-      setCurrentField('message');
-    }
-  };
-
-  const handleMessageSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && message) {
-      const mailtoUrl = `mailto:sridharmani510@gmail.com?subject=${encodeURIComponent(
-        `Portfolio Inquiry from ${email}`
-      )}&body=${encodeURIComponent(message)}`;
-
-      // Automatically launch mail client
-      window.location.href = mailtoUrl;
-
-      setSubmittedLines((prev) => [
-        ...prev,
-        { type: 'input', content: message },
-        { type: 'output', content: '' },
-        { type: 'output', content: '> Launching your default email client...' },
-        { type: 'output', content: `> Recipient: sridharmani510@gmail.com` },
-        { type: 'output', content: `> Sender:    ${email}` },
-        { type: 'output', content: '> ✓ Email client opened! Looking forward to connecting.' },
-        { type: 'output', content: '' },
-        { type: 'output', content: 'Type "help" for more commands.' },
-      ]);
-      setCurrentField('command');
-      setEmail('');
-      setMessage('');
-    }
-  };
-
   return (
-    <section id="contact" ref={sectionRef} className="py-16 sm:py-24 lg:py-32 bg-white">
+    <section id="contact" ref={sectionRef} className="py-20 sm:py-28 bg-white border-t border-slate-200/60 relative">
       <div className="container mx-auto px-4 sm:px-6">
-        {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-8 sm:mb-12"
+          transition={{ duration: 0.5 }}
+          className="mb-12 max-w-3xl"
         >
-          <span className="section-label text-xs sm:text-sm text-gray-500 font-mono tracking-widest">// 05 CONTACT</span>
-          <h2 className="section-title mt-3 sm:mt-4 text-3xl sm:text-4xl md:text-5xl font-mono font-bold text-gray-900">terminal.sh</h2>
+          <span className="text-xs font-mono font-semibold text-blue-600 uppercase tracking-widest">// 05 INITIATE CONTACT</span>
+          <h2 className="mt-2 text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+            Let's Build Together
+          </h2>
+          <p className="text-sm sm:text-base text-slate-600 mt-2">
+            Available for full-time AI/Systems engineering roles, high-performance contracts, and technical advisory.
+          </p>
         </motion.div>
 
-        {/* Terminal window */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="terminal max-w-3xl mx-auto shadow-xl"
-        >
-          {/* Terminal header */}
-          <div className="terminal-header">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="ide-dot ide-dot-red w-2.5 h-2.5 sm:w-3 sm:h-3" />
-              <div className="ide-dot ide-dot-yellow w-2.5 h-2.5 sm:w-3 sm:h-3" />
-              <div className="ide-dot ide-dot-green w-2.5 h-2.5 sm:w-3 sm:h-3" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Direct Info & Quick Actions */}
+          <div className="lg:col-span-5 space-y-4">
+            {/* 1-Click Copy Email Card */}
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200/90 shadow-sm">
+              <div className="flex items-center gap-2 text-xs font-mono font-medium text-slate-600 mb-2">
+                <Mail size={14} className="text-blue-600" />
+                <span>DIRECT EMAIL</span>
+              </div>
+              
+              <div className="flex items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200">
+                <span className="font-mono text-sm sm:text-base font-semibold text-slate-900 truncate">
+                  sridharmani510@gmail.com
+                </span>
+                <button
+                  onClick={copyEmail}
+                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium inline-flex items-center gap-1.5 transition-colors shrink-0"
+                  aria-label="Copy email address"
+                >
+                  {copied ? (
+                    <>
+                      <Check size={14} className="text-emerald-600" />
+                      <span className="text-emerald-600 font-semibold">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={14} />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500">
+                <span>📍 Bangalore / Chennai, India</span>
+                <span className="text-emerald-700 font-medium">⚡ Replies in &lt; 24h</span>
+              </div>
             </div>
-            <span className="ml-3 sm:ml-4 font-mono text-xs sm:text-sm text-editor-comment truncate">
-              sridhar@portfolio:~/contact
-            </span>
-          </div>
 
-          {/* Terminal body */}
-          <div
-            className="terminal-body min-h-[340px] max-h-[460px] overflow-y-auto font-mono text-xs sm:text-sm p-4 sm:p-6"
-            onClick={() => inputRef.current?.focus()}
-          >
-            {/* Initial lines */}
-            {terminalLines.map((line, i) => (
-              <div key={i} className="mb-2 leading-relaxed">
-                {line.type === 'command' && (
-                  <div className="flex items-center gap-2 text-syntax-cyan">
-                    <span className="text-editor-comment">{line.path} $</span>
-                    <span>{line.content}</span>
-                  </div>
-                )}
-                {line.type === 'output' && (
-                  <div className="text-editor-text pl-4 opacity-90">{line.content}</div>
-                )}
+            {/* Quick Links Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <a
+                href="https://github.com/sridhar-mani"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-4 rounded-xl bg-white border border-slate-200/90 hover:border-slate-300 hover:shadow-sm transition-all flex items-center gap-3 text-slate-700 hover:text-slate-900"
+              >
+                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-800">
+                  <Github size={18} />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-slate-900">GitHub</div>
+                  <div className="text-[11px] text-slate-600">@sridhar-mani</div>
+                </div>
+              </a>
+
+              <a
+                href="https://www.linkedin.com/in/sridharmanimuthusamy/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-4 rounded-xl bg-white border border-slate-200/90 hover:border-blue-300 hover:shadow-sm transition-all flex items-center gap-3 text-slate-700 hover:text-blue-600"
+              >
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                  <Linkedin size={18} />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-slate-900">LinkedIn</div>
+                  <div className="text-[11px] text-slate-600">Profile ↗</div>
+                </div>
+              </a>
+            </div>
+
+            {/* Resume Callout Card */}
+            <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200/60 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText size={20} className="text-blue-600" />
+                <div>
+                  <div className="text-xs font-bold text-slate-900">Oct 2026 Master Resume</div>
+                  <div className="text-[11px] text-slate-600">Verified achievements & metrics</div>
+                </div>
               </div>
-            ))}
-
-            {/* Submitted history */}
-            {submittedLines.map((line, i) => (
-              <div key={`sub-${i}`} className="mb-2 leading-relaxed">
-                {line.type === 'command' && (
-                  <div className="flex items-center gap-2 text-syntax-cyan">
-                    <span className="text-editor-comment">{line.path} $</span>
-                    <span>{line.content}</span>
-                  </div>
-                )}
-                {line.type === 'input' && (
-                  <div className="text-syntax-green pl-4">▸ {line.content}</div>
-                )}
-                {line.type === 'output' && (
-                  <div className="text-editor-text pl-4 opacity-90">{line.content}</div>
-                )}
-              </div>
-            ))}
-
-            {/* Active input prompt */}
-            <div className="flex items-center gap-2 mt-3 text-syntax-cyan">
-              <span className="text-editor-comment">
-                {currentField === 'command'
-                  ? '~/contact $'
-                  : currentField === 'email'
-                  ? 'enter email:'
-                  : 'enter message:'}
-              </span>
-              <input
-                ref={inputRef}
-                type={currentField === 'email' ? 'email' : 'text'}
-                value={
-                  currentField === 'command'
-                    ? command
-                    : currentField === 'email'
-                    ? email
-                    : message
-                }
-                onChange={(e) => {
-                  if (currentField === 'command') setCommand(e.target.value);
-                  else if (currentField === 'email') setEmail(e.target.value);
-                  else setMessage(e.target.value);
-                }}
-                onKeyDown={
-                  currentField === 'command'
-                    ? handleCommandSubmit
-                    : currentField === 'email'
-                    ? handleEmailSubmit
-                    : handleMessageSubmit
-                }
-                className="flex-1 bg-transparent border-none outline-none font-mono text-editor-text text-xs sm:text-sm p-0 focus:ring-0"
-                placeholder={
-                  currentField === 'command'
-                    ? 'type "agent", "fetch", "pet crab" or "help"...'
-                    : currentField === 'email'
-                    ? 'yourname@domain.com'
-                    : 'your message here (press Enter to send)...'
-                }
-                autoFocus
-              />
+              <a
+                href={`${import.meta.env.BASE_URL}Sridhar_M_Resume.pdf`}
+                target="_blank"
+                rel="noopener noreferrer"
+                download="Sridhar_M_Resume.pdf"
+                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium shadow-sm transition-colors"
+              >
+                Download PDF
+              </a>
             </div>
           </div>
-        </motion.div>
+
+          {/* Right Column: Interactive Dual Form / Terminal */}
+          <div className="lg:col-span-7">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
+              {/* Header Bar with View Toggle */}
+              <div className="flex items-center justify-between px-4 sm:px-6 py-3 bg-slate-100/80 border-b border-slate-200">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-rose-400 border border-rose-500/30 inline-block" />
+                  <span className="w-3 h-3 rounded-full bg-amber-400 border border-amber-500/30 inline-block" />
+                  <span className="w-3 h-3 rounded-full bg-emerald-400 border border-emerald-500/30 inline-block" />
+                  <span className="ml-2 font-mono text-xs text-slate-600 font-medium">contact-hub</span>
+                </div>
+
+                <div className="flex items-center gap-1 bg-slate-200/70 p-0.5 rounded-lg">
+                  <button
+                    onClick={() => setActiveTab('form')}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                      activeTab === 'form'
+                        ? 'bg-white text-slate-900 shadow-sm font-semibold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <MessageSquare size={13} />
+                    <span>Direct Message</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('terminal')}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                      activeTab === 'terminal'
+                        ? 'bg-white text-slate-900 shadow-sm font-semibold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <TerminalIcon size={13} />
+                    <span>CLI Terminal</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Tab 1: Direct Message Form */}
+              {activeTab === 'form' ? (
+                <form onSubmit={handleFormSubmit} className="p-6 sm:p-8 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-slate-700 mb-1.5">Your Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={formName}
+                        onChange={(e) => setFormName(e.target.value)}
+                        placeholder="Ada Lovelace"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm text-slate-900 placeholder:text-slate-400 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-700 mb-1.5">Your Email</label>
+                      <input
+                        type="email"
+                        required
+                        value={formEmail}
+                        onChange={(e) => setFormEmail(e.target.value)}
+                        placeholder="ada@example.com"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm text-slate-900 placeholder:text-slate-400 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1.5">Subject / Opportunity</label>
+                    <input
+                      type="text"
+                      value={formSubject}
+                      onChange={(e) => setFormSubject(e.target.value)}
+                      placeholder="AI Systems Engineer Role / Collaboration"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm text-slate-900 placeholder:text-slate-400 transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1.5">Message</label>
+                    <textarea
+                      rows={4}
+                      required
+                      value={formMessage}
+                      onChange={(e) => setFormMessage(e.target.value)}
+                      placeholder="Hi Sridhar, I came across your work on autonomous coding agents and WebGPU..."
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm text-slate-900 placeholder:text-slate-400 transition-all resize-none"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full inline-flex items-center justify-center gap-2 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium text-sm transition-all shadow-sm hover:shadow"
+                  >
+                    <Send size={15} />
+                    <span>Send Message Directly</span>
+                  </button>
+                </form>
+              ) : (
+                /* Tab 2: Clean Light Terminal */
+                <div
+                  className="p-6 font-mono text-xs sm:text-sm min-h-[320px] max-h-[380px] overflow-y-auto bg-slate-50 cursor-text"
+                  onClick={() => inputRef.current?.focus()}
+                >
+                  {terminalLines.map((line, i) => (
+                    <div key={i} className="mb-2 leading-relaxed">
+                      {line.type === 'command' && (
+                        <div className="flex items-center gap-2 text-blue-600">
+                          <span className="text-slate-400">{line.path} $</span>
+                          <span className="font-semibold text-slate-900">{line.content}</span>
+                        </div>
+                      )}
+                      {line.type === 'output' && (
+                        <div className="text-slate-600 pl-4">{line.content}</div>
+                      )}
+                    </div>
+                  ))}
+
+                  {submittedLines.map((line, i) => (
+                    <div key={`sub-${i}`} className="mb-2 leading-relaxed">
+                      {line.type === 'command' && (
+                        <div className="flex items-center gap-2 text-blue-600">
+                          <span className="text-slate-400">{line.path} $</span>
+                          <span className="font-semibold text-slate-900">{line.content}</span>
+                        </div>
+                      )}
+                      {line.type === 'output' && (
+                        <div className="text-slate-700 pl-4">{line.content}</div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Active prompt */}
+                  <div className="flex items-center gap-2 mt-3 text-blue-600">
+                    <span className="text-slate-400">~/contact $</span>
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={command}
+                      onChange={(e) => setCommand(e.target.value)}
+                      onKeyDown={handleCommandSubmit}
+                      placeholder='type "help"'
+                      className="flex-1 bg-transparent border-none outline-none font-mono text-slate-900 text-xs sm:text-sm placeholder:text-slate-400"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
