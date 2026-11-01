@@ -247,20 +247,36 @@ export const Navigation = () => {
                     </motion.a>
                   );
                 })}
-                <motion.a
-                  href="#contact"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavClick('#contact');
-                  }}
-                  className="mt-4 flex items-center justify-center gap-2 px-5 py-3 bg-syntax-cyan text-editor-bg rounded-full font-mono text-sm font-medium"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  Let's Talk
-                  <span>→</span>
-                </motion.a>
+                <div className="flex flex-col gap-2 mt-4">
+                  <motion.a
+                    href={`${import.meta.env.BASE_URL}Sridhar_M_Resume.pdf`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download="Sridhar_M_Resume.pdf"
+                    className="flex items-center justify-center gap-2 py-3 px-5 bg-slate-900 text-white rounded-full font-mono text-sm font-medium border border-slate-700 shadow-sm"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25 }}
+                  >
+                    <FileText size={16} className="text-syntax-cyan" />
+                    <span>Download Resume (PDF)</span>
+                  </motion.a>
+
+                  <motion.a
+                    href="#contact"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavClick('#contact');
+                    }}
+                    className="flex items-center justify-center gap-2 px-5 py-3 bg-syntax-cyan text-editor-bg rounded-full font-mono text-sm font-medium"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    Let's Talk
+                    <span>→</span>
+                  </motion.a>
+                </div>
               </div>
             </motion.div>
           )}

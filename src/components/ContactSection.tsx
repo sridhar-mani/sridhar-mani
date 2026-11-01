@@ -63,6 +63,7 @@ export const ContactSection = () => {
         case 'help':
           outputLines = [
             { type: 'output', content: 'Available terminal commands:' },
+            { type: 'output', content: '  resume    - View and download latest resume (PDF)' },
             { type: 'output', content: '  email     - Send Sridhar a direct email message' },
             { type: 'output', content: '  agent     - Simulate autonomous coding agent runtime (LangGraph + Zenteiq)' },
             { type: 'output', content: '  fetch     - Throw tennis ball for your screen pet to chase 🎾' },
@@ -117,13 +118,27 @@ export const ContactSection = () => {
 
         case 'projects':
           outputLines = [
-            { type: 'output', content: 'Featured Repositories:' },
-            { type: 'output', content: '  * npc-code        - Autonomous coding agent monorepo (CLI & VS Code)' },
-            { type: 'output', content: '  * three-webgpu    - Three.js WebGPU offscreen worker renderer' },
-            { type: 'output', content: '  * code-dcr        - PyTorch code structure deep learning model' },
-            { type: 'output', content: '  * cfd-toolkit     - OpenFOAM simulation VTK.js viewer' },
-            { type: 'output', content: '  * rn-sms-fetch    - Android New Arch TurboModule on NPM' },
-            { type: 'output', content: '  * freepdf.rest    - Client-side WASM PDF editor' },
+            { type: 'output', content: 'Featured Flagship Repositories:' },
+            { type: 'output', content: '  * npc-code          - Autonomous coding agent monorepo (@npc/cli & VS Code)' },
+            { type: 'output', content: '  * cadfusion         - Browser CAD & scene workspace (Three.js + OpenCascade + WebGPU)' },
+            { type: 'output', content: '  * yugho             - Full-stack production e-commerce (Next.js + Postgres + PhonePe)' },
+            { type: 'output', content: '  * dining-management - Multi-tenant restaurant SaaS (Next.js + Drizzle ORM + PWA)' },
+            { type: 'output', content: '  * three-webgpu      - Three.js WebGPU offscreen worker renderer' },
+            { type: 'output', content: '  * aidocs            - Desktop AI document retrieval & analysis app (Electron + RAG)' },
+            { type: 'output', content: '  * code-dcr          - PyTorch code structure deep learning architecture' },
+          ];
+          setSubmittedLines([...newLines, ...outputLines]);
+          break;
+
+        case 'resume':
+        case 'cv':
+          if (typeof window !== 'undefined') {
+            window.open(`${import.meta.env.BASE_URL}Sridhar_M_Resume.pdf`, '_blank');
+          }
+          outputLines = [
+            { type: 'output', content: '> Sridhar M - Software Engineer & AI Engineer (Oct 2026 Master Resume)' },
+            { type: 'output', content: '> Direct download link: /Sridhar_M_Resume.pdf (4.8 KB)' },
+            { type: 'output', content: '> Opened resume in a new browser tab! 📄' },
           ];
           setSubmittedLines([...newLines, ...outputLines]);
           break;
