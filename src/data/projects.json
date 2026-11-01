@@ -7,9 +7,45 @@
     "iconBg": "bg-gradient-to-br from-indigo-500 to-cyan-500",
     "tech": "TypeScript + Agent CLI",
     "category": "AI & Agents",
-    "stars": 2,
+    "stars": 5,
     "verified": true,
     "repoUrl": "https://github.com/sridhar-mani/npc-code"
+  },
+  {
+    "id": "cadfusion",
+    "title": "CADFusion",
+    "description": "AI-Assisted Browser CAD & Simulation Workspace with Three.js, OpenCascade WASM worker geometry operations, WebGPU meshing, and LangChain ReAct agent tools.",
+    "iconName": "cadfusion",
+    "iconBg": "bg-gradient-to-br from-blue-600 to-indigo-600",
+    "tech": "Three.js + OpenCascade + WebGPU",
+    "category": "3D & WebGPU",
+    "stars": 5,
+    "verified": true,
+    "repoUrl": "https://github.com/sridhar-mani/web-cad-fusion-sketch"
+  },
+  {
+    "id": "yugho",
+    "title": "YUGHO",
+    "description": "Full-stack production e-commerce platform with Next.js, PostgreSQL, PhonePe checkout SDK, and NimbusPost logistics integration with real-time courier tracking & webhooks.",
+    "iconName": "yugho",
+    "iconBg": "bg-gradient-to-br from-emerald-600 to-teal-700",
+    "tech": "Next.js + Postgres + PhonePe",
+    "category": "Full-Stack",
+    "stars": 5,
+    "verified": true,
+    "repoUrl": "https://github.com/sridhar-mani/yugho"
+  },
+  {
+    "id": "dining-management",
+    "title": "Dining Management",
+    "description": "Multi-tenant restaurant SaaS platform covering QR table sessions, kitchen operations, server-authoritative billing, inventory, transactional outbox, and offline-safe PWA.",
+    "iconName": "dining_management",
+    "iconBg": "bg-gradient-to-br from-amber-500 to-rose-600",
+    "tech": "Next.js + Drizzle ORM + PWA",
+    "category": "Full-Stack",
+    "stars": 4,
+    "verified": true,
+    "repoUrl": "https://github.com/sridhar-mani/dining-management"
   },
   {
     "id": "three-webgpu",
@@ -19,9 +55,21 @@
     "iconBg": "bg-gradient-to-br from-cyan-500 to-emerald-500",
     "tech": "Three.js + WebGPU",
     "category": "3D & WebGPU",
-    "stars": 2,
+    "stars": 4,
     "verified": true,
     "repoUrl": "https://github.com/sridhar-mani/three-webgpu"
+  },
+  {
+    "id": "aidocs",
+    "title": "AiDocs",
+    "description": "Desktop AI Document Intelligence & Retrieval application combining local embeddings, vector search, Socket.IO live progress updates, and local LLM-assisted analysis.",
+    "iconName": "aidocs",
+    "iconBg": "bg-gradient-to-br from-purple-600 to-blue-500",
+    "tech": "Electron + React + RAG",
+    "category": "AI & Agents",
+    "stars": 3,
+    "verified": true,
+    "repoUrl": "https://github.com/sridhar-mani/AiDocs"
   },
   {
     "id": "code-dcr",
@@ -31,7 +79,7 @@
     "iconBg": "bg-gradient-to-br from-violet-500 to-rose-500",
     "tech": "Python + PyTorch",
     "category": "AI & Agents",
-    "stars": 1,
+    "stars": 3,
     "verified": true,
     "repoUrl": "https://github.com/sridhar-mani/code-dcr"
   },
@@ -56,7 +104,7 @@
     "iconBg": "bg-gradient-to-br from-amber-500 to-orange-600",
     "tech": "Python + Ollama",
     "category": "AI & Agents",
-    "stars": 1,
+    "stars": 2,
     "verified": true,
     "repoUrl": "https://github.com/sridhar-mani/Doc-Migration-Analyser-Base"
   },
@@ -68,7 +116,7 @@
     "iconBg": "bg-gradient-to-br from-emerald-500 to-teal-600",
     "tech": "React Native + Kotlin",
     "category": "Mobile",
-    "stars": 2,
+    "stars": 3,
     "verified": true,
     "repoUrl": "https://github.com/sridhar-mani/rn-sms-fetch",
     "liveUrl": "https://www.npmjs.com/package/rn-sms-fetch"
