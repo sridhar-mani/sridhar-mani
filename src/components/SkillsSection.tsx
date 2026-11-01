@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import skillsData from '@/data/skills.json';
+import projectsData from '@/data/projects.json';
 
 interface Skill {
   name: string;
@@ -195,176 +196,66 @@ export const SkillsSection = () => {
                     {'  '}<span className="syntax-key">"projects"</span>
                     <span className="text-editor-comment">:</span>
                     {' '}<span className="syntax-bracket">{'['}</span>
-                  </span>
-                </CodeLine>
-                
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1, duration: 0.3 }}
-                  viewport={{ once: true }}
-                >
-                  <CodeLine lineNumber={5}>
-                    <span className="text-editor-text">
-                      {'    '}<span className="syntax-bracket">{'{'}</span>
-                    </span>
-                  </CodeLine>
-                  <CodeLine lineNumber={6}>
-                    <span className="text-editor-text">
-                      {'      '}<span className="syntax-key">"name"</span>
-                      <span className="text-editor-comment">:</span>
-                      {' '}<span className="syntax-string">"AI-Powered Portfolio"</span>
-                      <span className="text-editor-comment">,</span>
-                    </span>
-                  </CodeLine>
-                  <CodeLine lineNumber={7}>
-                    <span className="text-editor-text">
-                      {'      '}<span className="syntax-key">"tech"</span>
-                      <span className="text-editor-comment">:</span>
-                      {' '}<span className="syntax-bracket">[</span>
-                      <span className="syntax-string">"React"</span>
-                      <span className="text-editor-comment">,</span>
-                      {' '}<span className="syntax-string">"Three.js"</span>
-                      <span className="text-editor-comment">,</span>
-                      {' '}<span className="syntax-string">"GSAP"</span>
-                      <span className="syntax-bracket">]</span>
-                      <span className="text-editor-comment">,</span>
-                    </span>
-                  </CodeLine>
-                  <CodeLine lineNumber={8}>
-                    <span className="text-editor-text">
-                      {'      '}<span className="syntax-key">"repo"</span>
-                      <span className="text-editor-comment">:</span>
-                      {' '}
-                      <a 
-                        href="https://github.com/sridhar-mani/sridhar-os" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="syntax-cyan hover:underline transition-colors"
-                      >
-                        "→ View on GitHub"
-                      </a>
-                    </span>
-                  </CodeLine>
-                  <CodeLine lineNumber={9}>
-                    <span className="text-editor-text">
-                      {'    '}<span className="syntax-bracket">{'}'}</span>
-                      <span className="text-editor-comment">,</span>
-                    </span>
-                  </CodeLine>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2, duration: 0.3 }}
-                  viewport={{ once: true }}
-                >
-                  <CodeLine lineNumber={10}>
-                    <span className="text-editor-text">
-                      {'    '}<span className="syntax-bracket">{'{'}</span>
-                    </span>
-                  </CodeLine>
-                  <CodeLine lineNumber={11}>
-                    <span className="text-editor-text">
-                      {'      '}<span className="syntax-key">"name"</span>
-                      <span className="text-editor-comment">:</span>
-                      {' '}<span className="syntax-string">"LLM Chat Interface"</span>
-                      <span className="text-editor-comment">,</span>
-                    </span>
-                  </CodeLine>
-                  <CodeLine lineNumber={12}>
-                    <span className="text-editor-text">
-                      {'      '}<span className="syntax-key">"tech"</span>
-                      <span className="text-editor-comment">:</span>
-                      {' '}<span className="syntax-bracket">[</span>
-                      <span className="syntax-string">"Python"</span>
-                      <span className="text-editor-comment">,</span>
-                      {' '}<span className="syntax-string">"LangChain"</span>
-                      <span className="text-editor-comment">,</span>
-                      {' '}<span className="syntax-string">"FastAPI"</span>
-                      <span className="syntax-bracket">]</span>
-                      <span className="text-editor-comment">,</span>
-                    </span>
-                  </CodeLine>
-                  <CodeLine lineNumber={13}>
-                    <span className="text-editor-text">
-                      {'      '}<span className="syntax-key">"repo"</span>
-                      <span className="text-editor-comment">:</span>
-                      {' '}
-                      <a 
-                        href="https://github.com/sridhar-mani" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="syntax-cyan hover:underline transition-colors"
-                      >
-                        "→ View on GitHub"
-                      </a>
-                    </span>
-                  </CodeLine>
-                  <CodeLine lineNumber={14}>
-                    <span className="text-editor-text">
-                      {'    '}<span className="syntax-bracket">{'}'}</span>
-                      <span className="text-editor-comment">,</span>
-                    </span>
-                  </CodeLine>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3, duration: 0.3 }}
-                  viewport={{ once: true }}
-                >
-                  <CodeLine lineNumber={15}>
-                    <span className="text-editor-text">
-                      {'    '}<span className="syntax-bracket">{'{'}</span>
-                    </span>
-                  </CodeLine>
-                  <CodeLine lineNumber={16}>
-                    <span className="text-editor-text">
-                      {'      '}<span className="syntax-key">"name"</span>
-                      <span className="text-editor-comment">:</span>
-                      {' '}<span className="syntax-string">"3D Medical Viewer"</span>
-                      <span className="text-editor-comment">,</span>
-                    </span>
-                  </CodeLine>
-                  <CodeLine lineNumber={17}>
-                    <span className="text-editor-text">
-                      {'      '}<span className="syntax-key">"tech"</span>
-                      <span className="text-editor-comment">:</span>
-                      {' '}<span className="syntax-bracket">[</span>
-                      <span className="syntax-string">"VTK.js"</span>
-                      <span className="text-editor-comment">,</span>
-                      {' '}<span className="syntax-string">"React"</span>
-                      <span className="text-editor-comment">,</span>
-                      {' '}<span className="syntax-string">"Python"</span>
-                      <span className="syntax-bracket">]</span>
-                      <span className="text-editor-comment">,</span>
-                    </span>
-                  </CodeLine>
-                  <CodeLine lineNumber={18}>
-                    <span className="text-editor-text">
-                      {'      '}<span className="syntax-key">"repo"</span>
-                      <span className="text-editor-comment">:</span>
-                      {' '}
-                      <a 
-                        href="https://github.com/sridhar-mani" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="syntax-cyan hover:underline transition-colors"
-                      >
-                        "→ View on GitHub"
-                      </a>
-                    </span>
-                  </CodeLine>
-                  <CodeLine lineNumber={19}>
-                    <span className="text-editor-text">
-                      {'    '}<span className="syntax-bracket">{'}'}</span>
-                    </span>
-                  </CodeLine>
-                </motion.div>
-
+                {projectsData.slice(0, 6).map((proj, idx) => {
+                  const isLast = idx === 5;
+                  const lineBase = 5 + idx * 5;
+                  return (
+                    <motion.div
+                      key={proj.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.05 * idx, duration: 0.3 }}
+                      viewport={{ once: true }}
+                    >
+                      <CodeLine lineNumber={lineBase}>
+                        <span className="text-editor-text">
+                          {'    '}<span className="syntax-bracket">{'{'}</span>
+                        </span>
+                      </CodeLine>
+                      <CodeLine lineNumber={lineBase + 1}>
+                        <span className="text-editor-text">
+                          {'      '}<span className="syntax-key">"title"</span>
+                          <span className="text-editor-comment">:</span>
+                          {' '}<span className="syntax-string">"{proj.title}"</span>
+                          <span className="text-editor-comment">,</span>
+                        </span>
+                      </CodeLine>
+                      <CodeLine lineNumber={lineBase + 2}>
+                        <span className="text-editor-text">
+                          {'      '}<span className="syntax-key">"tech"</span>
+                          <span className="text-editor-comment">:</span>
+                          {' '}<span className="syntax-string">"{proj.tech}"</span>
+                          <span className="text-editor-comment">,</span>
+                        </span>
+                      </CodeLine>
+                      <CodeLine lineNumber={lineBase + 3}>
+                        <span className="text-editor-text">
+                          {'      '}<span className="syntax-key">"repo"</span>
+                          <span className="text-editor-comment">:</span>
+                          {' '}
+                          {proj.repoUrl ? (
+                            <a
+                              href={proj.repoUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="syntax-cyan hover:underline transition-colors"
+                            >
+                              "→ View on GitHub"
+                            </a>
+                          ) : (
+                            <span className="syntax-string">"Proprietary"</span>
+                          )}
+                        </span>
+                      </CodeLine>
+                      <CodeLine lineNumber={lineBase + 4}>
+                        <span className="text-editor-text">
+                          {'    '}<span className="syntax-bracket">{'}'}</span>
+                          {!isLast && <span className="text-editor-comment">,</span>}
+                        </span>
+                      </CodeLine>
+                    </motion.div>
+                  );
+                })}
                 <CodeLine lineNumber={20}>
                   <span className="text-editor-text">
                     {'  '}<span className="syntax-bracket">{']'}</span>
