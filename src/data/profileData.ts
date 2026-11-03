@@ -66,11 +66,6 @@ Implemented server-authoritative pricing, idempotent mutations, offline-safe PWA
 Tech: Next.js, React, TypeScript, PostgreSQL, Drizzle ORM, PWA
 GitHub: github.com/sridhar-mani/dining-management
 
-### Three WebGPU Worker (three-webgpu)
-Offload Three.js WebGPU compute and rendering to Web Workers using OffscreenCanvas. Ensures the main thread stays 100% responsive for UI, gestures, and React while the background worker handles heavy GPU pipelines.
-Tech: JavaScript, Three.js, WebGPU, OffscreenCanvas, Web Workers
-GitHub: github.com/sridhar-mani/three-webgpu
-
 ### AiDocs
 Desktop AI Document Intelligence & Retrieval application combining local embeddings, vector search, Socket.IO live progress updates, and local LLM-assisted analysis.
 Tech: Electron, React, TypeScript, ChromaDB, Hugging Face embeddings, RAG

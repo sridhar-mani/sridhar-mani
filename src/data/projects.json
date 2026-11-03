@@ -14,14 +14,16 @@
   {
     "id": "cadfusion",
     "title": "CADFusion",
-    "description": "AI-Assisted Browser CAD & Simulation Workspace with Three.js, OpenCascade WASM worker geometry operations, WebGPU meshing, and LangChain ReAct agent tools.",
+    "description": "Zero-backend in-browser CAD & simulation platform featuring LangGraph autonomous agent workflows, NVIDIA Switchyard router, OpenCascade WASM B-Rep modeling, and WebGPU mechanics.",
     "iconName": "cadfusion",
     "iconBg": "bg-gradient-to-br from-blue-600 to-indigo-600",
-    "tech": "Three.js + OpenCascade + WebGPU",
+    "tech": "Three.js + OpenCascade WASM + LangGraph + NVIDIA NIM",
     "category": "3D & WebGPU",
     "stars": 5,
     "verified": true,
-    "repoUrl": "https://github.com/sridhar-mani/web-cad-fusion-sketch"
+    "repoUrl": "https://github.com/sridhar-mani/web-cad-fusion-sketch",
+    "liveUrl": "https://web-cad-fusion-sketch.vercel.app/",
+    "demoUrl": "https://web-cad-fusion-sketch.vercel.app/"
   },
   {
     "id": "yugho",
@@ -46,18 +48,6 @@
     "stars": 5,
     "verified": true,
     "repoUrl": "https://github.com/sridhar-mani/dining-management"
-  },
-  {
-    "id": "three-webgpu",
-    "title": "Three WebGPU Worker",
-    "description": "High-performance WebGPU rendering library offloading Three.js compute and draw loops to Web Workers via OffscreenCanvas, keeping the main thread 100% responsive.",
-    "iconName": "three_webgpu",
-    "iconBg": "bg-gradient-to-br from-cyan-500 to-emerald-500",
-    "tech": "Three.js + WebGPU",
-    "category": "3D & WebGPU",
-    "stars": 4,
-    "verified": true,
-    "repoUrl": "https://github.com/sridhar-mani/three-webgpu"
   },
   {
     "id": "aidocs",

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { ExternalLink, Github, ArrowUpRight, Terminal, Layers, Lock, X, Cpu, Box, Sparkles } from 'lucide-react';
+import { ExternalLink, Github, ArrowUpRight, Terminal, Layers, Lock, X, Cpu, Box, Sparkles, ShoppingBag } from 'lucide-react';
 import projectsData from '@/data/projects.json';
 
 interface Project {
@@ -21,7 +21,7 @@ interface Project {
 const allProjects: Project[] = projectsData;
 
 // Top 3 Flagship Projects for the Asymmetric Bento Showcase
-const FLAGSHIP_IDS = ['npc-code', 'cadfusion', 'three-webgpu'];
+const FLAGSHIP_IDS = ['npc-code', 'cadfusion', 'yugho'];
 const flagshipProjects = allProjects.filter((p) => FLAGSHIP_IDS.includes(p.id));
 const directoryProjects = allProjects.filter((p) => !FLAGSHIP_IDS.includes(p.id));
 
@@ -150,7 +150,7 @@ export const ProjectsSection = () => {
   // Find specific flagship objects
   const npcCode = flagshipProjects.find((p) => p.id === 'npc-code') || allProjects[0];
   const cadFusion = flagshipProjects.find((p) => p.id === 'cadfusion') || allProjects[1];
-  const threeWebGPU = flagshipProjects.find((p) => p.id === 'three-webgpu') || allProjects[4];
+  const yugho = flagshipProjects.find((p) => p.id === 'yugho') || allProjects[2];
 
   return (
     <section id="works" ref={sectionRef} className="py-24 sm:py-36 bg-slate-50/60 border-y border-slate-200/80 relative">
@@ -173,7 +173,7 @@ export const ProjectsSection = () => {
             </h2>
           </div>
           <p className="text-sm sm:text-base text-slate-600 max-w-md font-normal">
-            Autonomous agent frameworks, offscreen compute shaders, and geometric kernels built for scale and low-latency execution.
+            Autonomous agent frameworks, production full-stack platforms, and geometric kernels built for scale and low-latency execution.
           </p>
         </motion.div>
 
@@ -303,45 +303,45 @@ export const ProjectsSection = () => {
               </div>
             </motion.div>
 
-            {/* Card 3: Three WebGPU Worker */}
+            {/* Card 3: YUGHO Full-Stack Platform */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              onClick={() => setSelectedModalProject(threeWebGPU)}
+              onClick={() => setSelectedModalProject(yugho)}
               className="bg-white rounded-3xl border border-slate-200/90 p-7 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 cursor-pointer flex-1 flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-700 border border-blue-200 flex items-center justify-center font-bold">
-                      <Cpu size={18} />
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-700 border border-emerald-200 flex items-center justify-center font-bold">
+                      <ShoppingBag size={18} />
                     </div>
                     <div>
-                      <span className="font-mono text-[10px] uppercase tracking-wider text-blue-700 font-semibold block">
-                        GPU Shaders & Web Workers
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-700 font-semibold block">
+                        Full-Stack E-Commerce & Logistics
                       </span>
                       <h3 className="text-xl font-bold text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">
-                        {threeWebGPU.title}
+                        {yugho.title}
                       </h3>
                     </div>
                   </div>
                   <span className="font-mono text-[11px] text-slate-600 font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200">
-                    60 FPS
+                    Production
                   </span>
                 </div>
 
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4 line-clamp-3 font-normal">
-                  {threeWebGPU.description}
+                  {yugho.description}
                 </p>
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
-                <span className="font-mono text-xs text-slate-600 font-medium">OffscreenCanvas • Comlink</span>
-                {threeWebGPU.repoUrl && (
+                <span className="font-mono text-xs text-slate-600 font-medium">Next.js • PhonePe • NimbusPost</span>
+                {yugho.repoUrl && (
                   <a
-                    href={threeWebGPU.repoUrl}
+                    href={yugho.repoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs font-semibold text-slate-900 hover:text-blue-600"

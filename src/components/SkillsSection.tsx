@@ -24,10 +24,10 @@ const DOMAINS = [
   },
   {
     icon: Box,
-    title: 'High-Performance 3D & WebGPU',
+    title: 'Graphics & Scientific Visualization',
     color: 'text-amber-600 bg-amber-50 border-amber-100',
-    description: 'Off-thread compute shaders, hardware-accelerated scientific visualization, and Three.js pipelines.',
-    skills: ['WebGPU', 'Three.js', 'Web Workers', 'Comlink', 'GLSL Shaders', 'VTK.js']
+    description: 'Hardware-accelerated scientific visualization, binary dataset streaming, and interactive 3D simulations.',
+    skills: ['Three.js', 'VTK.js', 'GLSL Shaders', 'Web Workers', 'Taichi.js', 'WASM']
   },
   {
     icon: Server,
@@ -212,7 +212,7 @@ export const SkillsSection = () => {
                   <span>
                     {'  '}<span className="text-blue-600 font-medium">"role"</span>
                     <span className="text-slate-400">:</span>
-                    {' '}<span className="text-emerald-600">"AI & High-Performance Graphics Engineer"</span>
+                    {' '}<span className="text-emerald-600">"AI & Systems Engineer"</span>
                     <span className="text-slate-400">,</span>
                   </span>
                 </CodeLine>

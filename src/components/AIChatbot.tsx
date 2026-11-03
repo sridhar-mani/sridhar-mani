@@ -11,7 +11,7 @@ interface Message {
 
 const QUICK_PROMPTS = [
   "What is NPC Code?",
-  "Tell me about your WebGPU Worker",
+  "Tell me about YUGHO & CADFusion",
   "What's your experience with CFD?",
   "What are your core technical skills?",
 ];
@@ -22,7 +22,7 @@ export const AIChatbot = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "Hi! I'm Sridhar's AI assistant powered by local in-browser LLM. Ask me anything about my autonomous coding agents, WebGPU pipelines, CFD visualization, or projects!",
+      content: "Hi! I'm Sridhar's AI assistant powered by local in-browser LLM. Ask me anything about my autonomous coding agents, full-stack architecture, scientific computing, or engineering projects!",
     },
   ]);
   const [input, setInput] = useState('');

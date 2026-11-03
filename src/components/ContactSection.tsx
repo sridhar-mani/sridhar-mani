@@ -28,7 +28,7 @@ export const ContactSection = () => {
   const [terminalLines] = useState<TerminalLine[]>([
     { type: 'command', content: 'cat README.md', path: '~/contact' },
     { type: 'output', content: "# Let's build high-performance systems together" },
-    { type: 'output', content: 'Available for AI/ML, 3D WebGPU, and Full-Stack Engineering roles.' },
+    { type: 'output', content: 'Available for AI/ML, Autonomous Agents, and Scalable Full-Stack Engineering roles.' },
     { type: 'output', content: 'Type "help" to see all available commands.' },
     { type: 'output', content: '' },
   ]);
@@ -121,7 +121,6 @@ export const ContactSection = () => {
             { type: 'output', content: '  * cadfusion         - Browser CAD & scene workspace (Three.js + OpenCascade + WebGPU)' },
             { type: 'output', content: '  * yugho             - Full-stack production e-commerce (Next.js + Postgres + PhonePe)' },
             { type: 'output', content: '  * dining-management - Multi-tenant restaurant SaaS (Next.js + Drizzle ORM + PWA)' },
-            { type: 'output', content: '  * three-webgpu      - Three.js WebGPU offscreen worker renderer' },
             { type: 'output', content: '  * aidocs            - Desktop AI document retrieval & analysis app (Electron + RAG)' },
             { type: 'output', content: '  * code-dcr          - PyTorch code structure deep learning architecture' },
           ];
