@@ -209,6 +209,8 @@ export const PixelPet = () => {
   const [x, setX] = useState<number>(() => typeof window !== 'undefined' ? Math.max(80, window.innerWidth - 200) : 180);
   const [y, setY] = useState<number>(10); // Vertical altitude/depth from bottom
   const [rotation, setRotation] = useState<number>(0);
+  const [scaleX, setScaleX] = useState<number>(1);   // squish when the head is petted
+  const [scaleY, setScaleY] = useState<number>(1);
   const [facing, setFacing] = useState<'left' | 'right'>('right');
   const [isMuted, setIsMuted] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -487,7 +489,7 @@ export const PixelPet = () => {
           const isPaused = time < pauseUntilRef.current;
 
           if (isPaused || stateRef.current === 'sleep' || isLevelingUp) {
-            if (stateRef.current !== 'happy' && stateRef.current !== 'sleep' && !isLevelingUp) {
+            if (stateRef.current !== 'happy' && (stateRef.current as PetState) !== 'sleep' && !isLevelingUp) {
               setState('idle');
             }
             currentYRef.current = baseDepthYRef.current;
@@ -558,7 +560,7 @@ export const PixelPet = () => {
                     setTimeout(() => setShowDialogue(false), 4000);
                   }
                 }
-              } else if (stateRef.current !== 'happy' && stateRef.current !== 'sleep') {
+              } else if (stateRef.current !== 'happy' && (stateRef.current as PetState) !== 'sleep') {
                 setState('idle');
               }
             }
@@ -878,7 +880,7 @@ export const PixelPet = () => {
           left: `${x}px`,
           bottom: `${y}px`,
           cursor: isDragging ? 'grabbing' : 'grab',
-          transform: `rotate(${rotation}deg)`,
+          transform: `rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`,
           transformOrigin: 'bottom center'
         }}
         onPointerDown={handlePointerDown}

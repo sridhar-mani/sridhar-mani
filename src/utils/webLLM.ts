@@ -6,31 +6,23 @@ import { env, FeatureExtractionPipeline, pipeline } from "@xenova/transformers";
 import { profileSridhar } from "../data/profileData";
 import { simpleHash } from "./simpleHash";
 
-// Use stable Qwen2.5-1.5B-Instruct for conversational AI (with fallback to Llama-3.2-1B)
-const primaryModel = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC";
-const fallbackModel = "Llama-3.2-1B-Instruct-q4f16_1-MLC";
+// Models in order of preference; the first one this device can load is used. The order comes from an
+// on-device benchmark of grounded Q&A on this site's own knowledge base, not from model names.
+const MODEL_CHAIN: string[] = [
+  "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+  "Llama-3.2-1B-Instruct-q4f32_1-MLC",
+];
+let activeModel = MODEL_CHAIN[0];
 
-let activeModel = primaryModel;
-let customAppConfig: any = null;
+// Qwen3-family and MiniCPM5 models can emit "thinking" tokens; WebLLM can switch that off for them.
+const thinkingFamily = (id: string) => /^(Qwen3|MiniCPM5)/.test(id);
+const extraFor = (id: string): Record<string, unknown> => (thinkingFamily(id) ? { extra_body: { enable_thinking: false } } : {});
+const stripThink = (t: string) => t.replace(/<think>[\s\S]*?<\/think>/g, "").replace(/<\/?think>/g, "").trim();
 
-// Initialize with prebuilt config, auto-detect model availability
+const ANSWER_RULES = `You are the assistant on Sridhar Mani's portfolio website. Answer questions about Sridhar using ONLY the information below. Be concise: 1 to 3 short sentences. Refer to him as "Sridhar". If the information does not contain the answer, say you don't have that information and suggest emailing sridharmani510@gmail.com. Never guess or invent details.`;
+
 async function getAppConfig() {
-  if (customAppConfig) return customAppConfig;
-
-  const prebuilt = prebuiltAppConfig;
-  const qwenExists = prebuilt.model_list?.some((m: any) => m.model_id === primaryModel);
-
-  if (qwenExists) {
-    activeModel = primaryModel;
-    prebuilt.useIndexedDBCache = true;
-    return prebuilt;
-  }
-
-  // Fallback to Llama-3.2-1B
-  console.log("Qwen2.5 not found in prebuilt catalog, switching to Llama-3.2-1B fallback");
-  activeModel = fallbackModel;
-  prebuilt.useIndexedDBCache = true;
-  return prebuilt;
+  return { ...prebuiltAppConfig, cacheBackend: "indexeddb" } as any;
 }
 
 let engine: MLCEngine | null = null;
@@ -107,7 +99,7 @@ async function embedProfile(profileText: string) {
   let existingDb: any[] = [];
   try {
     existingDb = (await mydetailsIndex.getAllObjectsFromIndexedDB(
-      "ragIndexedDB",
+      "ragIndexedDB_v2",
       "ragDB"
     )) || [];
   } catch {
@@ -138,7 +130,7 @@ async function embedProfile(profileText: string) {
     });
   }
 
-  await mydetailsIndex.saveToIndexedDB("ragIndexedDB", "ragDB");
+  await mydetailsIndex.saveToIndexedDB("ragIndexedDB_v2", "ragDB");
   console.log("Profile embedded and saved to IndexedDB");
 }
 
@@ -147,10 +139,19 @@ async function initEngine() {
     console.log(`Initializing LLM engine...`);
     const appConfig = await getAppConfig();
 
-    engine = await CreateMLCEngine(activeModel, {
-      initProgressCallback: initProgressCallback,
-      appConfig: appConfig,
-    });
+    const candidates = MODEL_CHAIN.filter((id) => appConfig.model_list?.some((m: any) => m.model_id === id));
+    let lastError: unknown = null;
+    for (const id of candidates) {
+      try {
+        engine = await CreateMLCEngine(id, { initProgressCallback: initProgressCallback, appConfig: appConfig });
+        activeModel = id;
+        break;
+      } catch (error) {
+        lastError = error;
+        console.warn(`Could not load ${id}, trying the next model`, error);
+      }
+    }
+    if (!engine) throw lastError ?? new Error("No model in the chain could be loaded");
 
     console.log(`LLM engine initialized with ${activeModel}`);
 
@@ -163,7 +164,7 @@ async function initEngine() {
       let existingDb: any[] = [];
       try {
         existingDb = (await mydetailsIndex.getAllObjectsFromIndexedDB(
-          "ragIndexedDB",
+          "ragIndexedDB_v2",
           "ragDB"
         )) || [];
       } catch {
@@ -197,9 +198,9 @@ async function reply() {
     if (mydetailsIndex) {
       const searchResults = await mydetailsIndex.search(queryEmbed, {
         useStorage: "indexedDB",
-        topK: 3,
+        topK: 4,
         storageOptions: {
-          indexedDBName: "ragIndexedDB",
+          indexedDBName: "ragIndexedDB_v2",
           indexedDBObjectStoreName: "ragDB",
         },
       });
@@ -213,9 +214,7 @@ async function reply() {
   }
 
   // Construct focused prompt reflecting current role and work
-  const systemPrompt = retrievedContext 
-    ? `You are Sridhar Mani, an AI Engineer at Zenteiq Aitech Innovations. Use this information to answer:\n${retrievedContext.slice(0, 700)}\n\nAnswer concisely in 1-3 sentences. Be specific.`
-    : `You are Sridhar Mani, an AI Engineer at Zenteiq specializing in agentic workflows, LangGraph, Python, WebGPU/Three.js, and full-stack systems. Answer concisely in 1-2 sentences.`;
+  const systemPrompt = `${ANSWER_RULES}\n\nInformation:\n${retrievedContext ? retrievedContext.slice(0, 2400) : "Sridhar Mani is an AI engineer at Zenteiq Aitech Innovations in Bengaluru who builds agentic workflows, coding agents, retrieval systems and full-stack products with Python and TypeScript."}`;
 
   const enhancedMessages = [
     { role: "system", content: systemPrompt },
@@ -224,12 +223,14 @@ async function reply() {
 
   const response = await engine!.chat.completions.create({
     messages: enhancedMessages as any,
-    temperature: 0.5,
+    temperature: 0.3,
     top_p: 0.9,
-    max_tokens: 100,
-    stop: ["\n\n", "---", "User:", "Assistant:"],
+    max_tokens: 220,
+    stop: ["---", "User:", "Assistant:"],
+    ...extraFor(activeModel),
   });
 
+  for (const c of response.choices) { if (c.message?.content) c.message.content = stripThink(c.message.content); }
   return response;
 }
 
@@ -251,7 +252,7 @@ async function indexDocument(text: string, source: string) {
     let existingDb: any[] = [];
     try {
       existingDb = (await mydetailsIndex!.getAllObjectsFromIndexedDB(
-        "ragIndexedDB",
+        "ragIndexedDB_v2",
         "ragDB"
       )) || [];
     } catch {
@@ -272,7 +273,7 @@ async function indexDocument(text: string, source: string) {
     indexedCount++;
   }
 
-  await mydetailsIndex!.saveToIndexedDB("ragIndexedDB", "ragDB");
+  await mydetailsIndex!.saveToIndexedDB("ragIndexedDB_v2", "ragDB");
   console.log(`Indexed ${indexedCount} chunks from ${source}`);
   return indexedCount;
 }
@@ -296,7 +297,7 @@ async function analyzeJobFit(jobDescription: string) {
         useStorage: "indexedDB",
         topK: 3,
         storageOptions: {
-          indexedDBName: "ragIndexedDB",
+          indexedDBName: "ragIndexedDB_v2",
           indexedDBObjectStoreName: "ragDB",
         },
       });
@@ -322,11 +323,12 @@ Match candidate profile against JD skills. Return ONLY valid JSON:
         { role: "user", content: analysisPrompt }
       ],
       temperature: 0.3,
-      max_tokens: 160,
+      max_tokens: 200,
       stop: ["\n\n"],
+      ...extraFor(activeModel),
     });
 
-    const content = response.choices[0].message.content || "";
+    const content = stripThink(response.choices[0].message.content || "");
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
@@ -373,7 +375,7 @@ async function getIndexedSources() {
 
   try {
     const existingDb = (await mydetailsIndex.getAllObjectsFromIndexedDB(
-      "ragIndexedDB",
+      "ragIndexedDB_v2",
       "ragDB"
     )) || [];
 
