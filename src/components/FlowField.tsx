@@ -498,7 +498,7 @@ export const FlowField = () => {
 
       // skills labels follow the rotating globe (only while the globe is what's showing)
       const globeShown = aName === 'globe' && xfTarget === 0 ? cur.obj : 0;
-      const la = clamp((globeShown - 0.6) / 0.3, 0, 1) * clamp((cur.amt - 0.4) / 0.4, 0, 1);
+      const la = clamp((globeShown - 0.6) / 0.3, 0, 1) * clamp((cur.amt - 0.4) / 0.4, 0, 1) * (1 - smooth(innerHeight * 0.1, innerHeight * 0.4, scrollY));
       if (la > 0.01 && tagEls.length) {
         const rot = U.uRot.value, cs = Math.cos(rot), sn = Math.sin(rot);
         const sparse = innerWidth < 700;

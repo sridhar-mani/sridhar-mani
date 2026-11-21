@@ -671,3 +671,74 @@ mark{background:var(--mint);color:#07090c;padding:0 .14em;border-radius:.16em;di
 .live-frame img{display:block;width:100%;height:auto}
 @media (max-width:900px){.live-item,.live-item.flip{grid-template-columns:1fr;min-height:0;padding-top:6vh;padding-bottom:6vh}.live-item.flip .live-copy{order:0}.live-shot{order:2}}
 @media print{.live-frame{box-shadow:none}}
+
+/* page bodies */
+.pagebody{position:relative;z-index:6;padding:0 clamp(20px,6vw,88px) 14vh;max-width:1360px;margin:0 auto}
+.pb-sec{margin-top:8vh}
+.pb-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.dcard{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:18px;padding:22px 24px;backdrop-filter:blur(10px)}
+.dcard h3{margin:0 0 6px;font:600 20px "Space Grotesk",system-ui,sans-serif;letter-spacing:-.02em;color:#fff}
+.dcard p{margin:0;font:400 14px/1.55 system-ui,sans-serif;color:var(--mut)}
+.dcard-k{display:block;font:500 11px "JetBrains Mono",ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mint);margin-bottom:10px}
+
+/* work */
+.work-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:14px}
+.work-tile{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:#fff;padding:12px 12px 18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035);transition:transform .35s cubic-bezier(.2,.7,.2,1),border-color .25s,box-shadow .25s}
+.work-tile:hover{transform:translateY(-6px);border-color:var(--mint);box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 40px rgba(94,242,192,.08)}
+.work-tile img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;border-radius:10px;border:1px solid rgba(255,255,255,.08);display:block;margin-bottom:8px}
+.work-tile-name{font:600 18px "Space Grotesk",system-ui,sans-serif;letter-spacing:-.02em;padding:0 6px}
+.work-tile-name em{font-style:normal;color:var(--mint);font-size:14px}
+.work-tile-line{font:400 13px/1.45 system-ui,sans-serif;color:var(--mut);padding:0 6px}
+.wrows{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.wrow{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:20px;align-items:start;padding:26px 6px;border-bottom:1px solid var(--line);transition:background .25s}
+.wrow:hover{background:rgba(94,242,192,.035)}
+.wrow-n{font:500 12px "JetBrains Mono",ui-monospace,Menlo,monospace;color:var(--mut);padding-top:7px}
+.wrow-main h3{margin:0 0 8px;font:600 clamp(22px,2.4vw,32px) "Space Grotesk",system-ui,sans-serif;letter-spacing:-.03em;color:#fff;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.wrow-main h3 small{font:500 10px "JetBrains Mono",ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mint);border:1px solid rgba(94,242,192,.3);border-radius:999px;padding:3px 9px}
+.wrow-main p{margin:0 0 10px;font:400 15px/1.6 system-ui,sans-serif;color:#a9b6c4;max-width:70ch}
+.wrow-tech{font:500 12px "JetBrains Mono",ui-monospace,Menlo,monospace;color:var(--mut);letter-spacing:.04em}
+.wrow-links{display:flex;gap:10px;flex-wrap:wrap;padding-top:6px}
+.wrow-links a{font:600 13px system-ui,sans-serif;color:#e9eff6;text-decoration:none;border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:8px 14px;transition:border-color .2s,color .2s}
+.wrow-links a:hover{border-color:var(--mint);color:var(--mint)}
+.wrow-private{font:500 11px "JetBrains Mono",ui-monospace,Menlo,monospace;color:var(--mut)}
+@media (max-width:760px){.wrow{grid-template-columns:1fr;gap:10px}.wrow-n{padding-top:0}}
+
+/* experience */
+.exp{list-style:none;margin:0;padding:0;display:grid;gap:clamp(28px,5vh,56px)}
+.exp-item{display:grid;grid-template-columns:200px minmax(0,1fr);gap:clamp(20px,4vw,56px);padding-top:28px;border-top:1px solid var(--line)}
+.exp-meta{display:flex;flex-direction:column;gap:6px}
+.exp-when{font:500 12px "JetBrains Mono",ui-monospace,Menlo,monospace;letter-spacing:.08em;color:var(--mint)}
+.exp-where{font:400 13px system-ui,sans-serif;color:var(--mut)}
+.exp-role{margin:0;font:700 clamp(28px,3.4vw,48px)/1.05 "Space Grotesk",system-ui,sans-serif;letter-spacing:-.04em;color:#fff}
+.exp-org{margin:6px 0 16px;font:500 16px system-ui,sans-serif;color:#cdd8e3}
+.exp-points{margin:0 0 18px;padding:0 0 0 18px;display:grid;gap:10px;max-width:72ch}
+.exp-points li{font:400 15px/1.6 system-ui,sans-serif;color:#a9b6c4}
+.exp-points li::marker{color:var(--mint)}
+.exp-stats{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 18px}
+.exp-stats div{border:1px solid var(--line);border-radius:14px;padding:14px 18px;background:rgba(255,255,255,.04);min-width:170px}
+.exp-stats b{display:block;font:700 38px/1 "Space Grotesk",system-ui,sans-serif;letter-spacing:-.04em;color:var(--mint)}
+.exp-stats span{font:400 12px "JetBrains Mono",ui-monospace,Menlo,monospace;color:var(--mut)}
+.edu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px}
+@media (max-width:760px){.exp-item{grid-template-columns:1fr;gap:12px}}
+
+/* skills */
+.skill-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.skill-grid .live-stack{margin-top:14px}
+
+/* contact */
+.contact{display:flex;flex-direction:column;gap:22px;align-items:flex-start;padding-top:2vh}
+.contact-mail{font:700 clamp(26px,5.2vw,76px)/1.05 "Space Grotesk",system-ui,sans-serif;letter-spacing:-.04em;color:#fff;text-decoration:none;border-bottom:2px solid var(--mint);padding-bottom:6px;word-break:break-all;transition:color .2s}
+.contact-mail:hover{color:var(--mint)}
+.contact-actions{display:flex;flex-wrap:wrap;gap:10px}
+.contact-links{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:0;width:min(100%,640px);border-top:1px solid var(--line)}
+.contact-links li{display:flex;justify-content:space-between;gap:16px;padding:16px 2px;border-bottom:1px solid var(--line);font:400 15px system-ui,sans-serif;color:#cdd8e3}
+.contact-links span{font:500 11px "JetBrains Mono",ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);padding-top:3px}
+.contact-links a{color:#fff;text-decoration:none}
+.contact-links a:hover{color:var(--mint)}
+.sheet{display:none}
+
+/* inner pages: the shape gets the whole first screen, content starts below it */
+@media (min-width:761px){.pagehero{min-height:100vh}.pagehero-inner{padding-top:18vh}}
+
+/* cards stay readable over the particle layer */
+.dcard,.work-tile,.chain-card{background:rgba(9,13,17,.82)!important;backdrop-filter:blur(14px)}
