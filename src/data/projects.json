@@ -14,40 +14,51 @@
   {
     "id": "cadfusion",
     "title": "CADFusion",
-    "description": "Zero-backend in-browser CAD & simulation platform featuring LangGraph autonomous agent workflows, NVIDIA Switchyard router, OpenCascade WASM B-Rep modeling, and WebGPU mechanics.",
+    "description": "CAD workspace in the browser: sketching, solid modelling, scene tree and cloud sync, on OpenCascade compiled to WebAssembly, with a LangChain agent that drives deterministic CAD tools.",
     "iconName": "cadfusion",
     "iconBg": "bg-gradient-to-br from-blue-600 to-indigo-600",
     "tech": "Three.js + OpenCascade WASM + LangGraph + NVIDIA NIM",
     "category": "3D & WebGPU",
     "stars": 5,
     "verified": true,
-    "repoUrl": "https://github.com/sridhar-mani/web-cad-fusion-sketch",
     "liveUrl": "https://web-cad-fusion-sketch.vercel.app/",
     "demoUrl": "https://web-cad-fusion-sketch.vercel.app/"
   },
   {
     "id": "yugho",
     "title": "YUGHO",
-    "description": "Full-stack production e-commerce platform with Next.js, PostgreSQL, PhonePe checkout SDK, and NimbusPost logistics integration with real-time courier tracking & webhooks.",
+    "description": "Live store for sweat-proof undershirts, shipping across India: catalog, checkout with PhonePe, orders, reviews, coupons, preorders and warehouse-aware shipping through NimbusPost, with tracking webhooks.",
     "iconName": "yugho",
     "iconBg": "bg-gradient-to-br from-emerald-600 to-teal-700",
     "tech": "Next.js + Postgres + PhonePe",
     "category": "Full-Stack",
     "stars": 5,
     "verified": true,
-    "repoUrl": "https://github.com/sridhar-mani/yugho"
+    "liveUrl": "https://www.yughoclothing.com/"
   },
   {
-    "id": "dining-management",
-    "title": "Dining Management",
-    "description": "Multi-tenant restaurant SaaS platform covering QR table sessions, kitchen operations, server-authoritative billing, inventory, transactional outbox, and offline-safe PWA.",
-    "iconName": "dining_management",
-    "iconBg": "bg-gradient-to-br from-amber-500 to-rose-600",
-    "tech": "Next.js + Drizzle ORM + PWA",
+    "id": "ardor",
+    "title": "Ardor",
+    "description": "PWA for making friends in real life: circles, hangouts with RSVP, group chat, party games and synced video. Runs on free tiers with no socket server: Web Push for events and WebRTC for live play. English and Hindi.",
+    "iconName": "yugho",
+    "iconBg": "bg-gradient-to-br from-rose-500 to-orange-500",
+    "tech": "Next.js + Turso + Web Push + WebRTC",
     "category": "Full-Stack",
     "stars": 5,
     "verified": true,
-    "repoUrl": "https://github.com/sridhar-mani/dining-management"
+    "liveUrl": "https://www.ardordating.online/app/home"
+  },
+  {
+    "id": "dining-management",
+    "title": "GourmetOS",
+    "description": "Restaurant operating system: guests order from a QR code on the table, orders reach a live kitchen display, and payments settle by UPI with no commission. Multi-tenant, with idempotent mutations, a transactional outbox and an offline-safe PWA.",
+    "iconName": "dining_management",
+    "iconBg": "bg-gradient-to-br from-amber-500 to-rose-600",
+    "tech": "Next.js + PostgreSQL + Drizzle + PWA",
+    "category": "Full-Stack",
+    "stars": 5,
+    "verified": true,
+    "liveUrl": "https://custom-diner-gamma.vercel.app/"
   },
   {
     "id": "aidocs",
@@ -58,8 +69,7 @@
     "tech": "Electron + React + RAG",
     "category": "AI & Agents",
     "stars": 4,
-    "verified": true,
-    "repoUrl": "https://github.com/sridhar-mani/AiDocs"
+    "verified": true
   },
   {
     "id": "code-dcr",

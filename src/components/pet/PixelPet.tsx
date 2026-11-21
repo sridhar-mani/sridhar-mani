@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, Coffee, Cookie, Bug, Zap, X, Crosshair, Sparkles } from 'lucide-react';
 import { petAudio } from './PixelPetAudio';
+import { PetBot3D } from './PetBot3D';
 import { clamp, getHorizontalBounds, getVerticalBounds, moveTowards, getRandomPatrolTarget, getPatrolDepthTarget, stepVerticalPhysics } from './petPhysics';
 
-export type PetId = 'shiba' | 'fox' | 'crab' | 'duck' | 'clippy' | 'totoro' | 'zappy';
+export type PetId = 'bot3d' | 'shiba' | 'fox' | 'crab' | 'duck' | 'clippy' | 'totoro' | 'zappy';
 export type PetState = 'idle' | 'walk' | 'happy' | 'sleep';
 
 export interface PetMeta {
@@ -18,6 +19,21 @@ export interface PetMeta {
 }
 
 export const PET_CATALOG: PetMeta[] = [
+  {
+    id: 'bot3d',
+    name: 'Bit',
+    title: 'Agent Companion',
+    species: '3D Robot',
+    icon: '🤖',
+    color: 'from-cyan-500 to-teal-600',
+    dialogues: [
+      "Beep! Sridhar builds agents that plan, call tools and check their own work. 🤖",
+      "I am a mesh of triangles rendered live in your browser. No model files. ✨",
+      "Click anywhere on the page: it sends a shockwave through the flow field.",
+      "Try the Universe page: every shape connects to the next. 🌌",
+      "LangGraph state machines are my favourite bedtime story. 💤"
+    ]
+  },
   {
     id: 'shiba',
     name: 'Byte',
@@ -172,9 +188,9 @@ export const PixelPet = () => {
   const [petId, setPetId] = useState<PetId>(() => {
     try {
       const saved = localStorage.getItem('portfolio_pet_id');
-      return (saved as PetId) || 'shiba';
+      return (saved as PetId) || 'bot3d';
     } catch {
-      return 'shiba';
+      return 'bot3d';
     }
   });
 
@@ -976,7 +992,14 @@ export const PixelPet = () => {
                 transition: 'transform 0.15s ease-out'
               }}
             >
-              <img
+              {petId === 'bot3d' ? (
+                <PetBot3D
+                  state={state}
+                  size={80}
+                  className={`filter ${lvl >= 5 ? 'drop-shadow-[0_0_14px_rgba(6,182,212,0.8)]' : lvl >= 3 ? 'drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]' : 'drop-shadow-[0_6px_6px_rgba(15,23,42,0.25)]'}`}
+                />
+              ) : (
+                <img
                 src={spriteSrc}
                 alt={currentPet.name}
                 className={`w-14 h-14 object-contain filter ${
@@ -985,6 +1008,7 @@ export const PixelPet = () => {
                 style={{ imageRendering: 'pixelated' }}
                 draggable={false}
               />
+              )}
             </div>
 
             {/* Mini subtle level & settings button */}
@@ -1073,7 +1097,7 @@ export const PixelPet = () => {
                 <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 font-bold block mb-1.5">
                   Select Companion
                 </span>
-                <div className="grid grid-cols-7 gap-1">
+                <div className="grid grid-cols-8 gap-1">
                   {PET_CATALOG.map((p) => {
                     const isSelected = p.id === petId;
                     return (

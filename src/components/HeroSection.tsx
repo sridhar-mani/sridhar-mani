@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { IdentityPanel } from './IdentityPanel';
 import { HeroAgentSandbox } from './HeroAgentSandbox';
 import { DecryptText } from './DecryptText';
@@ -12,6 +13,7 @@ const METRICS = [
 ];
 
 export const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <section id="home" className="relative min-h-[96vh] flex flex-col justify-between pt-28 sm:pt-36 pb-12 sm:pb-16 bg-white overflow-hidden">
       {/* Precision architectural grid lines */}
@@ -115,10 +117,10 @@ export const HeroSection = () => {
               </a>
 
               <a
-                href="#works"
+                href="/work"
                 onClick={(e) => {
                   e.preventDefault();
-                  document.querySelector('#works')?.scrollIntoView({ behavior: 'smooth' });
+                  navigate('/work');
                 }}
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 font-medium text-xs sm:text-sm shadow-sm transition-all hover:border-slate-300"
               >

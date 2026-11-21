@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, ArrowUpRight, Menu, X } from 'lucide-react';
 
 const navItems = [
-  { id: '01', label: 'Index', href: '#home' },
-  { id: '02', label: 'Works', href: '#works' },
-  { id: '03', label: 'Architecture', href: '#architecture' },
-  { id: '04', label: 'Timeline', href: '#timeline' },
-  { id: '05', label: 'Contact', href: '#contact' },
+  { id: '01', label: 'Index', href: '/' },
+  { id: '02', label: 'Work', href: '/work' },
+  { id: '03', label: 'Experience', href: '/experience' },
+  { id: '04', label: 'Skills', href: '/skills' },
+  { id: '05', label: 'Contact', href: '/contact' },
+  { id: '06', label: 'Live', href: '/live' },
 ];
 
 export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const activeSection = pathname;
   const [time, setTime] = useState('');
 
   // Live Bengaluru Clock (Awwwards staple)
@@ -38,40 +42,15 @@ export const Navigation = () => {
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 30);
-
-      const isAtBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 60;
-      if (isAtBottom) {
-        setActiveSection('contact');
-        return;
-      }
-
-      const sections = ['contact', 'timeline', 'architecture', 'works', 'home'];
-      for (const section of sections) {
-        const el = document.getElementById(section);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= 140) {
-            setActiveSection(section);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 30);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleNavClick = (href: string) => {
     setIsMobileMenuOpen(false);
-    const sectionId = href.startsWith('#') ? href.slice(1) : href;
-    const el = document.getElementById(sectionId);
-    if (!el) return;
-    const headerOffset = 90;
-    const top = Math.max(el.getBoundingClientRect().top + window.scrollY - headerOffset, 0);
-    window.scrollTo({ top, behavior: 'smooth' });
+    navigate(href);
   };
 
   return (
@@ -86,10 +65,10 @@ export const Navigation = () => {
         <div className="flex items-center justify-between">
           {/* Brand Monogram */}
           <a
-            href="#home"
+            href="/"
             onClick={(e) => {
               e.preventDefault();
-              handleNavClick('#home');
+              handleNavClick('/');
             }}
             className="group flex items-center gap-3"
           >
@@ -109,7 +88,7 @@ export const Navigation = () => {
           {/* Center Navigation Capsule */}
           <div className="hidden md:flex items-center gap-1 bg-slate-100/70 p-1 rounded-full border border-slate-200/80 backdrop-blur-md">
             {navItems.map((item) => {
-              const isActive = activeSection === item.href.slice(1);
+              const isActive = activeSection === item.href;
               return (
                 <a
                   key={item.id}
@@ -152,10 +131,10 @@ export const Navigation = () => {
 
             {/* Contact Action */}
             <a
-              href="#contact"
+              href="/contact"
               onClick={(e) => {
                 e.preventDefault();
-                handleNavClick('#contact');
+                handleNavClick('/contact');
               }}
               className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition-all shadow-sm"
             >
@@ -194,7 +173,7 @@ export const Navigation = () => {
                       handleNavClick(item.href);
                     }}
                     className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-colors ${
-                      activeSection === item.href.slice(1)
+                      activeSection === item.href
                         ? 'bg-slate-900 text-white font-semibold'
                         : 'text-slate-600 hover:bg-slate-100'
                     }`}
@@ -216,10 +195,10 @@ export const Navigation = () => {
                     <span>Resume (PDF)</span>
                   </a>
                   <a
-                    href="#contact"
+                    href="/contact"
                     onClick={(e) => {
                       e.preventDefault();
-                      handleNavClick('#contact');
+                      handleNavClick('/contact');
                     }}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-medium"
                   >

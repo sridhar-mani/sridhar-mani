@@ -2,8 +2,10 @@ import { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import gsap from 'gsap';
 import { X, Mail, Github, Linkedin, Briefcase, Code } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 export const IdentityPanel = () => {
+  const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const miniCardRef = useRef<HTMLDivElement>(null);
@@ -228,8 +230,8 @@ export const IdentityPanel = () => {
 
               <div className="expanded-item flex gap-3 mt-auto pt-2">
                 <a 
-                  href="#contact" 
-                  onClick={(e) => { e.preventDefault(); toggleExpand(); document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' }); }}
+                  href="/contact"
+                  onClick={(e) => { e.preventDefault(); toggleExpand(); navigate('/contact'); }}
                   className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 text-white py-3.5 rounded-xl font-semibold text-sm hover:from-slate-700 hover:to-slate-800 transition-all shadow-lg shadow-slate-900/20"
                 >
                   <Mail size={16} /> Contact Me

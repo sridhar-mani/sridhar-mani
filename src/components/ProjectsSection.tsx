@@ -362,7 +362,7 @@ export const ProjectsSection = () => {
               // COMPLETE ENGINEERING DIRECTORY
             </h3>
             <span className="text-xs font-mono text-slate-600 font-medium">
-              {directoryProjects.length + flagshipProjects.length} Verified Architectures
+              {directoryProjects.length + flagshipProjects.length} Projects
             </span>
           </div>
 
